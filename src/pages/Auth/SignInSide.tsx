@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Divider } from "@mui/material";
 import HeartRateLoader from "../../components/HeartRateLoader";
 import { useForm } from "react-hook-form";
+import ToggleButton from "../../components/Toggle/ToggleButton";
 
 type FormValues = {
   email: string;
@@ -39,6 +40,12 @@ export default function SignInSide() {
       setLoading(false);
       navigate(`/dashboard`);
     }, 3000);
+  };
+
+  const options = ['Doctor', 'Lab', "Admin", 'Superadmin'];
+
+  const handleRoleSelect = (role: string) => {
+    console.log(`Role selected: ${role}`);
   };
 
   return (
@@ -87,6 +94,13 @@ export default function SignInSide() {
               <Typography component="h1" variant="h5">
                 Sign in
               </Typography>
+              <ToggleButton
+                options={options}
+                onSelect={handleRoleSelect}
+                style={{
+                  marginTop:4
+                }}
+              />
               <Box sx={{ mt: 1 }}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <TextField
@@ -166,9 +180,9 @@ export default function SignInSide() {
                   </Grid>
                 </Grid>
                 <Divider sx={{ mt: 2 }} light variant="middle">
-                  OR
+                  {/* OR */}
                 </Divider>
-                <Button
+                {/* <Button
                   fullWidth
                   startIcon={<GoogleIcon />}
                   variant="outlined"
@@ -188,7 +202,7 @@ export default function SignInSide() {
                   }}
                 >
                   Continue with facebook
-                </Button>
+                </Button> */}
 
                 <Typography align="center" variant="subtitle2" sx={{ mt: 2 }}>
                   By continuing, you agree to{" "}
