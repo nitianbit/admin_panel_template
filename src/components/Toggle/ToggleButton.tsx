@@ -4,9 +4,16 @@ import { Button, ButtonGroup } from '@mui/material';
 interface ToggleButtonProps {
     options?: string[];
     onSelect?: (value: string) => void;
+    buttonStyle?: React.CSSProperties; // Allows passing custom styles for buttons
+    style?: React.CSSProperties; 
 }
 
-const ToggleButton = ({ options = [], onSelect }: ToggleButtonProps) => {
+const ToggleButton: React.FC<ToggleButtonProps> = ({ 
+    options = [], 
+    onSelect, 
+    buttonStyle,
+    style
+}) => {
     const [selectedRole, setSelectedRole] = useState(options[0]);
 
     const handleRoleSelect = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -16,7 +23,9 @@ const ToggleButton = ({ options = [], onSelect }: ToggleButtonProps) => {
     };
 
     return (
-        <ButtonGroup variant="contained" aria-label="role-toggle-buttons">
+        <ButtonGroup variant="contained" sx={{
+            ...style
+        }} aria-label="role-toggle-buttons">
             {options.map((role) => (
                 <Button
                     key={role}
@@ -30,6 +39,7 @@ const ToggleButton = ({ options = [], onSelect }: ToggleButtonProps) => {
                         },
                         border: selectedRole === role ? 'none' : '1px solid primary.main',
                         borderColor: selectedRole !== role ? 'primary.main' : 'grey.300',
+                        ...buttonStyle, // Apply custom styles
                     }}
                 >
                     {role}
