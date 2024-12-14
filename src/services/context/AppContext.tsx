@@ -1,19 +1,23 @@
-import React, { createContext, useEffect, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useMemo } from 'react';
 import { STORAGE_KEYS, getValue } from '../Storage';
 import { toast } from 'react-toastify';
-import { doGET } from '../../utils/HttpUtils';
-import { ENDPOINTS } from '../api/constants';
+import { doPOST } from '../../utils/HttpUtils';
+import { AUTHENDPOINTS } from '../../EndPoints/Auth';
 
 // Define the shape of the context value
 interface AppContextProps {
-  userData: any; // Replace `any` with the specific type if known
+  userData: any;
   setUserData: React.Dispatch<React.SetStateAction<any>>;
-  success: (message: any) => any;
-  error: (message: any) => any;
+  success: (message: string) => any;
+  error: (message: string) => any;
+  verifyToken: (message: string) => any;
   isLoggedIn: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  isTokenVerified: boolean;
+  setIsTokenVerified: React.Dispatch<React.SetStateAction<boolean>>;
   logout: () => void;
-  isAppReady: boolean;
+  token: string;
+  setToken: React.Dispatch<React.SetStateAction<any>>;
 }
 
 // Define the props for the AppProvider component
@@ -25,25 +29,31 @@ interface AppProviderProps {
 export const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [userData, setUserData] = useState<any>(null); // Replace `any` with the specific type if known
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [isAppReady, setIsAppReady] = useState<boolean>(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean|any>(null);
+  const [token, setToken] = useState<string>("");
+
+  const [isTokenVerified, setIsTokenVerified] = useState(false); // State flag for token verification
 
   const success = (message: string) => toast.success(message);
   const error = (message: string) => toast.error(message);
 
-  const getCurrentUser = async () => {
+  const verifyToken = async (token: string | null) => {
     try {
-      const response = await doGET(ENDPOINTS?.profile);
-      setUserData(response?.data);
-      if (response) {
+      const response = await doPOST(AUTHENDPOINTS.verifyToken, { token: token });
+      if (response.success) {
         setIsLoggedIn(true);
+        return true;
+      } else {
+        setIsLoggedIn(false);
+        setIsTokenVerified(true)
+        localStorage.clear();
+        success('Session Expired');
       }
     } catch (err) {
-      error('Failed to fetch user data');
-    } finally {
-      setIsAppReady(true);
+      error('Failed to verify token');
     }
+    return  false
   };
 
   const logout = () => {
@@ -53,14 +63,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    // Only check token if it has not been verified yet
     const token = getValue(STORAGE_KEYS.TOKEN);
-    if (token) {
-      setIsLoggedIn(true);
-      getCurrentUser();
-    } else {
-      setIsAppReady(true);
+    if (token ) {
+      verifyToken(token);
+    }else{
+      setIsTokenVerified(false);
+      setIsLoggedIn(false)
     }
-  }, []);
+  }, []); // Add dependency on isTokenVerified to control the execution
 
   return (
     <AppContext.Provider
@@ -72,7 +83,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         isLoggedIn,
         setIsLoggedIn,
         logout,
-        isAppReady,
+        token,
+        setToken,
+        verifyToken,
+        isTokenVerified,
+        setIsTokenVerified
       }}
     >
       {children}
