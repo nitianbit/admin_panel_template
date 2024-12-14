@@ -18,6 +18,7 @@ import { AUTHENDPOINTS } from "../../EndPoints/Auth";
 import { useAppContext } from "../../services/context/AppContext";
 import  { OTP } from "../../components/OTP/OTP";
 import { isError } from "../../utils/helper";
+import {  setValue, STORAGE_KEYS } from "../../services/Storage";
 
 type FormValues = {
   email: string;
@@ -26,7 +27,7 @@ type FormValues = {
 
 export default function SignInSide() {
 
-  const { success, error, setIsLoggedIn } = useAppContext()
+  const { success, error, setIsLoggedIn, isLoggedIn } = useAppContext()
 
   const [loading, setLoading] = useState(false);
   const [isOTPSend, setIsOTPSend] = useState(false);
@@ -44,14 +45,6 @@ export default function SignInSide() {
     register,
     formState: { errors }
   } = useForm<FormValues>();
-
-  const onSubmit = (data: FormValues) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigate(`/dashboard`);
-    }, 3000);
-  };
 
   const options = ['Doctor', 'Lab', "Admin", 'Superadmin'];
 
@@ -79,8 +72,9 @@ export default function SignInSide() {
       setOtpData(updatedOTpData)
       const response = await doPOST(AUTHENDPOINTS.verifyotp, updatedOTpData);
       if (response.success) {
-        success("OTP Verified Successfully")
+        success("Login Successfully")
         setIsLoggedIn(true)
+        setValue(STORAGE_KEYS.TOKEN, response.data)
         navigate(`/dashboard`)
       }
     } catch (e) {
@@ -137,6 +131,12 @@ export default function SignInSide() {
       await signIn();
     }
   }
+  
+  useEffect(()=>{
+    if(isLoggedIn){
+      navigate(`/dashboard`)
+    }
+  },[isLoggedIn])
 
   return (
     <>
