@@ -3,7 +3,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { RouterProvider } from "react-router-dom";
 //import StickyFooter from "./components/StickyFooter";
-import { router } from "./router";
+import router from "./router";
 //import { themeOptions } from "./themeOptions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
