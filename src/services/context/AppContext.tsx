@@ -1,15 +1,15 @@
-import React, { createContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useEffect, useState, useContext, ReactNode } from 'react';
 import { STORAGE_KEYS, getValue } from '../Storage';
 import { toast } from 'react-toastify';
-import { doGET } from '../../utils/HttpUtils'
+import { doGET } from '../../utils/HttpUtils';
 import { ENDPOINTS } from '../api/constants';
 
 // Define the shape of the context value
 interface AppContextProps {
   userData: any; // Replace `any` with the specific type if known
   setUserData: React.Dispatch<React.SetStateAction<any>>;
-  success: (message: string) => void;
-  error: (message: string) => void;
+  success: (message: any) => any;
+  error: (message: any) => any;
   isLoggedIn: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
   logout: () => void;
@@ -78,4 +78,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       {children}
     </AppContext.Provider>
   );
+};
+
+export const useAppContext = (): AppContextProps => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within an AppProvider');
+  }
+  return context;
 };
