@@ -102,7 +102,7 @@ export default function Appbar(props: { appBarTitle: string }) {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting, index) => (
+              {settings.map((setting:any, index:any) => (
                 <MenuItem key={index} onClick={handleCloseUserMenu}>
                   <Link
                     to={setting.url}
