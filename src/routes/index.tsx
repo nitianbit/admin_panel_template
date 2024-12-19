@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import ErrorPage from "../components/ErrorPage";
 import SignInSide from "../pages/Auth/SignInSide";
 import SignUp from "../pages/Auth/SignUp";
@@ -15,136 +15,138 @@ import Kanban from "../pages/Kanban/Kanban";
 import Settings from "../pages/Settings/Settings";
 import Account from "../pages/Account/Account";
 import Profile from "../pages/Profile/Profile";
+import { hasAccess, moduleRoles } from "../utils/helper";
+import { useAppContext } from "../services/context/AppContext";
 
 const USER_TYPES = {
-    NORMAL_USER: "Normal User",
-    ADMIN_USER: "Admin User"
-  };
-  
-
-const CURRENT_USER_TYPE = USER_TYPES.ADMIN_USER;
+  NORMAL_USER: "Normal User",
+  ADMIN_USER: "Admin User"
+};
 
 const AdminElement = ({ children }: any) => {
-    if (CURRENT_USER_TYPE === USER_TYPES.ADMIN_USER) {
-        return <>{children}</>;
-    } else {
-        return <Navigate to={"/"} />;
-    }
+  const { userData } = useAppContext()
+
+
+  if (hasAccess(userData?.role ?? [])) {
+    return <>{children}</>;
+  } else {
+    return <div>You are not authorized to access this routes</div>;
+  }
 };
 
 
 export const authRoutes = [
-    {
-        path: "/",
-        element: <SignInSide />,
-        errorElement: <ErrorPage />
-      },
-    {
-        path: "/login",
-        element: <SignInSide />,
+  {
+    path: "/",
+    element: <SignInSide />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: "/login",
+    element: <SignInSide />,
 
-    },
-    {
-        path: "/signup",
-        element: <SignUp />,
+  },
+  {
+    path: "/signup",
+    element: <SignUp />,
 
-    },
-    {
-        path: "/forgot",
-        element: <ForgotPassword />
-      },
+  },
+  {
+    path: "/forgot",
+    element: <ForgotPassword />
+  },
 ]
 
 export const openRoutes = [];
 
 
 export const protectedRoutes = [
-    {
-        path: "/dashboard",
-        element: <AdminElement>
-            <Dashboard />
-        </AdminElement>,
-    },
-    {
-        path: "/orders",
-        element: (
-          <AdminElement>
-            <AllOrders />
-          </AdminElement>
-        )
-      },
+  {
+    path: "/dashboard",
+    element: <AdminElement>
+      <Dashboard />
+    </AdminElement>,
+  },
+  {
+    path: "/orders",
+    element: (
+      <AdminElement>
+        <AllOrders />
+      </AdminElement>
+    )
+  },
 
-      {
-        path: "/profile",
-        element: (
-          <AdminElement>
-            <Profile />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/patient-info/:id",
-        element: (
-          <AdminElement>
-            <PatientInfo patients={mockPatientData} />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/patient-list",
-        element: (
-          <AdminElement>
-            <PatientList data={mockPatientData} />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/doctor-list",
-        element: (
-          <AdminElement>
-            <DoctorList/>
-          </AdminElement>
-        )
-      },
-      {
-        path: "/appointments",
-        element: (
-          <AdminElement>
-            <Appointments />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/calender",
-        element: (
-          <AdminElement>
-            <Calender />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/kanban",
-        element: (
-          <AdminElement>
-            <Kanban />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/account",
-        element: (
-          <AdminElement>
-            <Account />
-          </AdminElement>
-        )
-      },
-      {
-        path: "/settings",
-        element: (
-          <AdminElement>
-            <Settings />
-          </AdminElement>
-        )
-      }
+  {
+    path: "/profile",
+    element: (
+      <AdminElement>
+        <Profile />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/patient-info/:id",
+    element: (
+      <AdminElement>
+        <PatientInfo patients={mockPatientData} />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/patient-list",
+    element: (
+      <AdminElement>
+        <PatientList data={mockPatientData} />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/doctor-list",
+    element: (
+      <AdminElement>
+        <DoctorList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/appointments",
+    element: (
+      <AdminElement>
+        <Appointments />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/calender",
+    element: (
+      <AdminElement>
+        <Calender />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/kanban",
+    element: (
+      <AdminElement>
+        <Kanban />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/account",
+    element: (
+      <AdminElement>
+        <Account />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/settings",
+    element: (
+      <AdminElement>
+        <Settings />
+      </AdminElement>
+    )
+  }
 
 ]
