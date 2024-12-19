@@ -193,13 +193,13 @@ export default function SignInSide() {
               </Typography>
 
               <Box sx={{ mt: 1 }}>
-                <ToggleButton
+               {!isOTPSend && <ToggleButton
                   options={options}
                   onSelect={handleRoleSelect}
                   style={{
                     marginTop: 4
                   }}
-                />
+                />}
                 {isOTPSend ?
 
                   <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={4} />
