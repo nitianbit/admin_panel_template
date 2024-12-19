@@ -16,9 +16,9 @@ import ToggleButton from "../../components/Toggle/ToggleButton";
 import { doPOST } from '../../utils/HttpUtils'
 import { AUTHENDPOINTS } from "../../EndPoints/Auth";
 import { useAppContext } from "../../services/context/AppContext";
-import  { OTP } from "../../components/OTP/OTP";
+import { OTP } from "../../components/OTP/OTP";
 import { isError } from "../../utils/helper";
-import {  setValue, STORAGE_KEYS } from "../../services/Storage";
+import { setValue, STORAGE_KEYS } from "../../services/Storage";
 
 type FormValues = {
   email: string;
@@ -46,7 +46,7 @@ export default function SignInSide() {
     formState: { errors }
   } = useForm<FormValues>();
 
-  const options = ['Doctor', 'Lab', "Admin", 'Superadmin'];
+  const options = ['doctors', 'laboratories', "admin", 'superadmin'];
 
   const handleRoleSelect = (role: string) => {
     console.log(`Role selected: ${role}`);
@@ -58,45 +58,52 @@ export default function SignInSide() {
     });
   }
 
-  const VerifyOTP = async ()=>{
+  const VerifyOTP = async () => {
     try {
-      if(otp.length != 4){
+      if (otp.length != 4) {
         error("Please enter 4 digit OTP")
         return;
       }
 
       const updatedOTpData = {
         ...otpData,
-        otp: otp
+        otp: otp,
+        role:data.role,
+        isTokenRequired:true
       };
       setOtpData(updatedOTpData)
       const response = await doPOST(AUTHENDPOINTS.verifyotp, updatedOTpData);
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         success("Login Successfully")
         setIsLoggedIn(true)
         setValue(STORAGE_KEYS.TOKEN, response.data)
         navigate(`/dashboard`)
       }
+      else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
     } catch (e) {
       if (isError(e)) {
         console.log(e);
       }
-      
-    } 
+
+    }
   }
 
   const sendOTP = async (userData: any) => {
     try {
       const response = await doPOST(AUTHENDPOINTS.sentotp, userData);
-      if (response.success) {
+      if (response.status >= 200 && response.status < 300) {
         // navigate(`/otp`)
         setIsOTPSend(true)
         setOtpData((prev: any) => ({
           ...prev,
-          otpId: response.data.otpId,
-          userId: response.data.userId
+          otpId: response.data.data.otpId,
+          userId: response.data.data.userId
         }))
         success("OTP Send Successfully")
+      }else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
       }
     } catch (e) {
       if (isError(e)) {
@@ -112,31 +119,31 @@ export default function SignInSide() {
         return;
       }
       const response = await doPOST(AUTHENDPOINTS.login, data);
-      if (response.success) {
-        await sendOTP(response.data);
-        console.log("sdfsdf");
-
+      if (response.status >= 200 && response.status < 300) {
+        await sendOTP(response.data.data);
+      }else if(response.status >= 400 && response.status <= 500){
+        error(response.message)
       }
     } catch (e) {
       if (isError(e)) {
-        console.log(e.message);
+        console.log(e);
       }
     }
   }
 
-  const handleSendButton = async ()=>{
-    if(isOTPSend){
+  const handleSendButton = async () => {
+    if (isOTPSend) {
       await VerifyOTP();
-    }else{
+    } else {
       await signIn();
     }
   }
-  
-  useEffect(()=>{
-    if(isLoggedIn){
+
+  useEffect(() => {
+    if (isLoggedIn) {
       navigate(`/dashboard`)
     }
-  },[isLoggedIn])
+  }, [isLoggedIn])
 
   return (
     <>
@@ -194,24 +201,24 @@ export default function SignInSide() {
                   }}
                 />
                 {isOTPSend ?
-                
-                <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={4} />
-                : <TextField
-                  margin="normal"
-                  //required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  onChange={(e: any) => {
-                    handleChange("email", e?.target?.value)
-                  }}
-                  // name="email"
-                  //autoComplete="email"
-                  //autoFocus
-                  value={data?.email}
-                  error={!!errors.email}
-                  helperText={errors.email?.message}
-                />}
+
+                  <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={4} />
+                  : <TextField
+                    margin="normal"
+                    //required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    onChange={(e: any) => {
+                      handleChange("email", e?.target?.value)
+                    }}
+                    // name="email"
+                    //autoComplete="email"
+                    //autoFocus
+                    value={data?.email}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                  />}
                 <Button
                   type="submit"
                   fullWidth
