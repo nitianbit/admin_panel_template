@@ -14,7 +14,7 @@ export const doGET = async function (url:string) {
     return response;
 
   } catch (err:any) {
-    throw new Error(err.message);
+    return err
   }
 };
 
@@ -22,9 +22,8 @@ export const doPOST = async function (url:String, data:any) {
   try {
     const response = await apiHandler(url, API_METHODS.POST, data)
     return response;
-    throw new Error(response?.data);
   } catch (err:any) {
-    throw new Error(err.message);
+    return err
   }
 };
 
@@ -33,7 +32,7 @@ export const doDELETE = async function (url:string) {
     const response = await apiHandler(url, API_METHODS.DELETE)
     return response;
   } catch (err:any) {
-    throw new Error(err.message);
+    return err
   }
 };
 
@@ -42,7 +41,7 @@ export const doPUT = async function (url:String, data:any) {
     const response = await apiHandler(url, API_METHODS.PUT, data)
     return response;
   } catch (err:any) {
-    throw new Error(err.message);
+    return err
   }
 }
 
