@@ -44,6 +44,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const response = await doPOST(AUTHENDPOINTS.verifyToken, { token: token });
       if (response.status==200) {
         setIsLoggedIn(true);
+        setUserData(response.data.data);
         return true;
       } else {
         setIsLoggedIn(false);
