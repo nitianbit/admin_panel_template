@@ -48,8 +48,10 @@ export default function SignInSide() {
 
   const options = ['doctors', 'laboratories', "admin", 'superadmin'];
 
-  const handleRoleSelect = (role: string) => {
-    console.log(`Role selected: ${role}`);
+  const handleRoleSelect = (role: any) => {
+    setData((prev) => {
+      return { ...prev, role: role };
+    });
   };
 
   const handleChange = (key: any, value: any) => {
