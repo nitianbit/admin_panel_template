@@ -5,15 +5,14 @@ import { getValue, STORAGE_KEYS } from '../services/Storage';
 import HeartRateLoader from '../components/HeartRateLoader';
 
 const Layout = () => {
-    const { isLoggedIn, error, verifyToken, isTokenVerified } = useAppContext();
+    const { isLoggedIn, error,isTokenVerified } = useAppContext();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isLoggedIn) {
-            error('You need to login');
+        if (!isLoggedIn && isTokenVerified) {
             navigate('/');
         }
-    }, [isLoggedIn, error, navigate, verifyToken, isTokenVerified]);
+    }, [isLoggedIn,isTokenVerified]);
 
     if (!isLoggedIn) {
         return <HeartRateLoader />

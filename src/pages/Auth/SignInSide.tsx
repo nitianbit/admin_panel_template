@@ -27,7 +27,7 @@ type FormValues = {
 
 export default function SignInSide() {
 
-  const { success, error, setIsLoggedIn, isLoggedIn } = useAppContext()
+  const { success, error, setIsLoggedIn, isLoggedIn,setIsTokenVerified } = useAppContext()
 
   const [loading, setLoading] = useState(false);
   const [isOTPSend, setIsOTPSend] = useState(false);
@@ -78,8 +78,9 @@ export default function SignInSide() {
       if (response.status >= 200 && response.status < 300) {
         success("Login Successfully")
         setIsLoggedIn(true)
-        setValue(STORAGE_KEYS.TOKEN, response.data)
+        setValue(STORAGE_KEYS.TOKEN, response.data?.data)
         navigate(`/dashboard`)
+        setIsTokenVerified(true);
       }
       else if (response.status >= 400 && response.status <= 500) {
         error(response.message)

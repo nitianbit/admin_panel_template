@@ -3,6 +3,7 @@ import { STORAGE_KEYS, getValue } from '../Storage';
 import { toast } from 'react-toastify';
 import { doPOST } from '../../utils/HttpUtils';
 import { AUTHENDPOINTS } from '../../EndPoints/Auth';
+import { useNavigate } from 'react-router-dom';
 
 // Define the shape of the context value
 interface AppContextProps {
@@ -41,7 +42,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const verifyToken = async (token: string | null) => {
     try {
       const response = await doPOST(AUTHENDPOINTS.verifyToken, { token: token });
-      if (response.success) {
+      if (response.status==200) {
         setIsLoggedIn(true);
         return true;
       } else {
@@ -52,6 +53,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
     } catch (err) {
       error('Failed to verify token');
+    }finally{
+      setIsTokenVerified(true)
     }
     return  false
   };
@@ -68,7 +71,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (token ) {
       verifyToken(token);
     }else{
-      setIsTokenVerified(false);
+      setIsTokenVerified(true);
       setIsLoggedIn(false)
     }
   }, []); // Add dependency on isTokenVerified to control the execution
