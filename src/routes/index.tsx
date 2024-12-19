@@ -45,7 +45,7 @@ export const authRoutes = [
 
     },
     {
-        path: "/register",
+        path: "/signup",
         element: <SignUp />,
 
     },
