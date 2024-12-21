@@ -17,8 +17,10 @@ import Menu from "@mui/material/Menu";
 import { Link } from "react-router-dom";
 import { settings } from "../constant";
 import { AppBar, Drawer } from "../styles";
+import { useAppContext } from "../services/context/AppContext";
 
 export default function Appbar(props: { appBarTitle: string }) {
+  const { userData } = useAppContext();
   const [open, setOpen] = React.useState(true);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
@@ -135,9 +137,9 @@ export default function Appbar(props: { appBarTitle: string }) {
         </Toolbar>
         <Divider />
         <List component="nav">
-          {mainListItems}
+          {mainListItems(userData?.role)}
           <Divider sx={{ my: 1 }} />
-          {secondaryListItems}
+          {secondaryListItems(userData?.role)}
         </List>
       </Drawer>
     </Box>
