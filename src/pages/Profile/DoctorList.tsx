@@ -14,9 +14,36 @@ import {
 import { Avatar, Grid, Box } from "@mui/material";
 import { mockDoctorsData } from "../../mockData";
 import AddDoctorDialog from "./AddDoctorDialog";
+import { doGET } from "../../utils/HttpUtils";
+import { DOCTORENDPOINTS } from "../../EndPoints/Doctor";
+import { isError } from "../../utils/helper";
+import { useAppContext } from "../../services/context/AppContext";
 
 export default function DoctorList() {
-  const [doctors, setDoctors] = React.useState(mockDoctorsData);
+  const { success, error, userData } = useAppContext();
+  const [doctors, setDoctors] = React.useState([]);
+
+  const getDoctors = async () => {
+    try {
+      const response = await doGET(DOCTORENDPOINTS.getDoctors)
+      if (response.status >= 200 && response.status < 300) {
+        setDoctors(response.data.data.rows)
+        success("Appointment created successfully")
+      } else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e);
+        error(e.message)
+      }
+    }
+  }
+
+  React.useEffect(() => {
+    getDoctors()
+  }, [])
+
 
   return (
     <Box sx={{ display: "flex" }}>
