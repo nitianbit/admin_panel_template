@@ -10,25 +10,35 @@ import { TransitionProps } from "@mui/material/transitions";
 import { Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
-import { useForm } from "react-hook-form";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import dayjs from "dayjs";
+import { doGET, doPOST } from "../../utils/HttpUtils";
+import { APPOITMENTENDPOINTS } from "../../EndPoints/Appointments";
+import { useAppContext } from "../../services/context/AppContext";
+import { isError } from "../../utils/helper";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import PatientDialog from "../../components/Dialog/PatientDialog";
+import { DOCTORENDPOINTS } from "../../EndPoints/Doctor";
 
 type FormValues = {
-  id: string;
-  fullName: string;
-  gender: string;
-  phone: string;
-  age: string;
-  appointmentDate: string;
-  referredByDoctor: string;
-  assignedDoctor: string;
+  fee: Number;
+  status: string;
+  paymentStatus: string;
+  appointmentDate: any;
+  timeSlot: {
+    start: any,
+    end: any,
+  };
+  patiendId?: string;
+  doctor: string
+
 };
 
 const Transition = React.forwardRef(function Transition(
@@ -41,16 +51,31 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AppointmentDialog({
-  appointments,
-  setAppointments,
+  getAppointments
 }: any) {
+  const { success, error, userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
+  const [patients, setPatients] = React.useState([])
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>();
+  const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
+
+  const [data, setData] = React.useState<FormValues>({
+    fee: 0,
+    status: "SCHD",
+    paymentStatus: "PND",
+    appointmentDate: "",
+    timeSlot: {
+      start: "",
+      end: ""
+    },
+    patiendId: "",
+    doctor: userData?._id
+  })
+
+
+  const handleChange = (key: any, value: any) => {
+    setData({ ...data, [key]: value })
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -60,11 +85,54 @@ export default function AppointmentDialog({
     setOpen(false);
   };
 
-  const onSubmit = (data: FormValues) => {
-    data.id = appointments.length + 1;
-    setAppointments((prevState: any) => [...prevState, data]);
-    handleClose();
-  };
+  const handlePatientDialogSave = () => {
+    setPatientDialogOpen(false)
+  }
+
+  const handlePatientDialogClose = () => {
+    setPatientDialogOpen(false)
+  }
+
+  const patientGrid = async () => {
+    try {
+      const response = await doGET(DOCTORENDPOINTS.getPatient(userData?._id))
+
+
+      if (response.status >= 200 && response.status < 300) {
+        setPatients(response.data.data)
+        // setPatients((prevState: any) => [...prevState, ...response.data.data]);
+      } else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e);
+      }
+    }
+  }
+
+
+  const handleSave = async () => {
+    try {
+      const date = dayjs(data.appointmentDate).format("YYYYMMDD");
+      const startTime = dayjs(data.timeSlot.start).format("HHMM");
+      const endTime = dayjs(data.timeSlot.end).format("HHMM");
+      const response = await doPOST(APPOITMENTENDPOINTS.createAppointment, data);
+      if (response.status >= 200 && response.status < 300) {
+        getAppointments()
+        handleClose()
+        success("Appointment created successfully")
+      } else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e);
+        error(e.message)
+      }
+    }
+  }
+
 
   return (
     <div>
@@ -83,6 +151,12 @@ export default function AppointmentDialog({
           Book an Appointment
         </Button>
       </Stack>
+      <PatientDialog
+        patients={patients}
+        open={patientDialogOpen}
+        handleClose={handlePatientDialogClose}
+        handleSave={handlePatientDialogSave}
+      />
 
       <Dialog
         open={open}
@@ -92,113 +166,119 @@ export default function AppointmentDialog({
         fullWidth
         sx={{ height: "100%" }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Appointment Details</DialogTitle>
+        <DialogTitle>Appointment Details</DialogTitle>
 
-          <DialogContent dividers>
-            <TextField
-              margin="dense"
-              id="fullName"
-              label="Full Name"
-              type="fullName"
-              fullWidth
-              variant="outlined"
-              {...register("fullName", {
-                required: "Name is required",
-              })}
-              error={!!errors.fullName}
-              helperText={errors.fullName?.message}
+        <DialogContent dividers>
+          <div onClick={() => {
+            setPatientDialogOpen(true)
+            patientGrid()
+          }}>Select Patient</div>
+          <TextField
+            margin="dense"
+            id="fee"
+            label="Fee"
+            type="fee"
+            fullWidth
+            variant="outlined"
+            value={data?.fee}
+            onChange={(e) => handleChange("fee", e.target.value)}
+
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="status">Status</InputLabel>
+            <Select
+              labelId="status"
+              id="status"
+              label="Status"
+              value={data?.status}
+              onChange={(e) => handleChange("status", e.target.value)}
+            >
+              <MenuItem value={"SCHD"}>Scheduled</MenuItem>
+              <MenuItem value={"COMP"}>Completed</MenuItem>
+              <MenuItem value={"CNCL"}>Cancel</MenuItem>
+              <MenuItem value={"NOSH"}>No Show</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="paymentStatus">Payment Status</InputLabel>
+            <Select
+              labelId="paymentStatus"
+              id="paymentStatus"
+              label="Payment Status"
+              value={data?.paymentStatus}
+              onChange={(e) => handleChange("paymentStatus", e.target.value)}
+            >
+              <MenuItem value={"PD"}>Paid</MenuItem>
+              <MenuItem value={"PND"}>Pending</MenuItem>
+              <MenuItem value={"FLD"}>Failed</MenuItem>
+            </Select>
+          </FormControl>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+            <DemoContainer components={["DatePicker"]}>
+              <DatePicker
+                value={data?.appointmentDate}
+                onChange={(e: any) => {
+                  handleChange("appointmentDate", e)
+                }
+                }
+                label="Appointment Date"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    margin: "dense",
+                  },
+                }}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <TimePicker
+              value={data?.timeSlot.start}
+              onChange={(e: any) => {
+                // const startTime = dayjs(e).format("HHmm");
+                handleChange("timeSlot.start", e)
+              }
+              }
+              label="Start Time"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "dense",
+                },
+              }}
             />
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="gender">Gender</InputLabel>
-              <Select
-                labelId="gender"
-                id="gender"
-                label="Gender"
-                {...register("gender")}
-              >
-                <MenuItem value={"Male"}>Male</MenuItem>
-                <MenuItem value={"Female"}>Female</MenuItem>
-                <MenuItem value={"Other"}>Other</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              margin="dense"
-              id="phone"
-              label="Phone no"
-              type="phone"
-              fullWidth
-              variant="outlined"
-              placeholder="0 123456789"
-              {...register("phone", {
-                required: "Phone no is required",
-              })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
+          </LocalizationProvider>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <TimePicker
+              value={data?.timeSlot.end}
+              onChange={(e: any) => {   // 
+                handleChange("timeSlot.end", e)
+              }
+              }
+              label="End Time"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "dense",
+                },
+              }}
             />
-            <TextField
-              margin="dense"
-              id="age"
-              label="Age"
-              type="age"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: 18"
-              {...register("age", {
-                required: "Age is required",
-              })}
-              error={!!errors.age}
-              helperText={errors.age?.message}
-            />
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["DatePicker"]}>
-                <DatePicker
-                  label="Appointment Date"
-                  sx={{ width: "100%" }}
-                  slotProps={{
-                    textField: {
-                      helperText: "Date is required",
-                    },
-                  }}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <TextField
-              margin="dense"
-              id="referredByDoctor"
-              label="Referred By Doctor"
-              type="referredByDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("referredByDoctor", {
-                required: "Specialist is required",
-              })}
-              error={!!errors.referredByDoctor}
-              helperText={errors.referredByDoctor?.message}
-            />
-            <TextField
-              margin="dense"
-              id="assignedDoctor"
-              label="Assigned Doctor"
-              type="assignedDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("assignedDoctor", {
-                required: "Assigned Doctor is required",
-              })}
-              error={!!errors.assignedDoctor}
-              helperText={errors.assignedDoctor?.message}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
-              Submit
-            </Button>
-          </DialogActions>
-        </form>
+          </LocalizationProvider>
+
+
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSave} type="submit" variant="contained">
+            Submit
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );
