@@ -1,14 +1,56 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Box } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AppointmentDialog from "./AppointmentDialog";
-import { appointmentsData } from "../../mockData";
 import AppointmentTableData from "./AppointmentTableData";
+import { useAppContext } from "../../services/context/AppContext";
+import { doGET } from "../../utils/HttpUtils";
+import { APPOITMENTENDPOINTS } from "../../EndPoints/Appointments";
+import { isError } from "../../utils/helper";
 
 function Appointments() {
-  const [appointments, setAppointments] = React.useState(appointmentsData);
+  const [appointments, setAppointments] = useState([]);
+
+  const { success, error, userData} = useAppContext();
+  const [filters, setFilters] = useState({
+      doctor: null
+    });
+
+
+  const getAppointments = async () => {
+      try {
+        const response = await doGET(APPOITMENTENDPOINTS.getAppointments(filters.doctor))
+  
+  
+        if (response.status >= 200 && response.status < 300) {
+          setAppointments(response.data.data)
+          // setAppointments((prevState: any) => [...prevState, ...response.data.data]);
+        } else if (response.status >= 400 && response.status <= 500) {
+          error(response.message)
+        }
+      } catch (e) {
+        if (isError(e)) {
+          console.log(e);
+        }
+      }
+    }
+  
+    useEffect(() => {
+      if (userData && !filters.doctor) {
+        setFilters((prevState) => ({
+          ...prevState,
+          doctor: userData._id,
+        }));
+      }
+    }, [userData]);
+    
+    useEffect(() => {
+      if (filters.doctor) {
+        getAppointments();
+      }
+    }, [filters.doctor]);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -31,6 +73,7 @@ function Appointments() {
           <AppointmentDialog
             appointments={appointments}
             setAppointments={setAppointments}
+            getAppointments={getAppointments}
           />
           <Grid
             container
