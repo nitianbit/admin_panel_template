@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -17,13 +17,22 @@ import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AddPatientDialog from "./AddPatientDialog";
-import { mockPatientData } from "../../mockData";
+import { doGET } from "../../utils/HttpUtils";
+import { DOCTORENDPOINTS } from "../../EndPoints/Doctor";
+import { useAppContext } from "../../services/context/AppContext";
+import { isError } from "../../utils/helper";
 
 function PatientList({ data }: any) {
-  const [patients, setPatients] = React.useState(mockPatientData);
+
+  const { success, error, userData} = useAppContext()
+  const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  const [filters, setFilters] = useState({
+    doctor: null
+  });
 
   const handleChange = (e: any) => {
     const data: any = patients.filter((item: any) =>
@@ -49,6 +58,39 @@ function PatientList({ data }: any) {
     setPage(0); // Reset page to the first page when changing rows per page
   };
 
+  const patientGrid = async () => {
+    try {
+      const response = await doGET(DOCTORENDPOINTS.getPatient(filters.doctor))
+
+
+      if (response.status >= 200 && response.status < 300) {
+        // setPatients([response.data.data])
+        // setPatients((prevState: any) => [...prevState, ...response.data.data]);
+      } else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e);
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (userData && !filters.doctor) {
+      setFilters((prevState) => ({
+        ...prevState,
+        doctor: userData._id,
+      }));
+    }
+  }, [userData]);
+  
+  useEffect(() => {
+    if (filters.doctor) {
+      patientGrid();
+    }
+  }, [filters.doctor]);
+  
   const emptyRows =
     rowsPerPage -
     Math.min(rowsPerPage, patientList.length - page * rowsPerPage);
@@ -98,9 +140,9 @@ function PatientList({ data }: any) {
                 <TableBody>
                   {(rowsPerPage > 0
                     ? patientList.slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
+                      page * rowsPerPage,
+                      page * rowsPerPage + rowsPerPage
+                    )
                     : patientList
                   ).map((patient: any, index: any) => (
                     <TableRow
