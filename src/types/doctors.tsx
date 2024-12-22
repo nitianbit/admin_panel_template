@@ -27,6 +27,7 @@ export interface DoctorFilters {
 export interface DoctorState {
   data: Doctor[];
   totalPages: number;
+  total: number;
   currentPage: number;
   filters: DoctorFilters;
   isLoading: boolean;

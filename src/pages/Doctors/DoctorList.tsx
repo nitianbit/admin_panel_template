@@ -11,7 +11,7 @@ import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 
 export default function DoctorList() {
-  const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
+  const { data, totalPages, currentPage,total, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
 
 
   React.useEffect(() => {
@@ -43,6 +43,7 @@ export default function DoctorList() {
             columns={COLUMNS}
             currentPage={currentPage}
             totalPages={totalPages}
+            total={total}
             loading={isLoading}
             onPageChange={onPageChange}
             module={MODULES.DOCTOR}
