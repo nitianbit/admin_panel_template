@@ -5,14 +5,10 @@ import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AppointmentDialog from "./AppointmentDialog";
 import AppointmentTableData from "./AppointmentTableData";
-import { useAppContext } from "../../services/context/AppContext";
-import { doGET } from "../../utils/HttpUtils";
-import { APPOITMENTENDPOINTS } from "../../EndPoints/Appointments";
-import { isError } from "../../utils/helper";
 import { useAppointmentStore } from "../../services/appointment";
 
 function Appointments() {
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, setFilters, nextPage, prevPage } = useAppointmentStore();
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, create, setFilters, nextPage, prevPage } = useAppointmentStore();
   const [appointments, setAppointments] = useState([]);
 
 
@@ -40,6 +36,8 @@ function Appointments() {
 
         <Container sx={{ mt: 4, mb: 4 }}>
           <AppointmentDialog
+            create={create}
+            fetchGrid={fetchGrid}
             appointments={appointments}
             setAppointments={setAppointments}
             getAppointments={fetchGrid}
