@@ -4,14 +4,34 @@ import { usePatientStore } from "../../services/patient";
 import { useEffect } from "react";
 
 const PatientTable = ({
+  selectedIds ,
+  setSelectedIds,
 }: any) => {
   const { data, totalPages, rows, currentPage, filters, isLoading, fetchGrid, create, setFilters, nextPage, prevPage, onPageChange } = usePatientStore();
 
-  useEffect(()=>{
-    if(data.length == 0){
+  const handleSelect = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((selectedId: any) => selectedId !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      const newSelectedIds = data.map((patient: any) => patient._id);
+      setSelectedIds(newSelectedIds);
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+
+  useEffect(() => {
+    if (data.length == 0) {
       fetchGrid()
     }
-  },[])
+  }, [])
 
   return <Grid
     container
@@ -22,7 +42,7 @@ const PatientTable = ({
       <Table sx={{ minWidth: 650 }} aria-label="patient table">
         <TableHead>
           <TableRow>
-            <TableCell align="center">#</TableCell>
+            {selectedIds && <TableCell align="center"><input type="checkbox" onChange={handleSelectAll} /></TableCell>}
             <TableCell>NAME</TableCell>
             <TableCell>AGE</TableCell>
             <TableCell>GENDER</TableCell>
@@ -34,14 +54,16 @@ const PatientTable = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((patient: any, index: any) => (
+          {data?.map((patient: any, index: any) => (
             <TableRow
               key={index}
-              component={Link}
-              to={`/patient-info/${patient?._id}`}
+              // component={Link}
+              // to={`/patient-info/${patient?._id}`}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <TableCell align="center">{patient.id}</TableCell>
+              {selectedIds && <TableCell><input type="checkbox" checked={selectedIds?.includes(patient?._id)} onChange={(e) => {
+                handleSelect(patient._id)
+              }} /></TableCell>}
               <TableCell>{patient.name}</TableCell>
               <TableCell>{patient.age}</TableCell>
               <TableCell>{patient.gender}</TableCell>
