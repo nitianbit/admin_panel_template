@@ -6,12 +6,11 @@ import Container from "@mui/material/Container";
 import { Avatar, Grid, Box } from "@mui/material";
 import AddDoctorDialog from "./AddDoctorDialog";
 import { useDoctorStore } from "../../services/doctors";
-import DoctorTable from "./DoctorTable";
+import GeneralTable from "../../components/GridTable";
+import { COLUMNS } from "./constants";
 
 export default function DoctorList() {
-  const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage } = useDoctorStore();
-
-  console.log("rendering,,,,", { data, totalPages, currentPage, isLoading })
+  const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage, onPageChange } = useDoctorStore();
 
 
   React.useEffect(() => {
@@ -38,13 +37,14 @@ export default function DoctorList() {
 
         <Container sx={{ mt: 4, mb: 4 }}>
           <AddDoctorDialog />
-          {/* <div onClick={nextPage}>
-            update
-          </div>
-          <div onClick={() => setFilters({ a: 1 })}>
-            filter
-          </div> */}
-         <DoctorTable/>
+          <GeneralTable
+            data={data}
+            columns={COLUMNS}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            loading={isLoading}
+            onPageChange={onPageChange}
+          />
         </Container>
       </Box>
     </Box>
