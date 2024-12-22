@@ -3,17 +3,10 @@ import Paper from "@mui/material/Paper";
 import Appbar from "../../components/Appbar";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
-} from "@mui/material";
 import { Avatar, Grid, Box } from "@mui/material";
 import AddDoctorDialog from "./AddDoctorDialog";
 import { useDoctorStore } from "../../services/doctors";
+import DoctorTable from "./DoctorTable";
 
 export default function DoctorList() {
   const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage } = useDoctorStore();
@@ -51,51 +44,7 @@ export default function DoctorList() {
           <div onClick={() => setFilters({ a: 1 })}>
             filter
           </div> */}
-          <Grid
-            container
-            spacing={2}
-            sx={{ marginleft: "10px", marginTop: "40px" }}
-          >
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }} aria-label="patient table">
-                <TableHead>
-                  <TableRow>
-                    {/* <TableCell align="center">#</TableCell> */}
-                    <TableCell></TableCell>
-                    <TableCell>DOCTOR NAME</TableCell>
-                    <TableCell>SPECIALIST</TableCell>
-                    <TableCell>SEX</TableCell>
-                    <TableCell>PHONE NO</TableCell>
-                    <TableCell>EDUCATION</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.length > 0 &&
-                    data.map((doctor: any, index: any) => (
-                      <TableRow
-                        key={index}
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        {/* <TableCell align="center">{doctor.id}</TableCell> */}
-                        <TableCell align="right">
-                          <Avatar
-                            src={"https://i.pravatar.cc/300"}
-                            sx={{
-                              height: "25%"
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>{doctor.fullName}</TableCell>
-                        <TableCell>{doctor.specialist}</TableCell>
-                        <TableCell>{doctor.gender}</TableCell>
-                        <TableCell>{doctor.phone}</TableCell>
-                        <TableCell>{doctor.education}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
+         <DoctorTable/>
         </Container>
       </Box>
     </Box>
