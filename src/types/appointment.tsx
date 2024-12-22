@@ -32,6 +32,7 @@ export interface AppointmentFilters {
 export interface AppointmentState {
     data: Appointment[];
     totalPages: number;
+    total: number;
     currentPage: number;
     filters: AppointmentFilters;
     isLoading: boolean;

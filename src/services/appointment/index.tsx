@@ -12,10 +12,11 @@ const store = create<AppointmentState>((set, get) => ({
     filters: {},
     isLoading: false,
     rows: 20,
+    total:0,
 
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows, isLoading } = get();
+            const { filters, currentPage, rows, isLoading, total } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
@@ -30,7 +31,8 @@ const store = create<AppointmentState>((set, get) => ({
             if (response.status >= 200 && response.status < 400) {
                 set({
                     data: response.data.data.rows,
-                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) })
+                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) }),
+                    total : response.data.data.total ? response.data.data.total : total
                 });
             } else {
                 showError(response.message);
@@ -68,9 +70,9 @@ const store = create<AppointmentState>((set, get) => ({
     },
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
         const { currentPage, filters, fetchGrid, totalPages } = get();
-        if (currentPage > 1 || currentPage < totalPages) {
+        if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page
+                currentPage: page+1
             })
             fetchGrid();
         }

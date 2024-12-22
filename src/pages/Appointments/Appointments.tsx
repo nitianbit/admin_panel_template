@@ -10,7 +10,7 @@ import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 
 function Appointments() {
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
+  const { data, totalPages, total,rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
   useEffect(() => {
     fetchGrid()
   }, [])
@@ -56,6 +56,7 @@ function Appointments() {
               columns={COLUMNS}
               currentPage={currentPage}
               totalPages={totalPages}
+              total={total}
               loading={isLoading}
               onPageChange={onPageChange}
               module={MODULES.DOCTOR}
