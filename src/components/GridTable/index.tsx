@@ -89,6 +89,7 @@ const GridTable: React.FC<GridTableProps> = ({
   styles = {},
   currentPage = 1,
   totalPages = 1,
+  total,
   onPageChange,
   onDelete=(...args:any)=>{},
   onEdit=()=>{}
@@ -169,10 +170,10 @@ const GridTable: React.FC<GridTableProps> = ({
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[20]}
+        rowsPerPageOptions={[2]}
         component="div"
-        count={totalPages}
-        rowsPerPage={20}
+        count={total}
+        rowsPerPage={2}
         page={currentPage - 1}
         onPageChange={onPageChange}
       />

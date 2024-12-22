@@ -11,7 +11,8 @@ const store = create<PatientState>((set, get) => ({
     currentPage: 1,
     filters: {},
     isLoading: false,
-    rows: 20,
+    rows: 2,
+    total:0,
 
     fetchGrid: async () => {
         try {
@@ -30,7 +31,8 @@ const store = create<PatientState>((set, get) => ({
             if (response.status >= 200 && response.status < 400) {
                 set({
                     data: response.data.data.rows,
-                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) })
+                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) }),
+                    total:response.data.data.total ? response.data.data.total : get().total
                 });
             } else {
                 showError(response.message);
@@ -68,9 +70,9 @@ const store = create<PatientState>((set, get) => ({
     },
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
         const { currentPage, filters, fetchGrid, totalPages } = get();
-        if (currentPage > 1 || currentPage < totalPages) {
+        if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page
+                currentPage: page+1
             })
             fetchGrid();
         }

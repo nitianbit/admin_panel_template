@@ -27,6 +27,7 @@ export interface PatientFilters {
 export interface PatientState {
   data: Patient[];
   totalPages: number;
+  total: number;
   currentPage: number;
   filters: PatientFilters;
   isLoading: boolean;

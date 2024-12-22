@@ -14,7 +14,7 @@ import { MODULES } from "../../utils/constants";
 
 function PatientList({ }: any) {
 
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage } = usePatientStore();
+  const { data, totalPages, rows, total, currentPage, filters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage } = usePatientStore();
   const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
   const [page, setPage] = React.useState(0);
@@ -85,6 +85,7 @@ function PatientList({ }: any) {
             columns={COLUMNS}
             currentPage={currentPage}
             totalPages={totalPages}
+            total={total}
             loading={isLoading}
             onPageChange={onPageChange}
             module={MODULES.DOCTOR}
