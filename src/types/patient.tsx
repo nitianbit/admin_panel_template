@@ -5,7 +5,9 @@ export interface Patient {
   gender: string;
   phone: string;
   email: string;
-  company?: string
+  age?:number;
+  company?: string;
+  address?:string
 }
 
 export interface PatientResponse {
