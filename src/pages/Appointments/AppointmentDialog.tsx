@@ -19,27 +19,11 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import dayjs from "dayjs";
-import { doGET, doPOST } from "../../utils/HttpUtils";
-import { APPOITMENTENDPOINTS } from "../../EndPoints/Appointments";
 import { useAppContext } from "../../services/context/AppContext";
-import { isError } from "../../utils/helper";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import PatientDialog from "../../components/Dialog/PatientDialog";
-import { DOCTORENDPOINTS } from "../../EndPoints/Doctor";
-
-type FormValues = {
-  fee: Number;
-  status: string;
-  paymentStatus: string;
-  appointmentDate: any;
-  timeSlot: {
-    start: any,
-    end: any,
-  };
-  patiendId?: string;
-  doctor: string
-
-};
+import { useAppointmentStore } from "../../services/appointment";
+import { Appointment } from "../../types/appointment";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -53,13 +37,14 @@ const Transition = React.forwardRef(function Transition(
 export default function AppointmentDialog({
   getAppointments,
 }: any) {
-  const { success, error, userData } = useAppContext();
+  const { create, fetchGrid} = useAppointmentStore();
+  const { userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
   const [patients, setPatients] = React.useState([])
 
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
 
-  const [data, setData] = React.useState<FormValues>({
+  const [appointMentData, setAppointMentData] = React.useState<Appointment>({
     fee: 0,
     status: "SCHD",
     paymentStatus: "PND",
@@ -68,14 +53,22 @@ export default function AppointmentDialog({
       start: "",
       end: ""
     },
-    patiendId: "",
     doctor: userData?._id
   })
 
 
   const handleChange = (key: any, value: any) => {
-    setData({ ...data, [key]: value })
-  }
+    if (key.startsWith("timeSlot.")) {
+      const field = key.split(".")[1]; // Extract 'start' or 'end'
+      setAppointMentData({
+        ...appointMentData,
+        timeSlot: { ...appointMentData.timeSlot, [field]: value }
+      });
+    } else {
+      setAppointMentData({ ...appointMentData, [key]: value });
+    }
+  };
+  
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -85,8 +78,9 @@ export default function AppointmentDialog({
     setOpen(false);
   };
 
-  const handlePatientDialogSave = () => {
+  const handlePatientDialogSave = (ids: any) => {
     setPatientDialogOpen(false)
+    appointMentData.patient = ids
   }
 
   const handlePatientDialogClose = () => {
@@ -94,24 +88,17 @@ export default function AppointmentDialog({
   }
 
   const handleSave = async () => {
-    try {
-      const date = dayjs(data.appointmentDate).format("YYYYMMDD");
-      const startTime = dayjs(data.timeSlot.start).format("HHMM");
-      const endTime = dayjs(data.timeSlot.end).format("HHMM");
-      const response = await doPOST(APPOITMENTENDPOINTS.createAppointment, data);
-      if (response.status >= 200 && response.status < 300) {
-        getAppointments()
-        handleClose()
-        success("Appointment created successfully")
-      } else if (response.status >= 400 && response.status <= 500) {
-        error(response.message)
-      }
-    } catch (e) {
-      if (isError(e)) {
-        console.log(e);
-        error(e.message)
-      }
-    }
+
+    const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
+    const startTime = dayjs(appointMentData.timeSlot.start).format("HHMM");
+    const endTime = dayjs(appointMentData.timeSlot.end).format("HHMM");
+    appointMentData.appointmentDate = date;
+    appointMentData.timeSlot["start"] = startTime
+    appointMentData.timeSlot["end"] = endTime
+
+    create(appointMentData)
+    handleClose()
+    fetchGrid()
   }
 
 
@@ -160,7 +147,7 @@ export default function AppointmentDialog({
             type="fee"
             fullWidth
             variant="outlined"
-            value={data?.fee}
+            value={appointMentData?.fee}
             onChange={(e) => handleChange("fee", e.target.value)}
 
           />
@@ -170,7 +157,7 @@ export default function AppointmentDialog({
               labelId="status"
               id="status"
               label="Status"
-              value={data?.status}
+              value={appointMentData?.status}
               onChange={(e) => handleChange("status", e.target.value)}
             >
               <MenuItem value={"SCHD"}>Scheduled</MenuItem>
@@ -186,7 +173,7 @@ export default function AppointmentDialog({
               labelId="paymentStatus"
               id="paymentStatus"
               label="Payment Status"
-              value={data?.paymentStatus}
+              value={appointMentData?.paymentStatus}
               onChange={(e) => handleChange("paymentStatus", e.target.value)}
             >
               <MenuItem value={"PD"}>Paid</MenuItem>
@@ -199,7 +186,7 @@ export default function AppointmentDialog({
 
             <DemoContainer components={["DatePicker"]}>
               <DatePicker
-                value={data?.appointmentDate}
+                value={appointMentData?.appointmentDate}
                 onChange={(e: any) => {
                   handleChange("appointmentDate", e)
                 }
@@ -217,7 +204,7 @@ export default function AppointmentDialog({
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <TimePicker
-              value={data?.timeSlot.start}
+              value={appointMentData?.timeSlot.start}
               onChange={(e: any) => {
                 // const startTime = dayjs(e).format("HHmm");
                 handleChange("timeSlot.start", e)
@@ -235,7 +222,7 @@ export default function AppointmentDialog({
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <TimePicker
-              value={data?.timeSlot.end}
+              value={appointMentData?.timeSlot.end}
               onChange={(e: any) => {   // 
                 handleChange("timeSlot.end", e)
               }
