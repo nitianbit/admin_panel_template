@@ -16,16 +16,10 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import { useDoctorStore } from "../../services/doctors";
+import { Doctor } from "../../types/doctors";
 
-type FormValues = {
-  id: string;
-  fullName: string;
-  gender: string;
-  phone: string;
-  email: string;
-  education: string;
-  specialist: string;
-};
+ 
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -37,17 +31,16 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AddDoctorDialog({
-  mockData,
-  doctors,
-  setDoctors
+ 
 }: any) {
   const [open, setOpen] = React.useState(false);
+    const {create} = useDoctorStore();
 
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<FormValues>();
+  } = useForm<Doctor>();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -57,9 +50,8 @@ export default function AddDoctorDialog({
     setOpen(false);
   };
 
-  const onSubmit = (data: FormValues) => {
-    data.id = doctors.length + 1;
-    setDoctors((prevState: any) => [...prevState, data]);
+  const onSubmit = (data: Doctor) => {
+    create(data);
     handleClose();
   };
 
@@ -95,16 +87,16 @@ export default function AddDoctorDialog({
           <DialogContent dividers>
             <TextField
               margin="dense"
-              id="fullName"
+              id="name"
               label="Full Name"
-              type="fullName"
+              type="name"
               fullWidth
               variant="outlined"
-              {...register("fullName", {
+              {...register("name", {
                 required: "Name is required"
               })}
-              error={!!errors.fullName}
-              helperText={errors.fullName?.message}
+              error={!!errors.name}
+              helperText={errors.name?.message}
             />
             <FormControl fullWidth margin="dense">
               <InputLabel id="gender">Gender</InputLabel>
@@ -169,11 +161,11 @@ export default function AddDoctorDialog({
               fullWidth
               variant="outlined"
               placeholder="ex: Cardiologist, Dentist"
-              {...register("specialist", {
+              {...register("specialization", {
                 required: "Specialist is required"
               })}
-              error={!!errors.specialist}
-              helperText={errors.specialist?.message}
+              error={!!errors.specialization}
+              helperText={errors.specialization?.message}
             />
           </DialogContent>
           <DialogActions>

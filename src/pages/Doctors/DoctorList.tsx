@@ -12,36 +12,17 @@ import {
   TableRow
 } from "@mui/material";
 import { Avatar, Grid, Box } from "@mui/material";
-import { mockDoctorsData } from "../../mockData";
 import AddDoctorDialog from "./AddDoctorDialog";
-import { doGET } from "../../utils/HttpUtils";
-import { DOCTORENDPOINTS } from "../../EndPoints/Doctor";
-import { isError } from "../../utils/helper";
-import { useAppContext } from "../../services/context/AppContext";
+import { useDoctorStore } from "../../services/doctors";
 
 export default function DoctorList() {
-  const { success, error, userData } = useAppContext();
-  const [doctors, setDoctors] = React.useState([]);
+  const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage } = useDoctorStore();
 
-  const getDoctors = async () => {
-    try {
-      const response = await doGET(DOCTORENDPOINTS.getDoctors)
-      if (response.status >= 200 && response.status < 300) {
-        setDoctors(response.data.data.rows)
-        success("Appointment created successfully")
-      } else if (response.status >= 400 && response.status <= 500) {
-        error(response.message)
-      }
-    } catch (e) {
-      if (isError(e)) {
-        console.log(e);
-        error(e.message)
-      }
-    }
-  }
+  console.log("rendering,,,,", { data, totalPages, currentPage, isLoading })
+
 
   React.useEffect(() => {
-    getDoctors()
+    fetchGrid()
   }, [])
 
 
@@ -63,11 +44,13 @@ export default function DoctorList() {
         <Toolbar />
 
         <Container sx={{ mt: 4, mb: 4 }}>
-          <AddDoctorDialog
-            mockData={mockDoctorsData}
-            doctors={doctors}
-            setDoctors={setDoctors}
-          />
+          <AddDoctorDialog />
+          {/* <div onClick={nextPage}>
+            update
+          </div>
+          <div onClick={() => setFilters({ a: 1 })}>
+            filter
+          </div> */}
           <Grid
             container
             spacing={2}
@@ -87,8 +70,8 @@ export default function DoctorList() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {doctors.length > 0 &&
-                    doctors.map((doctor: any, index: any) => (
+                  {data.length > 0 &&
+                    data.map((doctor: any, index: any) => (
                       <TableRow
                         key={index}
                         style={{ textDecoration: "none", color: "inherit" }}
