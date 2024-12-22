@@ -16,7 +16,7 @@ const store = create<PatientState>((set, get) => ({
 
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows, isLoading } = get();
+            const { filters, currentPage, rows, isLoading, total } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
@@ -32,7 +32,7 @@ const store = create<PatientState>((set, get) => ({
                 set({
                     data: response.data.data.rows,
                     ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) }),
-                    total:response.data.data.total ? response.data.data.total : get().total
+                    total:response.data.data.total ? response.data.data.total : total
                 });
             } else {
                 showError(response.message);
