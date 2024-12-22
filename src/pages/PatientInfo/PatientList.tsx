@@ -9,7 +9,7 @@ import Appbar from "../../components/Appbar";
 import AddPatientDialog from "./AddPatientDialog";
 import { usePatientStore } from "../../services/patient";
 import GeneralTable from "../../components/GridTable";
-import { COLUMNS } from "../Doctors/constants";
+import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 
 function PatientList({ }: any) {
