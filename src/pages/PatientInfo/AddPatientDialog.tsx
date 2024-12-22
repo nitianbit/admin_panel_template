@@ -19,19 +19,8 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-
-type FormValues = {
-  id: string;
-  fullName: string;
-  gender: string;
-  phone: string;
-  dateOfEntry: any;
-  referredByDoctor: string;
-  status: string;
-  age: string;
-  address: string;
-};
-
+import { useAppContext } from "../../services/context/AppContext";
+import { Patient } from "../../types/patient";
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
@@ -42,17 +31,18 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AddPatientDialog({
-  patients,
-  setPatients,
-  handleChange
+  create,
+  handleChange,
+  fetchGrid
 }: any) {
   const [open, setOpen] = React.useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm<FormValues>();
+    formState: { errors },
+    reset
+  } = useForm<Patient>();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -62,11 +52,12 @@ export default function AddPatientDialog({
     setOpen(false);
   };
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (data: Patient) => {
     console.log(data);
-    data.id = patients.length + 1;
-    setPatients((prevState: any) => [...prevState, data]);
+    create(data)
+    fetchGrid()
     handleClose();
+    reset()
   };
 
   return (
@@ -106,11 +97,11 @@ export default function AddPatientDialog({
               type="fullName"
               fullWidth
               variant="outlined"
-              {...register("fullName", {
+              {...register("name", {
                 required: "Name is required"
               })}
-              error={!!errors.fullName}
-              helperText={errors.fullName?.message}
+              error={!!errors.name}
+              helperText={errors.name?.message}
             />
             <FormControl fullWidth margin="dense">
               <InputLabel id="gender">Gender</InputLabel>
@@ -167,7 +158,7 @@ export default function AddPatientDialog({
               error={!!errors.age}
               helperText={errors.age?.message}
             />
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["DatePicker"]}>
                 <DatePicker
                   label="Date of Entry"
@@ -180,22 +171,8 @@ export default function AddPatientDialog({
                   }}
                 />
               </DemoContainer>
-            </LocalizationProvider>
-            <TextField
-              margin="dense"
-              id="referredByDoctor"
-              label="Referred By Doctor"
-              type="referredByDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("referredByDoctor", {
-                required: "Specialist is required"
-              })}
-              error={!!errors.referredByDoctor}
-              helperText={errors.referredByDoctor?.message}
-            />
-            <FormControl fullWidth margin="dense">
+            </LocalizationProvider> */}
+            {/* <FormControl fullWidth margin="dense">
               <InputLabel id="status">Status</InputLabel>
               <Select
                 labelId="status"
@@ -208,7 +185,7 @@ export default function AddPatientDialog({
                 <MenuItem value={"Recovered"}>Recovered</MenuItem>
                 <MenuItem value={"Discharged"}>Discharged</MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
