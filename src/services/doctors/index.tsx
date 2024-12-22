@@ -78,26 +78,35 @@ const store = create<DoctorState>((set, get) => ({
         }
     },
 
-    create:async (data:any)=>{
+    onCreate:async (data:any)=>{
         try {
             const response=await doPOST(ENDPOINTS.create('doctors'),data);
             console.log(response);
+            if(response.status>=200 && response.status<400){
+                get().fetchGrid();
+            }
         } catch (error) {
             
         }
     },
-    update:async (id:string,data:any)=>{
+    onUpdate:async (id:string,data:any)=>{
         try {
             const response=await doPUT(ENDPOINTS.update('doctors',id),data);
             console.log(response);
+            if(response.status>=200 && response.status<400){
+                get().fetchGrid();
+            }
         } catch (error) {
             
         }
     },
-    delete:async (id:string)=>{
+    onDelete:async (id:string)=>{
         try {
             const response=await doDELETE(ENDPOINTS.delete('doctors',id));
             console.log(response);
+            if(response.status>=200 && response.status<400){
+                get().fetchGrid();
+            }
         } catch (error) {
             
         }

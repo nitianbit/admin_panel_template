@@ -19,7 +19,7 @@ import Select from "@mui/material/Select";
 import { useDoctorStore } from "../../services/doctors";
 import { Doctor } from "../../types/doctors";
 
- 
+
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -31,10 +31,10 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AddDoctorDialog({
- 
+
 }: any) {
   const [open, setOpen] = React.useState(false);
-    const {create} = useDoctorStore();
+  const { onCreate } = useDoctorStore();
 
   const {
     register,
@@ -51,7 +51,7 @@ export default function AddDoctorDialog({
   };
 
   const onSubmit = (data: Doctor) => {
-    create(data);
+    onCreate(data);
     handleClose();
   };
 

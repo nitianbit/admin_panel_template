@@ -8,7 +8,7 @@ import AppointmentTableData from "./AppointmentTableData";
 import { useAppointmentStore } from "../../services/appointment";
 
 function Appointments() {
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, create, setFilters, nextPage, prevPage } = useAppointmentStore();
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid,  setFilters, nextPage, prevPage } = useAppointmentStore();
   const [appointments, setAppointments] = useState([]);
 
 

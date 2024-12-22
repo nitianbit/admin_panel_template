@@ -76,7 +76,7 @@ const store = create<PatientState>((set, get) => ({
         }
     },
 
-    create: async (data: any) => {
+    onCreate: async (data: any) => {
         try {
             const response = await doPOST(ENDPOINTS.create('patients'), data);
             console.log(response);
@@ -84,7 +84,7 @@ const store = create<PatientState>((set, get) => ({
 
         }
     },
-    update: async (id: string, data: any) => {
+    onUpdate: async (id: string, data: any) => {
         try {
             const response = await doPUT(ENDPOINTS.update('patients', id), data);
             console.log(response);
@@ -92,7 +92,7 @@ const store = create<PatientState>((set, get) => ({
 
         }
     },
-    delete: async (id: string) => {
+    onDelete: async (id: string) => {
         try {
             const response = await doDELETE(ENDPOINTS.delete('patients', id));
             console.log(response);

@@ -36,7 +36,7 @@ export interface DoctorState {
   nextPage: () => void;
   prevPage: () => void;
   onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null,page:number) => void;
-  create: (...args:any) => Promise<void>;
-  update: (...args:any) => Promise<void>;
-  delete: (...args:any) => Promise<void>;
+  onCreate: (...args:any) => Promise<void>;
+  onUpdate: (...args:any) => Promise<void>;
+  onDelete: (...args:any) => Promise<void>;
 }

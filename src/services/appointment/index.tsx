@@ -76,26 +76,35 @@ const store = create<AppointmentState>((set, get) => ({
         }
     },
 
-    create: async (data: any) => {
+    onCreate: async (data: any) => {
         try {
             const response = await doPOST(ENDPOINTS.create('appointments'), data);
             console.log(response);
+            if(response.status>=200 && response.status<400){
+                get().fetchGrid();
+            }
         } catch (error) {
 
         }
     },
-    update: async (id: string, data: any) => {
+    onUpdate: async (id: string, data: any) => {
         try {
             const response = await doPUT(ENDPOINTS.update('appointments', id), data);
             console.log(response);
+            if(response.status>=200 && response.status<400){
+                get().fetchGrid();
+            }
         } catch (error) {
 
         }
     },
-    delete: async (id: string) => {
+    onDelete: async (id: string) => {
         try {
             const response = await doDELETE(ENDPOINTS.delete('appointments', id));
             console.log(response);
+            if(response.status>=200 && response.status<400){
+                get().fetchGrid();
+            }
         } catch (error) {
 
         }

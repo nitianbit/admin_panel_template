@@ -8,13 +8,13 @@ import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AddPatientDialog from "./AddPatientDialog";
 import { usePatientStore } from "../../services/patient";
-import PatientTable from "./PatientTable";
 import GeneralTable from "../../components/GridTable";
-import { COLUMNS } from "./constants";
+import { COLUMNS } from "../Doctors/constants";
+import { MODULES } from "../../utils/constants";
 
 function PatientList({ }: any) {
 
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, create, setFilters, nextPage, prevPage } = usePatientStore();
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage } = usePatientStore();
   const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
   const [page, setPage] = React.useState(0);
@@ -74,7 +74,7 @@ function PatientList({ }: any) {
 
         <Container sx={{ mt: 4, mb: 4 }}>
           <AddPatientDialog
-            create={create}
+            create={onCreate}
             fetchGrid={fetchGrid}
             patients={patients}
             setPatients={setPatients}
@@ -87,6 +87,10 @@ function PatientList({ }: any) {
             totalPages={totalPages}
             loading={isLoading}
             onPageChange={onPageChange}
+            module={MODULES.DOCTOR}
+            onDelete={(data: any) => {
+              onDelete(data._id)
+            }}
           />
         </Container>
       </Box>

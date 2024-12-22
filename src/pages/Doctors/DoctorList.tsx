@@ -8,9 +8,10 @@ import AddDoctorDialog from "./AddDoctorDialog";
 import { useDoctorStore } from "../../services/doctors";
 import GeneralTable from "../../components/GridTable";
 import { COLUMNS } from "./constants";
+import { MODULES } from "../../utils/constants";
 
 export default function DoctorList() {
-  const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage, onPageChange } = useDoctorStore();
+  const { data, totalPages, currentPage, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
 
 
   React.useEffect(() => {
@@ -44,6 +45,10 @@ export default function DoctorList() {
             totalPages={totalPages}
             loading={isLoading}
             onPageChange={onPageChange}
+            module={MODULES.DOCTOR}
+            onDelete={(data: any) => {
+              onDelete(data._id)
+            }}
           />
         </Container>
       </Box>

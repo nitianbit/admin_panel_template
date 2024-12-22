@@ -15,5 +15,6 @@ export interface GridTableProps {
     totalPages:number;
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null,page:number) => void;
     loading:boolean;
+    module:string;
     [key: string]: any; //for any extra data
   }

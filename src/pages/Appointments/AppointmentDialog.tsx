@@ -36,7 +36,7 @@ const Transition = React.forwardRef(function Transition(
 
 export default function AppointmentDialog({
 }: any) {
-  const { create, fetchGrid} = useAppointmentStore();
+  const { onCreate} = useAppointmentStore();
   const { userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
   const [patients, setPatients] = React.useState([])
@@ -95,9 +95,8 @@ export default function AppointmentDialog({
     appointMentData.timeSlot["start"] = startTime
     appointMentData.timeSlot["end"] = endTime
 
-    create(appointMentData)
+    onCreate(appointMentData)
     handleClose()
-    fetchGrid()
   }
 
 
