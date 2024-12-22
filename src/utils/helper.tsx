@@ -20,7 +20,7 @@ export const moduleRoles = {
     role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
   },
   "/appointments":{
-    role: [MODULES.SUPERVISOR, MODULES.DOCTOR]
+    role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
   },
   "/calender":{
     role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
