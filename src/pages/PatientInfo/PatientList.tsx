@@ -17,22 +17,17 @@ import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AddPatientDialog from "./AddPatientDialog";
-import { doGET } from "../../utils/HttpUtils";
-import { DOCTORENDPOINTS } from "../../EndPoints/Doctor";
 import { useAppContext } from "../../services/context/AppContext";
-import { isError } from "../../utils/helper";
+import { usePatientStore } from "../../services/patient";
 
-function PatientList({ data }: any) {
+function PatientList({ }: any) {
 
-  const { success, error, userData} = useAppContext()
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, setFilters, nextPage, prevPage } = usePatientStore();
   const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const [filters, setFilters] = useState({
-    doctor: null
-  });
 
   const handleChange = (e: any) => {
     const data: any = patients.filter((item: any) =>
@@ -58,42 +53,14 @@ function PatientList({ data }: any) {
     setPage(0); // Reset page to the first page when changing rows per page
   };
 
-  const patientGrid = async () => {
-    try {
-      const response = await doGET(DOCTORENDPOINTS.getPatient(filters.doctor))
-
-
-      if (response.status >= 200 && response.status < 300) {
-        // setPatients([response.data.data])
-        // setPatients((prevState: any) => [...prevState, ...response.data.data]);
-      } else if (response.status >= 400 && response.status <= 500) {
-        error(response.message)
-      }
-    } catch (e) {
-      if (isError(e)) {
-        console.log(e);
-      }
-    }
-  }
-
   useEffect(() => {
-    if (userData && !filters.doctor) {
-      setFilters((prevState) => ({
-        ...prevState,
-        doctor: userData._id,
-      }));
-    }
-  }, [userData]);
-  
-  useEffect(() => {
-    if (filters.doctor) {
-      patientGrid();
-    }
-  }, [filters.doctor]);
-  
-  const emptyRows =
-    rowsPerPage -
-    Math.min(rowsPerPage, patientList.length - page * rowsPerPage);
+    fetchGrid()
+  }, [])
+
+
+  // const emptyRows =
+  //   rowsPerPage -
+  //   Math.min(rowsPerPage, patientList.length - page * rowsPerPage);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -171,11 +138,11 @@ function PatientList({ data }: any) {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {emptyRows > 0 && (
+                  {/* {emptyRows > 0 && (
                     <TableRow style={{ height: 53 * emptyRows }}>
                       <TableCell colSpan={8} />
                     </TableRow>
-                  )}
+                  )} */}
                 </TableBody>
               </Table>
             </TableContainer>
