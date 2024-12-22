@@ -35,13 +35,7 @@ function Appointments() {
         <Toolbar />
 
         <Container sx={{ mt: 4, mb: 4 }}>
-          <AppointmentDialog
-            create={create}
-            fetchGrid={fetchGrid}
-            appointments={appointments}
-            setAppointments={setAppointments}
-            getAppointments={fetchGrid}
-          />
+          <AppointmentDialog />
           <Grid
             container
             spacing={2}

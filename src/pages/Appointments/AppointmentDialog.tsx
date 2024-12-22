@@ -35,7 +35,6 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AppointmentDialog({
-  getAppointments,
 }: any) {
   const { create, fetchGrid} = useAppointmentStore();
   const { userData } = useAppContext();
