@@ -12,8 +12,12 @@ export const COLUMNS = [
         />,
     },
     {
-        header: "DOCTOR NAME",
+        header: "Name",
         accessor: "name",
+    },
+    {
+        header: "Gender",
+        accessor: "gender",
     },
     {
         header: "Email",
@@ -24,7 +28,15 @@ export const COLUMNS = [
         accessor: "phone",
     },
     {
-        header: "SPECIALIST",
-        accessor: "specialization",
+        header: "Age",
+        accessor: "age",
+    },
+    {
+        header: "Company",
+        accessor: "company",
+    },
+    {
+        header: "Address",
+        accessor: "address",
     },
 ]
