@@ -22,7 +22,7 @@ import { usePatientStore } from "../../services/patient";
 
 function PatientList({ }: any) {
 
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, setFilters, nextPage, prevPage } = usePatientStore();
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, create, setFilters, nextPage, prevPage } = usePatientStore();
   const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
   const [page, setPage] = React.useState(0);
@@ -81,6 +81,8 @@ function PatientList({ }: any) {
 
         <Container sx={{ mt: 4, mb: 4 }}>
           <AddPatientDialog
+            create={create}
+            fetchGrid={fetchGrid}
             patients={patients}
             setPatients={setPatients}
             handleChange={handleChange}
