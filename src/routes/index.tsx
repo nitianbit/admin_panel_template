@@ -8,7 +8,7 @@ import AllOrders from "../pages/Orders/AllOrders";
 import PatientList from "../pages/PatientInfo/PatientList";
 import { mockPatientData } from "../mockData";
 import PatientInfo from "../pages/PatientInfo/PatientInfo";
-import DoctorList from "../pages/Profile/DoctorList";
+import DoctorList from "../pages/Doctors/DoctorList";
 import Appointments from "../pages/Appointments/Appointments";
 import Calender from "../pages/Calender/Calender";
 import Kanban from "../pages/Kanban/Kanban";

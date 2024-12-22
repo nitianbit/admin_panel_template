@@ -12,4 +12,9 @@ export const ENDPOINTS = {
     login: '/login',
     register: '/register',
     profile: '/profile',
+    create: (module:string)=>`/${module}/create`,
+    update: (module: string, id: string)=>`/${module}/${id}/update`,
+    delete: (module:string,id:string)=>`/${module}/${id}/delete`,
+    detail: (module:string,id:string)=>`/${module}/${id}/detail`,
+    grid: (module:string)=>`/${module}/grid`,
 }
