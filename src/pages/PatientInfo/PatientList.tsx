@@ -9,6 +9,8 @@ import Appbar from "../../components/Appbar";
 import AddPatientDialog from "./AddPatientDialog";
 import { usePatientStore } from "../../services/patient";
 import PatientTable from "./PatientTable";
+import GeneralTable from "../../components/GridTable";
+import { COLUMNS } from "./constants";
 
 function PatientList({ }: any) {
 
@@ -48,6 +50,11 @@ function PatientList({ }: any) {
   //   rowsPerPage -
   //   Math.min(rowsPerPage, patientList.length - page * rowsPerPage);
 
+   React.useEffect(() => {
+      fetchGrid()
+    }, [])
+  
+
   return (
     <Box sx={{ display: "flex" }}>
       <Appbar appBarTitle="Patient List" />
@@ -73,7 +80,14 @@ function PatientList({ }: any) {
             setPatients={setPatients}
             handleChange={handleChange}
           />
-          <PatientTable/>
+          <GeneralTable
+            data={data}
+            columns={COLUMNS}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            loading={isLoading}
+            onPageChange={onPageChange}
+          />
         </Container>
       </Box>
     </Box>
