@@ -4,14 +4,13 @@ import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AppointmentDialog from "./AppointmentDialog";
-import AppointmentTableData from "./AppointmentTableData";
 import { useAppointmentStore } from "../../services/appointment";
+import GeneralTable from '../../components/GridTable/index'
+import { COLUMNS } from "./constants";
+import { MODULES } from "../../utils/constants";
 
 function Appointments() {
-  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid,  setFilters, nextPage, prevPage } = useAppointmentStore();
-  const [appointments, setAppointments] = useState([]);
-
-
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
   useEffect(() => {
     fetchGrid()
   }, [])
@@ -41,7 +40,7 @@ function Appointments() {
             spacing={2}
             sx={{ marginleft: "10px", marginTop: "40px" }}
           >
-            <AppointmentTableData appointments={appointments} />
+            {/* <AppointmentTableData appointments={appointments} />
 
             <TablePagination
               rowsPerPageOptions={[20]}
@@ -50,6 +49,19 @@ function Appointments() {
               rowsPerPage={rows}
               page={currentPage}
               onPageChange={onPageChange}
+            /> */}
+
+            <GeneralTable
+              data={data}
+              columns={COLUMNS}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              loading={isLoading}
+              onPageChange={onPageChange}
+              module={MODULES.DOCTOR}
+              onDelete={(data: any) => {
+                onDelete(data._id)
+              }}
             />
           </Grid>
         </Container>
