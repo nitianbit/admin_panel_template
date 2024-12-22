@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Box } from "@mui/material";
+import { Grid, Box, TablePagination } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
@@ -9,48 +9,17 @@ import { useAppContext } from "../../services/context/AppContext";
 import { doGET } from "../../utils/HttpUtils";
 import { APPOITMENTENDPOINTS } from "../../EndPoints/Appointments";
 import { isError } from "../../utils/helper";
+import { useAppointmentStore } from "../../services/appointment";
 
 function Appointments() {
+  const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, setFilters, nextPage, prevPage } = useAppointmentStore();
   const [appointments, setAppointments] = useState([]);
 
-  const { success, error, userData} = useAppContext();
-  const [filters, setFilters] = useState({
-      doctor: null
-    });
 
+  useEffect(() => {
+    fetchGrid()
+  }, [])
 
-  const getAppointments = async () => {
-      try {
-        const response = await doGET(APPOITMENTENDPOINTS.getAppointments(filters.doctor))
-  
-  
-        if (response.status >= 200 && response.status < 300) {
-          setAppointments(response.data.data)
-          // setAppointments((prevState: any) => [...prevState, ...response.data.data]);
-        } else if (response.status >= 400 && response.status <= 500) {
-          error(response.message)
-        }
-      } catch (e) {
-        if (isError(e)) {
-          console.log(e);
-        }
-      }
-    }
-  
-    useEffect(() => {
-      if (userData && !filters.doctor) {
-        setFilters((prevState) => ({
-          ...prevState,
-          doctor: userData._id,
-        }));
-      }
-    }, [userData]);
-    
-    useEffect(() => {
-      if (filters.doctor) {
-        getAppointments();
-      }
-    }, [filters.doctor]);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -73,7 +42,7 @@ function Appointments() {
           <AppointmentDialog
             appointments={appointments}
             setAppointments={setAppointments}
-            getAppointments={getAppointments}
+            getAppointments={fetchGrid}
           />
           <Grid
             container
@@ -81,6 +50,15 @@ function Appointments() {
             sx={{ marginleft: "10px", marginTop: "40px" }}
           >
             <AppointmentTableData appointments={appointments} />
+
+            <TablePagination
+              rowsPerPageOptions={[20]}
+              component="div"
+              count={totalPages}
+              rowsPerPage={rows}
+              page={currentPage}
+              onPageChange={onPageChange}
+            />
           </Grid>
         </Container>
       </Box>
