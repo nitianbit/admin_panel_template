@@ -95,37 +95,33 @@ function PatientList({ }: any) {
                 <TableHead>
                   <TableRow>
                     <TableCell align="center">#</TableCell>
-                    <TableCell>FULL NAME</TableCell>
+                    <TableCell>NAME</TableCell>
                     <TableCell>AGE</TableCell>
                     <TableCell>GENDER</TableCell>
+                    <TableCell>Email</TableCell>
                     <TableCell>ADDRESS</TableCell>
-                    <TableCell>REFERRED BY DR.</TableCell>
+                    <TableCell>COMPANY</TableCell>
                     <TableCell>ENTRY DATE</TableCell>
-                    <TableCell>STATUS</TableCell>
+                    {/* <TableCell>STATUS</TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {(rowsPerPage > 0
-                    ? patientList.slice(
-                      page * rowsPerPage,
-                      page * rowsPerPage + rowsPerPage
-                    )
-                    : patientList
-                  ).map((patient: any, index: any) => (
+                  {data.map((patient: any, index: any) => (
                     <TableRow
                       key={index}
                       component={Link}
-                      to={`/patient-info/${patient.id}`}
+                      to={`/patient-info/${patient?._id}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       <TableCell align="center">{patient.id}</TableCell>
-                      <TableCell>{patient.fullName}</TableCell>
+                      <TableCell>{patient.name}</TableCell>
                       <TableCell>{patient.age}</TableCell>
                       <TableCell>{patient.gender}</TableCell>
+                      <TableCell>{patient.email}</TableCell>
                       <TableCell>{patient.address}</TableCell>
-                      <TableCell>{patient.referredByDoctor}</TableCell>
+                      <TableCell>{patient.company}</TableCell>
                       <TableCell>{patient.dateOfEntry}</TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <Chip
                           label={patient.status}
                           color={
@@ -135,7 +131,7 @@ function PatientList({ }: any) {
                           }
                           sx={{ textTransform: "uppercase" }}
                         />
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                   {/* {emptyRows > 0 && (
