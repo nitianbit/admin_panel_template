@@ -1,15 +1,14 @@
 
 
 export interface Appointment {
-    id: number;
-    patient?: string;
+    patient?: [string];
     doctor?: string;
     hospital?: string;
     department?: string;
-    appointmentDate: Date;
+    appointmentDate: string;
     timeSlot: {
-        start: Date;
-        end: Date;
+        start: string;
+        end: string;
     };
     status: string;
     fee?: Number
