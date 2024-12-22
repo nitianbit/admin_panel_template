@@ -1,24 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Grid,
-  Box,
-  TablePagination
+
+  Box
 } from "@mui/material";
-import { Link } from "react-router-dom";
-import Chip from "@mui/material/Chip";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AddPatientDialog from "./AddPatientDialog";
-import { useAppContext } from "../../services/context/AppContext";
 import { usePatientStore } from "../../services/patient";
+import PatientTable from "./PatientTable";
 
 function PatientList({ }: any) {
 
@@ -53,10 +43,6 @@ function PatientList({ }: any) {
     setPage(0); // Reset page to the first page when changing rows per page
   };
 
-  useEffect(() => {
-    fetchGrid()
-  }, [])
-
 
   // const emptyRows =
   //   rowsPerPage -
@@ -87,74 +73,7 @@ function PatientList({ }: any) {
             setPatients={setPatients}
             handleChange={handleChange}
           />
-          <Grid
-            container
-            spacing={2}
-            sx={{ marginleft: "10px", marginTop: "40px" }}
-          >
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }} aria-label="patient table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center">#</TableCell>
-                    <TableCell>NAME</TableCell>
-                    <TableCell>AGE</TableCell>
-                    <TableCell>GENDER</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>ADDRESS</TableCell>
-                    <TableCell>COMPANY</TableCell>
-                    <TableCell>ENTRY DATE</TableCell>
-                    {/* <TableCell>STATUS</TableCell> */}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.map((patient: any, index: any) => (
-                    <TableRow
-                      key={index}
-                      component={Link}
-                      to={`/patient-info/${patient?._id}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      <TableCell align="center">{patient.id}</TableCell>
-                      <TableCell>{patient.name}</TableCell>
-                      <TableCell>{patient.age}</TableCell>
-                      <TableCell>{patient.gender}</TableCell>
-                      <TableCell>{patient.email}</TableCell>
-                      <TableCell>{patient.address}</TableCell>
-                      <TableCell>{patient.company}</TableCell>
-                      <TableCell>{patient.dateOfEntry}</TableCell>
-                      {/* <TableCell>
-                        <Chip
-                          label={patient.status}
-                          color={
-                            patient.status === "In Treatment"
-                              ? "success"
-                              : "error"
-                          }
-                          sx={{ textTransform: "uppercase" }}
-                        />
-                      </TableCell> */}
-                    </TableRow>
-                  ))}
-                  {/* {emptyRows > 0 && (
-                    <TableRow style={{ height: 53 * emptyRows }}>
-                      <TableCell colSpan={8} />
-                    </TableRow>
-                  )} */}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={patientList.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Grid>
+          <PatientTable/>
         </Container>
       </Box>
     </Box>
