@@ -51,7 +51,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AppointmentDialog({
-  getAppointments
+  getAppointments,
 }: any) {
   const { success, error, userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
@@ -92,25 +92,6 @@ export default function AppointmentDialog({
   const handlePatientDialogClose = () => {
     setPatientDialogOpen(false)
   }
-
-  const patientGrid = async () => {
-    try {
-      const response = await doGET(DOCTORENDPOINTS.getPatient(userData?._id))
-
-
-      if (response.status >= 200 && response.status < 300) {
-        setPatients(response.data.data)
-        // setPatients((prevState: any) => [...prevState, ...response.data.data]);
-      } else if (response.status >= 400 && response.status <= 500) {
-        error(response.message)
-      }
-    } catch (e) {
-      if (isError(e)) {
-        console.log(e);
-      }
-    }
-  }
-
 
   const handleSave = async () => {
     try {
@@ -171,7 +152,6 @@ export default function AppointmentDialog({
         <DialogContent dividers>
           <div onClick={() => {
             setPatientDialogOpen(true)
-            patientGrid()
           }}>Select Patient</div>
           <TextField
             margin="dense"
