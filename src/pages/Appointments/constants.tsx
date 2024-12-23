@@ -12,19 +12,15 @@ export const COLUMNS = [
         />,
     },
     {
-        header: "DOCTOR NAME",
-        accessor: "name",
+        header: "Patient NAME",
+        accessor: `patient`,
     },
     {
-        header: "Email",
-        accessor: "email",
+        header: "Doctor NAME",
+        accessor: "doctor",
     },
     {
-        header: "Phone",
-        accessor: "phone",
-    },
-    {
-        header: "SPECIALIST",
-        accessor: "specialization",
+        header: "Hospital",
+        accessor: "hospital",
     },
 ]
