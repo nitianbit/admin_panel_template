@@ -7,20 +7,17 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { useAppContext } from "../../services/context/AppContext";
 import { Patient } from "../../types/patient";
+import AddSinglePatientContent from "./AddSinglePatientContent";
+import AddBulkUpload from "./AddBulkUploadContent";
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
@@ -36,30 +33,16 @@ export default function AddPatientDialog({
   fetchGrid
 }: any) {
   const [open, setOpen] = React.useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset
-  } = useForm<Patient>();
-
+  const [bulkOpen, setbulkOpen] = React.useState(false);
   const handleClickOpen = () => {
     setOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleBulkClickOpen = () => {
+    setbulkOpen(true);
   };
 
-  const onSubmit = (data: Patient) => {
-    console.log(data);
-    create(data)
-    fetchGrid()
-    handleClose();
-    reset()
-  };
-
+ 
   return (
     <div>
       <Stack
@@ -69,132 +52,29 @@ export default function AddPatientDialog({
         spacing={2}
       >
         <SearchInput handleChange={handleChange} />
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={handleClickOpen}
-        >
-          Add Patient
-        </Button>
+        <Box>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={handleBulkClickOpen}
+            sx={{mr:1}}
+          >
+            Add Bulk Patient
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={handleClickOpen}
+          >
+            Add Patient
+          </Button>
+        </Box>
+
+        <AddSinglePatientContent open={open} setOpen={setOpen} create={create} fetchGrid={fetchGrid}/>
+        <AddBulkUpload open={bulkOpen} setOpen={setbulkOpen}/>
       </Stack>
-
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        TransitionComponent={Transition}
-        maxWidth="xs"
-        fullWidth
-        sx={{ height: "100%" }}
-      >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Add Patient</DialogTitle>
-
-          <DialogContent dividers>
-            <TextField
-              margin="dense"
-              id="fullName"
-              label="Full Name"
-              type="fullName"
-              fullWidth
-              variant="outlined"
-              {...register("name", {
-                required: "Name is required"
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}
-            />
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="gender">Gender</InputLabel>
-              <Select
-                labelId="gender"
-                id="gender"
-                label="Gender"
-                {...register("gender")}
-              >
-                <MenuItem value={"Male"}>Male</MenuItem>
-                <MenuItem value={"Female"}>Female</MenuItem>
-                <MenuItem value={"Other"}>Other</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              margin="dense"
-              id="phone"
-              label="Phone no"
-              type="phone"
-              fullWidth
-              variant="outlined"
-              placeholder="0 123456789"
-              {...register("phone", {
-                required: "Phone no is required"
-              })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
-            />
-            <TextField
-              margin="dense"
-              id="address"
-              label="Address"
-              type="address"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: street name, number, postal code"
-              {...register("address", {
-                required: "Address is required"
-              })}
-              error={!!errors.address}
-              helperText={errors.address?.message}
-            />
-            <TextField
-              margin="dense"
-              id="age"
-              label="Age"
-              type="age"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: 18"
-              {...register("age", {
-                required: "Age is required"
-              })}
-              error={!!errors.age}
-              helperText={errors.age?.message}
-            />
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["DatePicker"]}>
-                <DatePicker
-                  label="Date of Entry"
-                  sx={{ width: "100%" }}
-                  onError={() => !!errors.dateOfEntry}
-                  slotProps={{
-                    textField: {
-                      helperText: "Date is required"
-                    }
-                  }}
-                />
-              </DemoContainer>
-            </LocalizationProvider> */}
-            {/* <FormControl fullWidth margin="dense">
-              <InputLabel id="status">Status</InputLabel>
-              <Select
-                labelId="status"
-                id="status"
-                label="Status"
-                {...register("status")}
-              >
-                <MenuItem value={"In Treatment"}>In Treatment</MenuItem>
-                <MenuItem value={"In ICU"}>In ICU</MenuItem>
-                <MenuItem value={"Recovered"}>Recovered</MenuItem>
-                <MenuItem value={"Discharged"}>Discharged</MenuItem>
-              </Select>
-            </FormControl> */}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
-              Submit
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+         
+        
     </div>
   );
 }
