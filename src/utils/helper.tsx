@@ -26,7 +26,7 @@ export const moduleRoles = {
     role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
   },
   "/doctor-list":{
-    role:[MODULES.ADMIN]
+    role:[MODULES.DOCTOR]
   }
 
 }
