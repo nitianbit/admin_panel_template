@@ -21,7 +21,6 @@ import Select from "@mui/material/Select";
 import dayjs from "dayjs";
 import { useAppContext } from "../../services/context/AppContext";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import PatientDialog from "../../components/Dialog/PatientDialog";
 import { useAppointmentStore } from "../../services/appointment";
 import { Appointment } from "../../types/appointment";
 import { showError } from "../../services/toaster";
