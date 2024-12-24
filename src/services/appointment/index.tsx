@@ -11,7 +11,7 @@ const store = create<AppointmentState>((set, get) => ({
     currentPage: 1,
     filters: {},
     isLoading: false,
-    rows: 20,
+    rows: 2,
     total:0,
 
     fetchGrid: async () => {
