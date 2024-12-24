@@ -7,7 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { Stack } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -39,7 +39,7 @@ export default function AppointmentDialog({
   const { onCreate} = useAppointmentStore();
   const { userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
-  const [patients, setPatients] = React.useState([])
+ 
 
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
 
@@ -52,7 +52,8 @@ export default function AppointmentDialog({
       start: "",
       end: ""
     },
-    doctor: userData?._id
+    doctor: userData?._id,
+    patient:[""]
   })
 
 
@@ -118,7 +119,6 @@ export default function AppointmentDialog({
         </Button>
       </Stack>
       <PatientDialog
-        patients={patients}
         open={patientDialogOpen}
         handleClose={handlePatientDialogClose}
         handleSave={handlePatientDialogSave}
@@ -135,9 +135,9 @@ export default function AppointmentDialog({
         <DialogTitle>Appointment Details</DialogTitle>
 
         <DialogContent dividers>
-          <div onClick={() => {
+          <Typography onClick={() => {
             setPatientDialogOpen(true)
-          }}>Select Patient</div>
+          }}>Select Patient {appointMentData.patient && appointMentData.patient.length } {appointMentData.patient}</Typography>
           <TextField
             margin="dense"
             id="fee"

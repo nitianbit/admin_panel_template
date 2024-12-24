@@ -17,20 +17,19 @@ const Transition = React.forwardRef(function Transition(
 
 interface PatientDialogProps {
     open: boolean;
-    patients: any[];
     handleClose: () => void;
     handleSave: (e: any) => void;
 }
 
-const PatiendDialog: React.FC<PatientDialogProps> = ({ patients = [], open, handleClose, handleSave }) => {
+const PatiendDialog: React.FC<PatientDialogProps> = ({ open, handleClose, handleSave}) => {
 
-    const [selectedIds, setSelectedIds] = useState([]);
+    const { data, totalPages, rows, total, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, setFilters, nextPage, prevPage } = usePatientStore();
 
-    const { data, totalPages, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, setFilters, nextPage, prevPage } = usePatientStore();
+     const [selectedPatientIds, setSelectedPatientIds] = React.useState([]);
 
 
     useEffect(() => {
-        if (data.length == 0) {
+        if (data?.length == 0) {
             fetchGrid()
         }
     }, [])
@@ -51,17 +50,20 @@ const PatiendDialog: React.FC<PatientDialogProps> = ({ patients = [], open, hand
                 columns={COLUMNS}
                 currentPage={currentPage}
                 totalPages={totalPages}
+                total={total}
                 loading={isLoading}
                 onPageChange={onPageChange}
                 module={MODULES.DOCTOR}
                 onDelete={(data: any) => {
                     onDelete(data._id)
                 }}
+                selectedIds={selectedPatientIds}
+                setSelectedIds={setSelectedPatientIds}
             />
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>
                 <Button onClick={() => {
-                    handleSave(selectedIds)
+                    handleSave(selectedPatientIds)
                 }} type="submit" variant="contained">
                     Submit
                 </Button>

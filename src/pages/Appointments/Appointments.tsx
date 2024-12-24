@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Box, TablePagination } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
@@ -40,17 +40,6 @@ function Appointments() {
             spacing={2}
             sx={{ marginleft: "10px", marginTop: "40px" }}
           >
-            {/* <AppointmentTableData appointments={appointments} />
-
-            <TablePagination
-              rowsPerPageOptions={[20]}
-              component="div"
-              count={totalPages}
-              rowsPerPage={rows}
-              page={currentPage}
-              onPageChange={onPageChange}
-            /> */}
-
             <GeneralTable
               data={data}
               columns={COLUMNS}
