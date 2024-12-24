@@ -86,6 +86,17 @@ const store = create<PatientState>((set, get) => ({
 
         }
     },
+
+    onBulkCreate: async (data: any) => {
+        try {
+            const formData = new FormData();
+            formData.append("file", data.file);
+            const response = await doPOST(ENDPOINTS.bulkCreate('patients'), formData);
+            console.log(response);
+        } catch (error) {
+
+        }
+    },
     onUpdate: async (id: string, data: any) => {
         try {
             const response = await doPUT(ENDPOINTS.update('patients', id), data);
