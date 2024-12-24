@@ -26,6 +26,7 @@ import { Appointment } from "../../types/appointment";
 import { showError } from "../../services/toaster";
 import GridDialog from "../../components/Dialog/GridDialog";
 import { usePatientStore } from "../../services/patient";
+import { useDoctorStore } from "../../services/doctors";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -38,13 +39,16 @@ const Transition = React.forwardRef(function Transition(
 
 export default function AppointmentDialog({
 }: any) {
+
   const { onCreate } = useAppointmentStore();
   const { data: patientData, totalPages: patientTotalPages, total: patientTotal, currentPage: patientCurrentPage, isLoading: patientIsLoading, onPageChange: patientOnPageChange, fetchGrid: patientFetchtGrid, onDelete: patientOnDelete } = usePatientStore();
+  const { data: doctorData, totalPages: doctorTotalPages, total: doctorTotal, currentPage: doctorCurrentPage, isLoading: doctorIsLoading, onPageChange: doctorOnPageChange, fetchGrid: doctorFetchtGrid, onDelete: doctorOnDelete } = useDoctorStore();
   const { userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
 
 
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
+  const [doctorDialogOpen, setDoctorDialogOpen] = React.useState(false);
 
   const [appointMentData, setAppointMentData] = React.useState<Appointment>({
     fee: 0,
@@ -55,8 +59,8 @@ export default function AppointmentDialog({
       start: "",
       end: ""
     },
-    doctor: userData?._id,
-    patient: []
+    doctor: userData?.role?.includes("doctors") ? userData?._id : "",
+    patient: [],
   })
 
 
@@ -86,7 +90,18 @@ export default function AppointmentDialog({
     appointMentData.patient = ids
   }
 
+
+  const handleDoctorDialogSave = (ids: any) => {
+    setDoctorDialogOpen(false)
+    appointMentData.doctor = ids
+  }
+
   const handlePatientDialogClose = () => {
+    setPatientDialogOpen(false)
+  }
+
+
+  const handleDoctorDialogClose = () => {
     setPatientDialogOpen(false)
   }
 
@@ -137,8 +152,22 @@ export default function AppointmentDialog({
         fetchGrid={patientFetchtGrid}
         onDelete={patientOnDelete}
         title="Patient"
-
       />
+
+      {userData?.role?.includes("admin") && <GridDialog
+        open={doctorDialogOpen}
+        handleClose={handleDoctorDialogClose}
+        handleSave={handleDoctorDialogSave}
+        data={doctorData}
+        totalPages={doctorTotalPages}
+        total={doctorTotal}
+        currentPage={doctorCurrentPage}
+        isLoading={doctorIsLoading}
+        onPageChange={doctorOnPageChange}
+        fetchGrid={doctorFetchtGrid}
+        onDelete={doctorOnDelete}
+        title="Doctor"
+      />}
 
       <Dialog
         open={open}
@@ -154,6 +183,10 @@ export default function AppointmentDialog({
           <Typography onClick={() => {
             setPatientDialogOpen(true)
           }}>Select Patient {appointMentData.patient?.length} {appointMentData.patient}</Typography>
+
+          {userData.role.includes("admin") && <Typography onClick={() => {
+            setDoctorDialogOpen(true)
+          }}>Select Doctor {appointMentData.doctor?.length} {appointMentData.doctor}</Typography>}
           <TextField
             margin="dense"
             id="fee"
