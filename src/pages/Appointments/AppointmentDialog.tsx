@@ -24,6 +24,9 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import PatientDialog from "../../components/Dialog/PatientDialog";
 import { useAppointmentStore } from "../../services/appointment";
 import { Appointment } from "../../types/appointment";
+import { showError } from "../../services/toaster";
+import GridDialog from "../../components/Dialog/GridDialog";
+import { usePatientStore } from "../../services/patient";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -36,10 +39,11 @@ const Transition = React.forwardRef(function Transition(
 
 export default function AppointmentDialog({
 }: any) {
-  const { onCreate} = useAppointmentStore();
+  const { onCreate } = useAppointmentStore();
+  const { data: patientData, totalPages: patientTotalPages, total: patientTotal, currentPage: patientCurrentPage, isLoading: patientIsLoading, onPageChange: patientOnPageChange, fetchGrid: patientFetchtGrid, onDelete: patientOnDelete } = usePatientStore();
   const { userData } = useAppContext();
   const [open, setOpen] = React.useState(false);
- 
+
 
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
 
@@ -53,7 +57,7 @@ export default function AppointmentDialog({
       end: ""
     },
     doctor: userData?._id,
-    patient:[""]
+    patient: []
   })
 
 
@@ -68,7 +72,7 @@ export default function AppointmentDialog({
       setAppointMentData({ ...appointMentData, [key]: value });
     }
   };
-  
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -94,7 +98,10 @@ export default function AppointmentDialog({
     const endTime = dayjs(appointMentData.timeSlot.end).format("HHMM");
     appointMentData.appointmentDate = date;
     appointMentData.timeSlot["start"] = startTime
-    appointMentData.timeSlot["end"] = endTime
+    appointMentData.timeSlot["end"] = endTime;
+
+    if (appointMentData.patient?.length === 0) return showError("Please select a patient")
+
 
     onCreate(appointMentData)
     handleClose()
@@ -118,10 +125,20 @@ export default function AppointmentDialog({
           Book an Appointment
         </Button>
       </Stack>
-      <PatientDialog
+      <GridDialog
         open={patientDialogOpen}
         handleClose={handlePatientDialogClose}
         handleSave={handlePatientDialogSave}
+        data={patientData}
+        totalPages={patientTotalPages}
+        total={patientTotal}
+        currentPage={patientCurrentPage}
+        isLoading={patientIsLoading}
+        onPageChange={patientOnPageChange}
+        fetchGrid={patientFetchtGrid}
+        onDelete={patientOnDelete}
+        title="Patient"
+
       />
 
       <Dialog
@@ -137,7 +154,7 @@ export default function AppointmentDialog({
         <DialogContent dividers>
           <Typography onClick={() => {
             setPatientDialogOpen(true)
-          }}>Select Patient {appointMentData.patient && appointMentData.patient.length } {appointMentData.patient}</Typography>
+          }}>Select Patient {appointMentData.patient?.length} {appointMentData.patient}</Typography>
           <TextField
             margin="dense"
             id="fee"
