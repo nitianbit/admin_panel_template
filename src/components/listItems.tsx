@@ -19,6 +19,7 @@ import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import SickIcon from "@mui/icons-material/Sick";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import BusinessIcon from '@mui/icons-material/Business';
 import { hasAccess } from "../utils/helper";
 
 const primarynavList = [
@@ -61,6 +62,11 @@ const primarynavList = [
     link: "/account",
     label: "Account",
     icon: <ManageAccountsIcon />,
+  },
+  {
+    link: "/company",
+    label: "Company",
+    icon: <BusinessIcon />,
   },
 ];
 

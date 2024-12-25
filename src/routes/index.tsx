@@ -17,6 +17,7 @@ import Account from "../pages/Account/Account";
 import Profile from "../pages/Profile/Profile";
 import { hasAccess, moduleRoles } from "../utils/helper";
 import { useAppContext } from "../services/context/AppContext";
+import Company from "../pages/Company/Company";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -147,6 +148,12 @@ export const protectedRoutes = [
         <Settings />
       </AdminElement>
     )
-  }
+  },
+  {
+    path: "/company",
+    element: <AdminElement>
+      <Company />
+    </AdminElement>,
+  },
 
 ]
