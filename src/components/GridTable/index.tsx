@@ -194,10 +194,7 @@ const GridTable: React.FC<GridTableProps> = ({
                       }}
                     >
 
-                      <Button sx={{ borderRadius: 0.5, }} variant="outlined" color="error" onClick={() => onActionClick(row)}>
-                        <DeleteIcon />
-                      </Button>
-
+                        <DeleteIcon color="error" onClick={() => onActionClick(row)}/>
                     </TableCell>
                   </TableRow>
                 ))}
