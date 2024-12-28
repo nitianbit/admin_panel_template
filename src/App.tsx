@@ -8,11 +8,18 @@ import router from "./router";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import { useThemeStore } from "./store/themeStore";
+import { useCompanyStore } from "./services/company";
 
 //const Theme = createTheme(themeOptions);
 
 export default function App() {
   const { theme } = useThemeStore();
+
+  const { fetchGrid } = useCompanyStore()
+  React.useEffect(() => {
+    fetchGrid()
+  }, [])
+
 
   return (
     <ThemeProvider theme={createTheme(theme)}>
