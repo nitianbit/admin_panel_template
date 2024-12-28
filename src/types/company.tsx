@@ -4,7 +4,7 @@ export interface Company {
     name: string;
     website: string,
     logo?: string,
-    isActive: boolean
+    isActive: boolean,
 }
 
 export interface CompanyResponse {
@@ -29,8 +29,10 @@ export interface CompanyState {
     filters: CompanyFilters;
     isLoading: boolean;
     rows: number;
+    globalCompanyId?:string;
     fetchGrid: (page?: number, filters?: CompanyFilters) => Promise<void>;
     setFilters: (newFilters: CompanyFilters) => void;
+    setGlobalCompanyId: (id: string) => void;
     nextPage: () => void;
     prevPage: () => void;
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void;

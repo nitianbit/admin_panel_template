@@ -13,6 +13,7 @@ const store = create<CompanyState>((set, get) => ({
     isLoading: false,
     rows: 2,
     total:0,
+    globalCompanyId : "",
 
     fetchGrid: async () => {
         try {
@@ -47,6 +48,10 @@ const store = create<CompanyState>((set, get) => ({
     setFilters: (newFilters: CompanyFilters) => {
         set({ filters: newFilters });
         get().fetchGrid(1, newFilters);
+    },
+
+    setGlobalCompanyId: (id: string) => {
+        set({ globalCompanyId: id });
     },
 
     nextPage: () => {
