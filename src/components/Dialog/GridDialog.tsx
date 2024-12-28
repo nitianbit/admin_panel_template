@@ -1,7 +1,6 @@
 import { Button, Dialog, DialogActions, DialogTitle, Slide } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { TransitionProps } from "@mui/material/transitions"
-import { usePatientStore } from "../../services/patient"
 import GeneralTable from '../GridTable/index'
 import { COLUMNS } from "../../pages/PatientInfo/constants"
 import { MODULES } from "../../utils/constants"
