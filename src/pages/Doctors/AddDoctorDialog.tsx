@@ -139,7 +139,7 @@ export default function AddDoctorDialog({
               error={!!errors.email}
               helperText={errors.email?.message}
             />
-            
+
             <TextField
               margin="dense"
               id="specialist"
