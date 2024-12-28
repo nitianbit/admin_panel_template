@@ -1,21 +1,10 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { Box, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
-import { useForm } from "react-hook-form";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import { Patient } from "../../types/patient";
 import AddSinglePatientContent from "./AddSinglePatientContent";
 import AddBulkUpload from "./AddBulkUploadContent";
 const Transition = React.forwardRef(function Transition(

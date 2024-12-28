@@ -14,7 +14,6 @@ import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import SickIcon from "@mui/icons-material/Sick";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";

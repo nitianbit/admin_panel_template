@@ -1,4 +1,3 @@
-import { Navigate, useLocation } from "react-router-dom";
 import ErrorPage from "../components/ErrorPage";
 import SignInSide from "../pages/Auth/SignInSide";
 import SignUp from "../pages/Auth/SignUp";
@@ -10,12 +9,11 @@ import { mockPatientData } from "../mockData";
 import PatientInfo from "../pages/PatientInfo/PatientInfo";
 import DoctorList from "../pages/Doctors/DoctorList";
 import Appointments from "../pages/Appointments/Appointments";
-import Calender from "../pages/Calender/Calender";
 import Kanban from "../pages/Kanban/Kanban";
 import Settings from "../pages/Settings/Settings";
 import Account from "../pages/Account/Account";
 import Profile from "../pages/Profile/Profile";
-import { hasAccess, moduleRoles } from "../utils/helper";
+import { hasAccess } from "../utils/helper";
 import { useAppContext } from "../services/context/AppContext";
 import Company from "../pages/Company/Company";
 
