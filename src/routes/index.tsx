@@ -118,14 +118,6 @@ export const protectedRoutes = [
     )
   },
   {
-    path: "/calender",
-    element: (
-      <AdminElement>
-        <Calender />
-      </AdminElement>
-    )
-  },
-  {
     path: "/kanban",
     element: (
       <AdminElement>
