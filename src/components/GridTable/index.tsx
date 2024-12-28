@@ -59,7 +59,7 @@ const GridTable: React.FC<GridTableProps> = ({
   };
   const handleSelectOne = (event: React.ChangeEvent<HTMLInputElement>, row: any) => {
     if (event.target.checked) {
-      setSelectedIds([...selectedIds, row._id]);
+      setSelectedIds([row._id]);
     } else {
       setSelectedIds(selectedIds.filter((id: any) => id !== row._id));
     }
@@ -81,7 +81,7 @@ const GridTable: React.FC<GridTableProps> = ({
                     color="primary"
                     indeterminate={selectedIds.length > 0 && selectedIds.length < data.length}
                     checked={selectedIds.length === data.length}
-                    onChange={handleSelectAll}
+                    // onChange={handleSelectAll}
                   />
                 </TableCell>}
                 {columns.map((col, index) => (
