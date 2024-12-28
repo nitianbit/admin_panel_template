@@ -13,10 +13,13 @@ import { useCompanyStore } from "./services/company";
 export default function App() {
   const { theme } = useThemeStore();
 
-  const { fetchGrid } = useCompanyStore()
+  const { data, fetchGrid, setGlobalCompanyId } = useCompanyStore()
   React.useEffect(() => {
-    fetchGrid()
-  }, [])
+    if(data.length === 0){
+      fetchGrid()
+    }else if(data.length > 0){
+    setGlobalCompanyId(data[0]?._id??"")}
+  }, [data])
 
 
   return (
