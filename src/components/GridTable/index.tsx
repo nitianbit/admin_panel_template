@@ -1,69 +1,3 @@
-// import React from "react";
-// import {
-//   Grid,
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Paper,
-//   Avatar,
-//   TablePagination,
-// } from "@mui/material";
-// import { GridTableProps } from "../../types/gridTable";
-
-
-// const GridTable: React.FC<GridTableProps> = ({
-//   data,
-//   columns,
-//   spacing = 2,
-//   styles = {},
-//   currentPage = 1,
-//   totalPages = 1,
-//   onPageChange
-// }) => {
-//   return (
-//     <Grid container spacing={spacing} sx={{ marginleft: "10px", marginTop: "40px", ...styles }}>
-//       <TableContainer component={Paper}>
-//         <Table sx={{ minWidth: 650 }} aria-label="general table">
-//           <TableHead>
-//             <TableRow>
-//               {columns.map((col, index) => (
-//                 <TableCell key={index}>{col.header}</TableCell>
-//               ))}
-//             </TableRow>
-//           </TableHead>
-//           <TableBody>
-//             {data.length > 0 &&
-//               data.map((row, rowIndex) => (
-//                 <TableRow key={rowIndex} style={{ textDecoration: "none", color: "inherit" }}>
-//                   {columns.map((col, colIndex) => (
-//                     <TableCell key={colIndex}>
-//                       {col.render ? col.render(row) : row[col.accessor]}
-//                     </TableCell>
-//                   ))}
-//                 </TableRow>
-//               ))}
-//           </TableBody>
-//         </Table>
-//       </TableContainer>
-//       <TablePagination
-//         rowsPerPageOptions={[20]}
-//         component="div"
-//         count={totalPages}
-//         rowsPerPage={20}
-//         page={currentPage-1}
-//         onPageChange={onPageChange}
-//       />
-//     </Grid>
-//   );
-// };
-
-// export default GridTable;
-
-
-
 import React, { useState } from "react";
 import {
   Grid,
@@ -82,6 +16,7 @@ import {
 import { GridTableProps } from "../../types/gridTable";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from "../ConfirmationDialog";
+import EditIcon from "@mui/icons-material/Edit";
 
 const GridTable: React.FC<GridTableProps> = ({
   data,
@@ -122,11 +57,11 @@ const GridTable: React.FC<GridTableProps> = ({
       setSelectedIds([]);
     }
   };
-  const handleSelectOne = (event: React.ChangeEvent<HTMLInputElement> , row: any) => {
+  const handleSelectOne = (event: React.ChangeEvent<HTMLInputElement>, row: any) => {
     if (event.target.checked) {
       setSelectedIds([...selectedIds, row._id]);
     } else {
-      setSelectedIds(selectedIds.filter((id:any) => id !== row._id));
+      setSelectedIds(selectedIds.filter((id: any) => id !== row._id));
     }
   }
 
@@ -169,11 +104,11 @@ const GridTable: React.FC<GridTableProps> = ({
               {data.length > 0 &&
                 data.map((row, rowIndex) => (
                   <TableRow key={rowIndex} style={{ textDecoration: "none", color: "inherit" }}>
-                   {selectedIds && <TableCell>
+                    {selectedIds && <TableCell>
                       <Checkbox
                         color="primary"
                         checked={selectedIds.includes(row._id)}
-                        onChange={(e)=>{
+                        onChange={(e) => {
                           handleSelectOne(e, row)
                         }}
                       />
@@ -193,8 +128,11 @@ const GridTable: React.FC<GridTableProps> = ({
                         boxShadow: "10px 10px",
                       }}
                     >
+                      <EditIcon className="cursor-pointer" color="success" onClick={() => {
+                        onEdit(row?._id)
+                      }} />
 
-                        <DeleteIcon color="error" onClick={() => onActionClick(row)}/>
+                      <DeleteIcon color="error" onClick={() => onActionClick(row)} />
                     </TableCell>
                   </TableRow>
                 ))}

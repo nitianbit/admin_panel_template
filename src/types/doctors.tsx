@@ -1,14 +1,22 @@
 
 
-export interface Doctor {
-    id: number;
-    name: string;
-    gender: string;
-    phone: string;
-    email: string;
-    education: string;
-    specialization: string;
- }
+ export interface Doctor {
+  name: string;
+  specialization: string; // Optional field
+  email: string;
+  phone: number;
+  countryCode: number;
+  gender: 'Male' | 'Female' | 'Other';
+  isIndividual: boolean;
+  role: string[];
+  hospital?: string; // Reference to Hospital schema
+  departments?: string[]; // References to Department schema
+  fee?: number; // Optional field
+  isActive: boolean;
+  isVerified: boolean;
+  createdAt: number;
+  updatedAt?: number; // Optional field
+}
 
 export interface DoctorResponse {
   data: {
@@ -40,4 +48,5 @@ export interface DoctorState {
   onCreate: (...args:any) => Promise<void>;
   onUpdate: (...args:any) => Promise<void>;
   onDelete: (...args:any) => Promise<void>;
+  detail: (id:string) => Promise<any>;
 }

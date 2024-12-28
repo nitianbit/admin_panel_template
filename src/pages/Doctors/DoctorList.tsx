@@ -11,12 +11,21 @@ import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 
 export default function DoctorList() {
-  const { data, totalPages, currentPage,total, filters, isLoading, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
-
+  const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
     fetchGrid()
   }, [])
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleEdit = async (id: string) => [
+    await detail(id),
+    handleClickOpen()
+  ]
 
 
   return (
@@ -37,7 +46,7 @@ export default function DoctorList() {
         <Toolbar />
 
         <Container sx={{ mt: 4, mb: 4 }}>
-          <AddDoctorDialog />
+          <AddDoctorDialog open={open} setOpen={setOpen} />
           <GeneralTable
             data={data}
             columns={COLUMNS}
@@ -50,6 +59,7 @@ export default function DoctorList() {
             onDelete={(data: any) => {
               onDelete(data._id)
             }}
+            onEdit={handleEdit}
           />
         </Container>
       </Box>

@@ -31,9 +31,9 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AddDoctorDialog({
-
+  open, setOpen
 }: any) {
-  const [open, setOpen] = React.useState(false);
+
   const { onCreate } = useDoctorStore();
 
   const {
@@ -139,20 +139,7 @@ export default function AddDoctorDialog({
               error={!!errors.email}
               helperText={errors.email?.message}
             />
-            <TextField
-              margin="dense"
-              id="education"
-              label="Education"
-              type="education"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: MBBS, MD"
-              {...register("education", {
-                required: "Education is required"
-              })}
-              error={!!errors.education}
-              helperText={errors.education?.message}
-            />
+            
             <TextField
               margin="dense"
               id="specialist"

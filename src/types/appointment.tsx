@@ -1,8 +1,8 @@
 
 
 export interface Appointment {
-    patient?: Array<string>;
-    doctor?: string;
+    patient: string;
+    doctor: string;
     hospital?: string;
     department?: string;
     appointmentDate: string;

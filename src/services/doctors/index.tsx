@@ -112,6 +112,14 @@ const store = create<DoctorState>((set, get) => ({
         } catch (error) {
             
         }
+    },
+    detail: async (id: string) => {
+        try {
+            const response = await doGET(ENDPOINTS.detail('doctors', id));
+            return response.data;
+        } catch (error) {
+
+        }
     }
 
 }));

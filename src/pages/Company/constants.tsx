@@ -1,4 +1,5 @@
 import { Avatar } from "@mui/material";
+import { Company } from "../../types/company";
 
 export const COLUMNS = [
     {
@@ -22,5 +23,8 @@ export const COLUMNS = [
     {
         header: "Is Active",
         accessor: "isActive",
+        render: (data:Company) => <>
+            {data.isActive ? "Yes" : "No"}
+        </>,
     },
 ]

@@ -27,6 +27,9 @@ import { showError } from "../../services/toaster";
 import GridDialog from "../../components/Dialog/GridDialog";
 import { usePatientStore } from "../../services/patient";
 import { useDoctorStore } from "../../services/doctors";
+import { APPOINTMENT_STATUS, PAYMENT_STATUS } from "../../utils/constants";
+import PatientDetail from "../../components/PatientDetail";
+import DoctorDetail from "../../components/DoctorDetail";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -60,7 +63,7 @@ export default function AppointmentDialog({
       end: ""
     },
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
-    patient: [],
+    patient: "",
   })
 
 
@@ -102,7 +105,7 @@ export default function AppointmentDialog({
 
 
   const handleDoctorDialogClose = () => {
-    setPatientDialogOpen(false)
+    setDoctorDialogOpen(false)
   }
 
   const handleSave = async () => {
@@ -182,11 +185,17 @@ export default function AppointmentDialog({
         <DialogContent dividers>
           <Typography onClick={() => {
             setPatientDialogOpen(true)
-          }}>Select Patient {appointMentData.patient?.length} {appointMentData.patient}</Typography>
+          }}>
+            Select Patient  <PatientDetail _id={appointMentData?.patient} />
+          </Typography>
+
 
           {userData.role.includes("admin") && <Typography onClick={() => {
             setDoctorDialogOpen(true)
-          }}>Select Doctor {appointMentData.doctor?.length} {appointMentData.doctor}</Typography>}
+          }}>
+            Select Doctor  <DoctorDetail _id={appointMentData?.doctor} />
+            </Typography>}
+
           <TextField
             margin="dense"
             id="fee"
@@ -207,10 +216,11 @@ export default function AppointmentDialog({
               value={appointMentData?.status}
               onChange={(e) => handleChange("status", e.target.value)}
             >
-              <MenuItem value={"SCHD"}>Scheduled</MenuItem>
-              <MenuItem value={"COMP"}>Completed</MenuItem>
-              <MenuItem value={"CNCL"}>Cancel</MenuItem>
-              <MenuItem value={"NOSH"}>No Show</MenuItem>
+              {
+                Object.keys(APPOINTMENT_STATUS).map((key) => (
+                    <MenuItem key={key} value={APPOINTMENT_STATUS[key as keyof typeof APPOINTMENT_STATUS]}>{key}</MenuItem>
+                ))
+              }
             </Select>
           </FormControl>
 
@@ -223,9 +233,11 @@ export default function AppointmentDialog({
               value={appointMentData?.paymentStatus}
               onChange={(e) => handleChange("paymentStatus", e.target.value)}
             >
-              <MenuItem value={"PD"}>Paid</MenuItem>
-              <MenuItem value={"PND"}>Pending</MenuItem>
-              <MenuItem value={"FLD"}>Failed</MenuItem>
+              {
+                Object.keys(PAYMENT_STATUS).map((key) => ( 
+                    <MenuItem key={key} value={PAYMENT_STATUS[key as keyof typeof PAYMENT_STATUS]}>{key}</MenuItem>
+                ))
+              }
             </Select>
           </FormControl>
 

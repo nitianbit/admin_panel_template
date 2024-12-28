@@ -2,13 +2,24 @@
 
 export interface Patient {
   name: string;
-  gender: string;
-  phone: string;
+  phone: number;
+  age?: number;
   email: string;
-  age?:number;
-  company?: string;
-  address?:string
+  countryCode: number;
+  gender: 'Male' | 'Female' | 'Other';
+  createdAt: number;
+  balance: number;
+  role: string;
+  address: string;
+  city: string;
+  company: string;
+  state: string;
+  profiePic: string;
+  password: string;
+  disabled: boolean;
+  isVerified: boolean;
 }
+
 
 export interface PatientResponse {
   data: {
@@ -41,4 +52,5 @@ export interface PatientState {
   onBulkCreate: (...args: any) => Promise<void>;
   onUpdate: (...args: any) => Promise<void>;
   onDelete: (...args: any) => Promise<void>;
+  detail: (id:string) => Promise<any>;
 }
