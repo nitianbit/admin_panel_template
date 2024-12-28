@@ -28,11 +28,11 @@ const GridTable: React.FC<GridTableProps> = ({
   total,
   onPageChange,
   onDelete = (...args: any) => { },
-  onEdit = () => { },
   selectedIds,
-  setSelectedIds
+  setSelectedIds,
+  toggleModal,
 }) => {
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: boolean | null }>({
+   const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: boolean | null }>({
     visible: false,
     data: false
   });
@@ -129,7 +129,7 @@ const GridTable: React.FC<GridTableProps> = ({
                       }}
                     >
                       <EditIcon className="cursor-pointer" color="success" onClick={() => {
-                        onEdit(row?._id)
+                        toggleModal(row?._id)
                       }} />
 
                       <DeleteIcon color="error" onClick={() => onActionClick(row)} />
