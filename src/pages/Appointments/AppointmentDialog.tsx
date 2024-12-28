@@ -7,7 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -30,6 +30,7 @@ import { useDoctorStore } from "../../services/doctors";
 import { APPOINTMENT_STATUS, PAYMENT_STATUS } from "../../utils/constants";
 import PatientDetail from "../../components/PatientDetail";
 import DoctorDetail from "../../components/DoctorDetail";
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -183,18 +184,50 @@ export default function AppointmentDialog({
         <DialogTitle>Appointment Details</DialogTitle>
 
         <DialogContent dividers>
-          <Typography onClick={() => {
-            setPatientDialogOpen(true)
+          <Box sx={{
+            display: "flex",
+            my:1,
+            justifyContent: "space-between",
+            alignItems: "center",
           }}>
-            Select Patient  <PatientDetail _id={appointMentData?.patient} />
-          </Typography>
+            <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
+              Select Patient - 
+            </Typography>
+            <Box sx={{
+              display: "flex",
+              alignItems: "center"
+            }}>
+              <PatientDetail _id={appointMentData?.patient} />
+              <PersonSearchIcon sx={{ cursor: "pointer", ml:2 }} onClick={() => {
+                setPatientDialogOpen(true)
+              }} />
+            </Box>
+          </Box>
 
 
-          {userData.role.includes("admin") && <Typography onClick={() => {
-            setDoctorDialogOpen(true)
-          }}>
-            Select Doctor  <DoctorDetail _id={appointMentData?.doctor} />
-            </Typography>}
+
+          {userData.role.includes("admin") &&
+            <Box sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              my:1
+            }}>
+              <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
+                Select Doctor - 
+              </Typography>
+              <Box sx={{
+                display: "flex",
+                alignItems: "center",
+              }}>
+                <DoctorDetail _id={appointMentData?.doctor} />
+                <PersonSearchIcon sx={{ cursor: "pointer",ml:2 }} onClick={() => {
+                  setDoctorDialogOpen(true)
+                }} />
+              </Box>
+
+            </Box>
+          }
 
           <TextField
             margin="dense"
@@ -218,7 +251,7 @@ export default function AppointmentDialog({
             >
               {
                 Object.keys(APPOINTMENT_STATUS).map((key) => (
-                    <MenuItem key={key} value={APPOINTMENT_STATUS[key as keyof typeof APPOINTMENT_STATUS]}>{key}</MenuItem>
+                  <MenuItem key={key} value={APPOINTMENT_STATUS[key as keyof typeof APPOINTMENT_STATUS]}>{key}</MenuItem>
                 ))
               }
             </Select>
@@ -234,8 +267,8 @@ export default function AppointmentDialog({
               onChange={(e) => handleChange("paymentStatus", e.target.value)}
             >
               {
-                Object.keys(PAYMENT_STATUS).map((key) => ( 
-                    <MenuItem key={key} value={PAYMENT_STATUS[key as keyof typeof PAYMENT_STATUS]}>{key}</MenuItem>
+                Object.keys(PAYMENT_STATUS).map((key) => (
+                  <MenuItem key={key} value={PAYMENT_STATUS[key as keyof typeof PAYMENT_STATUS]}>{key}</MenuItem>
                 ))
               }
             </Select>

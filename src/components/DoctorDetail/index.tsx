@@ -28,7 +28,7 @@ const DoctorDetail: React.FC<DoctorDetailProps> = ({ _id }) => {
   }, [_id])
 
   return (
-    <div>{data?.name??""}</div>
+    <div>{data?.name??"No Doctor Selected"}</div>
   )
 }
 
