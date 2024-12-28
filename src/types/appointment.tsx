@@ -13,6 +13,7 @@ export interface Appointment {
     status: string;
     fee?: Number
     paymentStatus?: string;
+    company?: string;
 }
 
 export interface AppointmentResponse {
@@ -45,4 +46,5 @@ export interface AppointmentState {
     onCreate: (...args: any) => Promise<void>;
     onUpdate: (...args: any) => Promise<void>;
     onDelete: (...args: any) => Promise<void>;
+    detail: (id:string) => Promise<{data:Appointment}>;
 }

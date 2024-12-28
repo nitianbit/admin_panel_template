@@ -31,6 +31,7 @@ import { APPOINTMENT_STATUS, PAYMENT_STATUS } from "../../utils/constants";
 import PatientDetail from "../../components/PatientDetail";
 import DoctorDetail from "../../components/DoctorDetail";
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import { useCompanyStore } from "../../services/company";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -42,13 +43,16 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AppointmentDialog({
+  isModalOpen,
+  toggleModal,
+  selectedId
 }: any) {
 
-  const { onCreate } = useAppointmentStore();
+  const { onCreate, detail } = useAppointmentStore();
+  const { globalCompanyId } = useCompanyStore();
   const { data: patientData, totalPages: patientTotalPages, total: patientTotal, currentPage: patientCurrentPage, isLoading: patientIsLoading, onPageChange: patientOnPageChange, fetchGrid: patientFetchtGrid, onDelete: patientOnDelete } = usePatientStore();
   const { data: doctorData, totalPages: doctorTotalPages, total: doctorTotal, currentPage: doctorCurrentPage, isLoading: doctorIsLoading, onPageChange: doctorOnPageChange, fetchGrid: doctorFetchtGrid, onDelete: doctorOnDelete } = useDoctorStore();
   const { userData } = useAppContext();
-  const [open, setOpen] = React.useState(false);
 
 
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
@@ -65,7 +69,23 @@ export default function AppointmentDialog({
     },
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
     patient: "",
+    company: globalCompanyId ??""
   })
+
+  const fetchData = async (id: string) => {
+    try {
+      const data = await detail(id)
+      setAppointMentData({ ...data?.data, appointmentDate: dayjs(data?.data?.appointmentDate, "YYYYMMDD").toISOString() })
+    } catch (error) {
+
+    }
+  }
+
+  React.useEffect(() => {
+    if (selectedId && isModalOpen) {
+      fetchData(selectedId)
+    }
+  }, [selectedId, isModalOpen])
 
 
   const handleChange = (key: any, value: any) => {
@@ -81,23 +101,16 @@ export default function AppointmentDialog({
   };
 
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handlePatientDialogSave = (ids: any) => {
+  const handlePatientDialogSave = (ids: string[]) => {
     setPatientDialogOpen(false)
-    appointMentData.patient = ids
+    appointMentData.patient = ids?.length ? ids[0] : ""
   }
 
 
-  const handleDoctorDialogSave = (ids: any) => {
+  const handleDoctorDialogSave = (ids: string[]) => {
     setDoctorDialogOpen(false)
-    appointMentData.doctor = ids
+    appointMentData.doctor = ids?.length ? ids[0] : ""
   }
 
   const handlePatientDialogClose = () => {
@@ -119,10 +132,8 @@ export default function AppointmentDialog({
     appointMentData.timeSlot["end"] = endTime;
 
     if (appointMentData.patient?.length === 0) return showError("Please select a patient")
-
-
     onCreate(appointMentData)
-    handleClose()
+    toggleModal()
   }
 
 
@@ -138,7 +149,7 @@ export default function AppointmentDialog({
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
-          onClick={handleClickOpen}
+          onClick={toggleModal}
         >
           Book an Appointment
         </Button>
@@ -174,8 +185,8 @@ export default function AppointmentDialog({
       />}
 
       <Dialog
-        open={open}
-        onClose={handleClose}
+        open={isModalOpen}
+        onClose={toggleModal}
         TransitionComponent={Transition}
         maxWidth="xs"
         fullWidth
@@ -186,19 +197,19 @@ export default function AppointmentDialog({
         <DialogContent dividers>
           <Box sx={{
             display: "flex",
-            my:1,
+            my: 1,
             justifyContent: "space-between",
             alignItems: "center",
           }}>
             <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
-              Select Patient - 
+              Select Patient -
             </Typography>
             <Box sx={{
               display: "flex",
               alignItems: "center"
             }}>
               <PatientDetail _id={appointMentData?.patient} />
-              <PersonSearchIcon sx={{ cursor: "pointer", ml:2 }} onClick={() => {
+              <PersonSearchIcon sx={{ cursor: "pointer", ml: 2 }} onClick={() => {
                 setPatientDialogOpen(true)
               }} />
             </Box>
@@ -211,17 +222,17 @@ export default function AppointmentDialog({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              my:1
+              my: 1
             }}>
               <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
-                Select Doctor - 
+                Select Doctor -
               </Typography>
               <Box sx={{
                 display: "flex",
                 alignItems: "center",
               }}>
                 <DoctorDetail _id={appointMentData?.doctor} />
-                <PersonSearchIcon sx={{ cursor: "pointer",ml:2 }} onClick={() => {
+                <PersonSearchIcon sx={{ cursor: "pointer", ml: 2 }} onClick={() => {
                   setDoctorDialogOpen(true)
                 }} />
               </Box>
@@ -333,7 +344,7 @@ export default function AppointmentDialog({
 
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={toggleModal}>Cancel</Button>
           <Button onClick={handleSave} type="submit" variant="contained">
             Submit
           </Button>

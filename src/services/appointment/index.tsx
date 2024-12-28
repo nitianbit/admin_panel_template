@@ -110,6 +110,14 @@ const store = create<AppointmentState>((set, get) => ({
         } catch (error) {
 
         }
+    },
+    detail: async (id: string) => {
+        try {
+            const response = await doGET(ENDPOINTS.detail('appointments', id));
+            return response.data;
+        } catch (error) {
+
+        }
     }
 }));
 

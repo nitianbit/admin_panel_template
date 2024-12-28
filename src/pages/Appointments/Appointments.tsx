@@ -8,12 +8,35 @@ import { useAppointmentStore } from "../../services/appointment";
 import GeneralTable from '../../components/GridTable/index'
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
+import Layout from "../../components/Layout";
 
 function Appointments() {
-  const { data, totalPages, total,rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
+  const { data, totalPages, total, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
   useEffect(() => {
     fetchGrid()
   }, [])
+
+  return (
+    <Layout appBarTitle="Appointment">
+      <Layout.Header component={AppointmentDialog} />
+      <Layout.Body
+        component={GeneralTable}
+        props={{
+          data,  
+          columns: COLUMNS,  
+          currentPage,
+          totalPages,
+          total,
+          loading: isLoading,
+          onPageChange,
+          module: MODULES.DOCTOR,
+          onDelete: (data: any) => onDelete(data._id)
+        }}
+      />
+
+
+    </Layout>
+  )
 
 
   return (
@@ -35,25 +58,20 @@ function Appointments() {
 
         <Container sx={{ mt: 4, mb: 4 }}>
           <AppointmentDialog />
-          <Grid
-            container
-            spacing={2}
-            sx={{ marginleft: "10px", marginTop: "40px" }}
-          >
-            <GeneralTable
-              data={data}
-              columns={COLUMNS}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              total={total}
-              loading={isLoading}
-              onPageChange={onPageChange}
-              module={MODULES.DOCTOR}
-              onDelete={(data: any) => {
-                onDelete(data._id)
-              }}
-            />
-          </Grid>
+          <GeneralTable
+            data={data}
+            columns={COLUMNS}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            total={total}
+            loading={isLoading}
+            onPageChange={onPageChange}
+            module={MODULES.DOCTOR}
+            onDelete={(data: any) => {
+              onDelete(data._id)
+            }}
+          />
+
         </Container>
       </Box>
     </Box>
