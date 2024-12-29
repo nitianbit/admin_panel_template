@@ -11,6 +11,7 @@ import { usePatientStore } from "../../services/patient";
 import GeneralTable from "../../components/GridTable";
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
+import Layout from "../../components/Layout";
 
 function PatientList({ }: any) {
 
@@ -53,6 +54,30 @@ function PatientList({ }: any) {
    React.useEffect(() => {
       fetchGrid()
     }, [])
+
+
+    return (
+      <Layout appBarTitle="Patient">
+        <Layout.Header component={AddPatientDialog} />
+        <Layout.Body
+          component={GeneralTable}
+          props={{
+            data,  
+            columns: COLUMNS,  
+            currentPage,
+            totalPages,
+            total,
+            loading: isLoading,
+            onPageChange,
+            module: MODULES.DOCTOR,
+            onDelete: (data: any) => onDelete(data._id)
+          }}
+        />
+  
+  
+      </Layout>
+    )
+  
   
 
   return (

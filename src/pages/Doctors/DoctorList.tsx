@@ -9,6 +9,7 @@ import { useDoctorStore } from "../../services/doctors";
 import GeneralTable from "../../components/GridTable";
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
+import Layout from "../../components/Layout";
 
 export default function DoctorList() {
   const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
@@ -26,6 +27,29 @@ export default function DoctorList() {
     await detail(id),
     handleClickOpen()
   ]
+
+
+  return (
+    <Layout appBarTitle="Patient">
+      <Layout.Header component={AddDoctorDialog} />
+      <Layout.Body
+        component={GeneralTable}
+        props={{
+          data,  
+          columns: COLUMNS,  
+          currentPage,
+          totalPages,
+          total,
+          loading: isLoading,
+          onPageChange,
+          module: MODULES.DOCTOR,
+          onDelete: (data: any) => onDelete(data._id)
+        }}
+      />
+
+
+    </Layout>
+  )
 
 
   return (
