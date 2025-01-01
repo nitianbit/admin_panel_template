@@ -31,7 +31,8 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AddDoctorDialog({
-  open, setOpen
+  isModalOpen,
+  toggleModal,
 }: any) {
 
   const { onCreate } = useDoctorStore();
@@ -43,11 +44,11 @@ export default function AddDoctorDialog({
   } = useForm<Doctor>();
 
   const handleClickOpen = () => {
-    setOpen(true);
+    toggleModal(true);
   };
 
   const handleClose = () => {
-    setOpen(false);
+    toggleModal(false);
   };
 
   const onSubmit = (data: Doctor) => {
@@ -74,7 +75,7 @@ export default function AddDoctorDialog({
       </Stack>
 
       <Dialog
-        open={open}
+        open={isModalOpen}
         onClose={handleClose}
         TransitionComponent={Transition}
         maxWidth="xs"

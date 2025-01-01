@@ -19,19 +19,22 @@ const Transition = React.forwardRef(function Transition(
 export default function AddPatientDialog({
   create,
   handleChange,
-  fetchGrid
+  fetchGrid,
+  isModalOpen,
+  toggleModal
 }: any) {
-  const [open, setOpen] = React.useState(false);
   const [bulkOpen, setbulkOpen] = React.useState(false);
+
+  
   const handleClickOpen = () => {
-    setOpen(true);
+    toggleModal(true);
   };
 
   const handleBulkClickOpen = () => {
     setbulkOpen(true);
   };
 
- 
+
   return (
     <div>
       <Stack
@@ -46,7 +49,7 @@ export default function AddPatientDialog({
             variant="outlined"
             startIcon={<AddIcon />}
             onClick={handleBulkClickOpen}
-            sx={{mr:1}}
+            sx={{ mr: 1 }}
           >
             Add Bulk Patient
           </Button>
@@ -59,11 +62,11 @@ export default function AddPatientDialog({
           </Button>
         </Box>
 
-        <AddSinglePatientContent open={open} setOpen={setOpen} create={create} fetchGrid={fetchGrid}/>
+        <AddSinglePatientContent open={isModalOpen} setOpen={toggleModal} create={create} fetchGrid={fetchGrid} />
         <AddBulkUpload open={bulkOpen} setOpen={setbulkOpen}/>
       </Stack>
-         
-        
+
+
     </div>
   );
 }

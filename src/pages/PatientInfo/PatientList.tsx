@@ -62,7 +62,14 @@ function PatientList({ }: any) {
 
     return (
       <Layout appBarTitle="Patient">
-        <Layout.Header component={AddPatientDialog} />
+        <Layout.Header 
+        component={AddPatientDialog}
+        props={{
+          handleChange,
+          create:onCreate,
+          fetchGrid
+        }}
+         />
         <Layout.Body
           component={GeneralTable}
           props={{
