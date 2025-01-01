@@ -35,14 +35,16 @@ const Transition = React.forwardRef(function Transition(
 export default function AddDoctorDialog({
   isModalOpen,
   toggleModal,
+  selectedId
 }: any) {
 
-  const { onCreate } = useDoctorStore();
+  const { onCreate,detail } = useDoctorStore();
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    reset
   } = useForm<Doctor>();
 
   const handleClickOpen = () => {
@@ -57,6 +59,21 @@ export default function AddDoctorDialog({
     onCreate(data);
     handleClose();
   };
+
+  const fetchDetail=async(selectedId:string)=>{
+    try {
+      const data=await detail(selectedId);
+      reset(data?.data)
+    } catch (error) {
+      
+    }
+  }
+
+  React.useEffect(() => {
+    if (selectedId) {
+     fetchDetail(selectedId)
+    }
+  }, [selectedId]);
 
   return (
     <div>

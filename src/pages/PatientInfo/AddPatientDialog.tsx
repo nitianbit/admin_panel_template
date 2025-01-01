@@ -21,7 +21,8 @@ export default function AddPatientDialog({
   handleChange,
   fetchGrid,
   isModalOpen,
-  toggleModal
+  toggleModal,
+  selectedId
 }: any) {
   const [bulkOpen, setbulkOpen] = React.useState(false);
 
@@ -62,7 +63,7 @@ export default function AddPatientDialog({
           </Button>
         </Box>
 
-        <AddSinglePatientContent open={isModalOpen} setOpen={toggleModal} create={create} fetchGrid={fetchGrid} />
+        <AddSinglePatientContent open={isModalOpen} setOpen={toggleModal} create={create} fetchGrid={fetchGrid} selectedId={selectedId} />
         <AddBulkUpload open={bulkOpen} setOpen={setbulkOpen}/>
       </Stack>
 
