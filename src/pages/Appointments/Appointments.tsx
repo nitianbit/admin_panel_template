@@ -9,12 +9,20 @@ import GeneralTable from '../../components/GridTable/index'
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 import Layout from "../../components/Layout";
+import { useCompanyStore } from "../../services/company";
 
 function Appointments() {
-  const { data, totalPages, total, rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
+  const { data, totalPages, total, rows, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
+  const { globalCompanyId } = useCompanyStore();
+
   useEffect(() => {
-    fetchGrid()
-  }, [])
+    if (globalCompanyId) {
+      setFilters({ company: globalCompanyId })
+    } else {
+      fetchGrid()
+    }
+  }, [globalCompanyId])
+
 
   return (
     <Layout appBarTitle="Appointment">
@@ -22,8 +30,8 @@ function Appointments() {
       <Layout.Body
         component={GeneralTable}
         props={{
-          data,  
-          columns: COLUMNS,  
+          data,
+          columns: COLUMNS,
           currentPage,
           totalPages,
           total,

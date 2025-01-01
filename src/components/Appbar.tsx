@@ -19,6 +19,7 @@ import { settings } from "../constant";
 import { AppBar, Drawer } from "../styles";
 import { useAppContext } from "../services/context/AppContext";
 import logo from '../../src/assets/images/EWA_logo.webp'
+import CompanyDropDown from "./DropDowns/Company/CompanyDropdown";
 
 export default function Appbar(props: { appBarTitle: string }) {
   const { userData } = useAppContext();
@@ -66,6 +67,10 @@ export default function Appbar(props: { appBarTitle: string }) {
           >
             {props.appBarTitle}
           </Typography>
+
+          {/* Company Selection Dropdown */}
+          <CompanyDropDown />
+
 
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton

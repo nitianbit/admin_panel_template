@@ -17,8 +17,7 @@ export default function App() {
   React.useEffect(() => {
     if(data.length === 0){
       fetchGrid()
-    }else if(data.length > 0){
-    setGlobalCompanyId(data[0]?._id??"")}
+    }
   }, [data])
 
 
