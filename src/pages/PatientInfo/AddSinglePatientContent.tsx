@@ -3,6 +3,8 @@ import { Patient } from "../../types/patient";
 import { useForm } from "react-hook-form";
 import React from "react";
 import { TransitionProps } from "@mui/material/transitions";
+import CompanySelect from "../../components/DropDowns/CompanySelect";
+import { MODULES } from "../../utils/constants";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -78,6 +80,9 @@ const AddSinglePatientContent:React.FC<AddPatientDialogProps> = ({ open, setOpen
                             <MenuItem value={"Other"}>Other</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <CompanySelect register={register} module={MODULES.PATIENTS} />
+
                     <TextField
                         margin="dense"
                         id="phone"

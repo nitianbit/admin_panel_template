@@ -18,6 +18,8 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { useDoctorStore } from "../../services/doctors";
 import { Doctor } from "../../types/doctors";
+import CompanySelect from "../../components/DropDowns/CompanySelect";
+import { MODULES } from "../../utils/constants";
 
 
 
@@ -112,6 +114,9 @@ export default function AddDoctorDialog({
                 <MenuItem value={"Other"}>Other</MenuItem>
               </Select>
             </FormControl>
+
+            <CompanySelect register={register} module={MODULES.DOCTOR} />
+
             <TextField
               margin="dense"
               id="phone"

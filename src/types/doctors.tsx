@@ -16,6 +16,7 @@
   isVerified: boolean;
   createdAt: number;
   updatedAt?: number; // Optional field
+  company: string;
 }
 
 export interface DoctorResponse {
