@@ -12,7 +12,7 @@ const store = create<AppointmentState>((set, get) => ({
     filters: {},
     isLoading: false,
     rows: 2,
-    total:0,
+    total: 0,
 
     fetchGrid: async () => {
         try {
@@ -31,8 +31,7 @@ const store = create<AppointmentState>((set, get) => ({
             if (response.status >= 200 && response.status < 400) {
                 set({
                     data: response.data.data.rows,
-                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) }),
-                    total : response.data.data.total ? response.data.data.total : total
+                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows), total: response.data.data.total ?? 0 }),
                 });
             } else {
                 showError(response.message);
@@ -45,7 +44,7 @@ const store = create<AppointmentState>((set, get) => ({
     },
 
     setFilters: (newFilters: AppointmentFilters) => {
-        set({ filters: newFilters });
+        set({ filters: newFilters, currentPage: 1 });
         get().fetchGrid(1, newFilters);
     },
 
@@ -72,7 +71,7 @@ const store = create<AppointmentState>((set, get) => ({
         const { currentPage, filters, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page+1
+                currentPage: page + 1
             })
             fetchGrid();
         }
@@ -82,7 +81,7 @@ const store = create<AppointmentState>((set, get) => ({
         try {
             const response = await doPOST(ENDPOINTS.create('appointments'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
         } catch (error) {
@@ -93,7 +92,7 @@ const store = create<AppointmentState>((set, get) => ({
         try {
             const response = await doPUT(ENDPOINTS.update('appointments', id), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
         } catch (error) {
@@ -104,7 +103,7 @@ const store = create<AppointmentState>((set, get) => ({
         try {
             const response = await doDELETE(ENDPOINTS.delete('appointments', id));
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
         } catch (error) {

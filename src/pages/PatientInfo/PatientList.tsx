@@ -12,10 +12,12 @@ import GeneralTable from "../../components/GridTable";
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 import Layout from "../../components/Layout";
+import { useCompanyStore } from "../../services/company";
 
 function PatientList({ }: any) {
 
-  const { data, totalPages, rows, total, currentPage, filters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage } = usePatientStore();
+  const { data, totalPages, rows, total, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage } = usePatientStore();
+  const { globalCompanyId } = useCompanyStore();
   const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
   const [page, setPage] = React.useState(0);
@@ -47,13 +49,15 @@ function PatientList({ }: any) {
   };
 
 
-  // const emptyRows =
-  //   rowsPerPage -
-  //   Math.min(rowsPerPage, patientList.length - page * rowsPerPage);
 
-   React.useEffect(() => {
-      fetchGrid()
-    }, [])
+  
+    React.useEffect(() => {
+      if (globalCompanyId) {
+        setFilters({ company: globalCompanyId })
+      } else {
+        fetchGrid()
+      }
+    }, [globalCompanyId])
 
 
     return (

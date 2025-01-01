@@ -33,8 +33,7 @@ const store = create<DoctorState>((set, get) => ({
             if (response.status >= 200 && response.status < 400) {
                 set({
                     data: response.data.data.rows,
-                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total/rows) }),
-                    total:response.data.data.total ? response.data.data.total : total
+                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows), total: response.data.data.total ?? 0 }),
                 });
             } else {
                 showError(response.message);
@@ -47,7 +46,7 @@ const store = create<DoctorState>((set, get) => ({
     },
 
     setFilters: (newFilters: DoctorFilters) => {
-        set({ filters: newFilters });
+        set({ filters: newFilters,currentPage:1 });
         get().fetchGrid(1, newFilters);
     },
 
