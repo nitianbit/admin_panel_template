@@ -16,6 +16,7 @@ import Profile from "../pages/Profile/Profile";
 import { hasAccess } from "../utils/helper";
 import { useAppContext } from "../services/context/AppContext";
 import Company from "../pages/Company/Company";
+import PushNotification from "../pages/PushNotification";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -143,6 +144,12 @@ export const protectedRoutes = [
     path: "/company",
     element: <AdminElement>
       <Company />
+    </AdminElement>,
+  },
+  {
+    path: "/push-notification",
+    element: <AdminElement>
+      <PushNotification />
     </AdminElement>,
   },
 

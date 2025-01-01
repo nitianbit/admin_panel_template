@@ -1,4 +1,5 @@
 import { Avatar } from "@mui/material";
+import CompanyDetail from "../../components/CompanyDetail";
 
 export const COLUMNS = [
     {
@@ -34,6 +35,7 @@ export const COLUMNS = [
     {
         header: "Company",
         accessor: "company",
+        render:(data: any)=><CompanyDetail  _id={data?.company}/>
     },
     {
         header: "Address",

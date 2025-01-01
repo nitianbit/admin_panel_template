@@ -4,10 +4,12 @@ import { useCompanyStore } from '../../../services/company';
 
 interface Props {
     register: any;
-    module: string
+    module: string;
+    value?: string;
+    onChange?: (value: string | unknown) => void
 }
 
-const CompanySelect: React.FC<Props> = ({ register, module }) => {
+const CompanySelect: React.FC<Props> = ({ register, module,value,onChange=()=>{} }) => {
     const { data } = useCompanyStore();
    
     return (
@@ -20,6 +22,8 @@ const CompanySelect: React.FC<Props> = ({ register, module }) => {
                 {...register("company",{
                      required: "Company is required"
                 })}
+                value={value}
+                onChange={(e) =>  onChange(e.target.value)}
             >
                 {
                     data?.map((item: any) => {

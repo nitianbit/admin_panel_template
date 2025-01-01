@@ -27,11 +27,12 @@ import { showError } from "../../services/toaster";
 import GridDialog from "../../components/Dialog/GridDialog";
 import { usePatientStore } from "../../services/patient";
 import { useDoctorStore } from "../../services/doctors";
-import { APPOINTMENT_STATUS, PAYMENT_STATUS } from "../../utils/constants";
+import { APPOINTMENT_STATUS, MODULES, PAYMENT_STATUS } from "../../utils/constants";
 import PatientDetail from "../../components/PatientDetail";
 import DoctorDetail from "../../components/DoctorDetail";
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import { useCompanyStore } from "../../services/company";
+import CompanySelect from "../../components/DropDowns/CompanySelect";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -82,10 +83,10 @@ export default function AppointmentDialog({
   }
 
   React.useEffect(() => {
-    if (selectedId && isModalOpen) {
+    if (selectedId) {
       fetchData(selectedId)
     }
-  }, [selectedId, isModalOpen])
+  }, [selectedId])
 
 
   const handleChange = (key: any, value: any) => {
@@ -284,6 +285,8 @@ export default function AppointmentDialog({
               }
             </Select>
           </FormControl>
+
+          <CompanySelect register={()=>{}} value={appointMentData?.company} onChange={(value) => handleChange("company", value)} module={MODULES.APPOINTMENT} />
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
 
