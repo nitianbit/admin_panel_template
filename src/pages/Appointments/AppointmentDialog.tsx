@@ -7,29 +7,31 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { Stack } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
-import { useForm } from "react-hook-form";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-
-type FormValues = {
-  id: string;
-  fullName: string;
-  gender: string;
-  phone: string;
-  age: string;
-  appointmentDate: string;
-  referredByDoctor: string;
-  assignedDoctor: string;
-};
+import dayjs from "dayjs";
+import { useAppContext } from "../../services/context/AppContext";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { useAppointmentStore } from "../../services/appointment";
+import { Appointment } from "../../types/appointment";
+import { showError } from "../../services/toaster";
+import GridDialog from "../../components/Dialog/GridDialog";
+import { usePatientStore } from "../../services/patient";
+import { useDoctorStore } from "../../services/doctors";
+import { APPOINTMENT_STATUS, PAYMENT_STATUS } from "../../utils/constants";
+import PatientDetail from "../../components/PatientDetail";
+import DoctorDetail from "../../components/DoctorDetail";
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import { useCompanyStore } from "../../services/company";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -41,30 +43,99 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function AppointmentDialog({
-  appointments,
-  setAppointments,
+  isModalOpen,
+  toggleModal,
+  selectedId
 }: any) {
-  const [open, setOpen] = React.useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>();
+  const { onCreate, detail } = useAppointmentStore();
+  const { globalCompanyId } = useCompanyStore();
+  const { data: patientData, totalPages: patientTotalPages, total: patientTotal, currentPage: patientCurrentPage, isLoading: patientIsLoading, onPageChange: patientOnPageChange, fetchGrid: patientFetchtGrid, onDelete: patientOnDelete } = usePatientStore();
+  const { data: doctorData, totalPages: doctorTotalPages, total: doctorTotal, currentPage: doctorCurrentPage, isLoading: doctorIsLoading, onPageChange: doctorOnPageChange, fetchGrid: doctorFetchtGrid, onDelete: doctorOnDelete } = useDoctorStore();
+  const { userData } = useAppContext();
 
-  const handleClickOpen = () => {
-    setOpen(true);
+
+  const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
+  const [doctorDialogOpen, setDoctorDialogOpen] = React.useState(false);
+
+  const [appointMentData, setAppointMentData] = React.useState<Appointment>({
+    fee: 0,
+    status: "SCHD",
+    paymentStatus: "PND",
+    appointmentDate: "",
+    timeSlot: {
+      start: "",
+      end: ""
+    },
+    doctor: userData?.role?.includes("doctors") ? userData?._id : "",
+    patient: "",
+    company: globalCompanyId ??""
+  })
+
+  const fetchData = async (id: string) => {
+    try {
+      const data = await detail(id)
+      setAppointMentData({ ...data?.data, appointmentDate: dayjs(data?.data?.appointmentDate, "YYYYMMDD").toISOString() })
+    } catch (error) {
+
+    }
+  }
+
+  React.useEffect(() => {
+    if (selectedId && isModalOpen) {
+      fetchData(selectedId)
+    }
+  }, [selectedId, isModalOpen])
+
+
+  const handleChange = (key: any, value: any) => {
+    if (key.startsWith("timeSlot.")) {
+      const field = key.split(".")[1]; // Extract 'start' or 'end'
+      setAppointMentData({
+        ...appointMentData,
+        timeSlot: { ...appointMentData.timeSlot, [field]: value }
+      });
+    } else {
+      setAppointMentData({ ...appointMentData, [key]: value });
+    }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
 
-  const onSubmit = (data: FormValues) => {
-    data.id = appointments.length + 1;
-    setAppointments((prevState: any) => [...prevState, data]);
-    handleClose();
-  };
+
+  const handlePatientDialogSave = (ids: string[]) => {
+    setPatientDialogOpen(false)
+    appointMentData.patient = ids?.length ? ids[0] : ""
+  }
+
+
+  const handleDoctorDialogSave = (ids: string[]) => {
+    setDoctorDialogOpen(false)
+    appointMentData.doctor = ids?.length ? ids[0] : ""
+  }
+
+  const handlePatientDialogClose = () => {
+    setPatientDialogOpen(false)
+  }
+
+
+  const handleDoctorDialogClose = () => {
+    setDoctorDialogOpen(false)
+  }
+
+  const handleSave = async () => {
+
+    const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
+    const startTime = dayjs(appointMentData.timeSlot.start).format("HHMM");
+    const endTime = dayjs(appointMentData.timeSlot.end).format("HHMM");
+    appointMentData.appointmentDate = date;
+    appointMentData.timeSlot["start"] = startTime
+    appointMentData.timeSlot["end"] = endTime;
+
+    if (appointMentData.patient?.length === 0) return showError("Please select a patient")
+    onCreate(appointMentData)
+    toggleModal()
+  }
+
 
   return (
     <div>
@@ -78,127 +149,206 @@ export default function AppointmentDialog({
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
-          onClick={handleClickOpen}
+          onClick={toggleModal}
         >
           Book an Appointment
         </Button>
       </Stack>
+      <GridDialog
+        open={patientDialogOpen}
+        handleClose={handlePatientDialogClose}
+        handleSave={handlePatientDialogSave}
+        data={patientData}
+        totalPages={patientTotalPages}
+        total={patientTotal}
+        currentPage={patientCurrentPage}
+        isLoading={patientIsLoading}
+        onPageChange={patientOnPageChange}
+        fetchGrid={patientFetchtGrid}
+        onDelete={patientOnDelete}
+        title="Patient"
+      />
+
+      {userData?.role?.includes("admin") && <GridDialog
+        open={doctorDialogOpen}
+        handleClose={handleDoctorDialogClose}
+        handleSave={handleDoctorDialogSave}
+        data={doctorData}
+        totalPages={doctorTotalPages}
+        total={doctorTotal}
+        currentPage={doctorCurrentPage}
+        isLoading={doctorIsLoading}
+        onPageChange={doctorOnPageChange}
+        fetchGrid={doctorFetchtGrid}
+        onDelete={doctorOnDelete}
+        title="Doctor"
+      />}
 
       <Dialog
-        open={open}
-        onClose={handleClose}
+        open={isModalOpen}
+        onClose={toggleModal}
         TransitionComponent={Transition}
         maxWidth="xs"
         fullWidth
         sx={{ height: "100%" }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Appointment Details</DialogTitle>
+        <DialogTitle>Appointment Details</DialogTitle>
 
-          <DialogContent dividers>
-            <TextField
-              margin="dense"
-              id="fullName"
-              label="Full Name"
-              type="fullName"
-              fullWidth
-              variant="outlined"
-              {...register("fullName", {
-                required: "Name is required",
-              })}
-              error={!!errors.fullName}
-              helperText={errors.fullName?.message}
+        <DialogContent dividers>
+          <Box sx={{
+            display: "flex",
+            my: 1,
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}>
+            <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
+              Select Patient -
+            </Typography>
+            <Box sx={{
+              display: "flex",
+              alignItems: "center"
+            }}>
+              <PatientDetail _id={appointMentData?.patient} />
+              <PersonSearchIcon sx={{ cursor: "pointer", ml: 2 }} onClick={() => {
+                setPatientDialogOpen(true)
+              }} />
+            </Box>
+          </Box>
+
+
+
+          {userData.role.includes("admin") &&
+            <Box sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              my: 1
+            }}>
+              <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
+                Select Doctor -
+              </Typography>
+              <Box sx={{
+                display: "flex",
+                alignItems: "center",
+              }}>
+                <DoctorDetail _id={appointMentData?.doctor} />
+                <PersonSearchIcon sx={{ cursor: "pointer", ml: 2 }} onClick={() => {
+                  setDoctorDialogOpen(true)
+                }} />
+              </Box>
+
+            </Box>
+          }
+
+          <TextField
+            margin="dense"
+            id="fee"
+            label="Fee"
+            type="fee"
+            fullWidth
+            variant="outlined"
+            value={appointMentData?.fee}
+            onChange={(e) => handleChange("fee", e.target.value)}
+
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="status">Status</InputLabel>
+            <Select
+              labelId="status"
+              id="status"
+              label="Status"
+              value={appointMentData?.status}
+              onChange={(e) => handleChange("status", e.target.value)}
+            >
+              {
+                Object.keys(APPOINTMENT_STATUS).map((key) => (
+                  <MenuItem key={key} value={APPOINTMENT_STATUS[key as keyof typeof APPOINTMENT_STATUS]}>{key}</MenuItem>
+                ))
+              }
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="paymentStatus">Payment Status</InputLabel>
+            <Select
+              labelId="paymentStatus"
+              id="paymentStatus"
+              label="Payment Status"
+              value={appointMentData?.paymentStatus}
+              onChange={(e) => handleChange("paymentStatus", e.target.value)}
+            >
+              {
+                Object.keys(PAYMENT_STATUS).map((key) => (
+                  <MenuItem key={key} value={PAYMENT_STATUS[key as keyof typeof PAYMENT_STATUS]}>{key}</MenuItem>
+                ))
+              }
+            </Select>
+          </FormControl>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+            <DemoContainer components={["DatePicker"]}>
+              <DatePicker
+                value={appointMentData?.appointmentDate}
+                onChange={(e: any) => {
+                  handleChange("appointmentDate", e)
+                }
+                }
+                label="Appointment Date"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    margin: "dense",
+                  },
+                }}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <TimePicker
+              value={appointMentData?.timeSlot.start}
+              onChange={(e: any) => {
+                // const startTime = dayjs(e).format("HHmm");
+                handleChange("timeSlot.start", e)
+              }
+              }
+              label="Start Time"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "dense",
+                },
+              }}
             />
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="gender">Gender</InputLabel>
-              <Select
-                labelId="gender"
-                id="gender"
-                label="Gender"
-                {...register("gender")}
-              >
-                <MenuItem value={"Male"}>Male</MenuItem>
-                <MenuItem value={"Female"}>Female</MenuItem>
-                <MenuItem value={"Other"}>Other</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              margin="dense"
-              id="phone"
-              label="Phone no"
-              type="phone"
-              fullWidth
-              variant="outlined"
-              placeholder="0 123456789"
-              {...register("phone", {
-                required: "Phone no is required",
-              })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
+          </LocalizationProvider>
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <TimePicker
+              value={appointMentData?.timeSlot.end}
+              onChange={(e: any) => {   // 
+                handleChange("timeSlot.end", e)
+              }
+              }
+              label="End Time"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "dense",
+                },
+              }}
             />
-            <TextField
-              margin="dense"
-              id="age"
-              label="Age"
-              type="age"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: 18"
-              {...register("age", {
-                required: "Age is required",
-              })}
-              error={!!errors.age}
-              helperText={errors.age?.message}
-            />
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["DatePicker"]}>
-                <DatePicker
-                  label="Appointment Date"
-                  sx={{ width: "100%" }}
-                  slotProps={{
-                    textField: {
-                      helperText: "Date is required",
-                    },
-                  }}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <TextField
-              margin="dense"
-              id="referredByDoctor"
-              label="Referred By Doctor"
-              type="referredByDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("referredByDoctor", {
-                required: "Specialist is required",
-              })}
-              error={!!errors.referredByDoctor}
-              helperText={errors.referredByDoctor?.message}
-            />
-            <TextField
-              margin="dense"
-              id="assignedDoctor"
-              label="Assigned Doctor"
-              type="assignedDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("assignedDoctor", {
-                required: "Assigned Doctor is required",
-              })}
-              error={!!errors.assignedDoctor}
-              helperText={errors.assignedDoctor?.message}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
-              Submit
-            </Button>
-          </DialogActions>
-        </form>
+          </LocalizationProvider>
+
+
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={toggleModal}>Cancel</Button>
+          <Button onClick={handleSave} type="submit" variant="contained">
+            Submit
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

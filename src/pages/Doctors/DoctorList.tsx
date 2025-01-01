@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { Grid, Box } from "@mui/material";
+import * as React from "react";
+import Paper from "@mui/material/Paper";
+import Appbar from "../../components/Appbar";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
-import Appbar from "../../components/Appbar";
-import AppointmentDialog from "./AppointmentDialog";
-import { useAppointmentStore } from "../../services/appointment";
-import GeneralTable from '../../components/GridTable/index'
+import { Avatar, Grid, Box } from "@mui/material";
+import AddDoctorDialog from "./AddDoctorDialog";
+import { useDoctorStore } from "../../services/doctors";
+import GeneralTable from "../../components/GridTable";
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 import Layout from "../../components/Layout";
 import { useCompanyStore } from "../../services/company";
 
-function Appointments() {
-  const { data, totalPages, total, rows, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
+export default function DoctorList() {
+  const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
+  const [open, setOpen] = React.useState(false);
+
   const { globalCompanyId } = useCompanyStore();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (globalCompanyId) {
       setFilters({ company: globalCompanyId })
     } else {
@@ -23,15 +26,24 @@ function Appointments() {
     }
   }, [globalCompanyId])
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleEdit = async (id: string) => [
+    await detail(id),
+    handleClickOpen()
+  ]
+
 
   return (
-    <Layout appBarTitle="Appointment">
-      <Layout.Header component={AppointmentDialog} />
+    <Layout appBarTitle="Patient">
+      <Layout.Header component={AddDoctorDialog} />
       <Layout.Body
         component={GeneralTable}
         props={{
-          data,
-          columns: COLUMNS,
+          data,  
+          columns: COLUMNS,  
           currentPage,
           totalPages,
           total,
@@ -49,7 +61,7 @@ function Appointments() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <Appbar appBarTitle="Appointment" />
+      <Appbar appBarTitle="Doctor List" />
       <Box
         component="main"
         sx={{
@@ -65,7 +77,7 @@ function Appointments() {
         <Toolbar />
 
         <Container sx={{ mt: 4, mb: 4 }}>
-          <AppointmentDialog />
+          <AddDoctorDialog open={open} setOpen={setOpen} />
           <GeneralTable
             data={data}
             columns={COLUMNS}
@@ -78,12 +90,10 @@ function Appointments() {
             onDelete={(data: any) => {
               onDelete(data._id)
             }}
+            onEdit={handleEdit}
           />
-
         </Container>
       </Box>
     </Box>
   );
 }
-
-export default Appointments;

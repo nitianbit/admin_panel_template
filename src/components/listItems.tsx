@@ -14,11 +14,12 @@ import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import SickIcon from "@mui/icons-material/Sick";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import BusinessIcon from '@mui/icons-material/Business';
+import { hasAccess } from "../utils/helper";
 
 const primarynavList = [
   {
@@ -47,11 +48,6 @@ const primarynavList = [
     icon: <BookOnlineIcon />,
   },
   {
-    link: "/calender",
-    label: "Calender",
-    icon: <CalendarMonthIcon />,
-  },
-  {
     link: "/kanban",
     label: "Kanban",
     icon: <ViewKanbanIcon />,
@@ -60,6 +56,11 @@ const primarynavList = [
     link: "/account",
     label: "Account",
     icon: <ManageAccountsIcon />,
+  },
+  {
+    link: "/company",
+    label: "Company",
+    icon: <BusinessIcon />,
   },
 ];
 
@@ -106,39 +107,44 @@ const secondaryNavList = [
   },
 ];
 
-export const mainListItems = (
+export const mainListItems = (userRoles: string[]) => (
   <React.Fragment>
     {primarynavList.map((data: any, index: any) => (
-      <Link
-        key={index}
-        to={data.link}
-        style={{ textDecoration: "none", color: "inherit" }}
-      >
-        <ListItemButton>
-          <ListItemIcon>{data.icon}</ListItemIcon>
-          <ListItemText primary={data.label} />
-        </ListItemButton>
-      </Link>
+      hasAccess(userRoles, data.link) && (
+        <Link
+          key={index}
+          to={data.link}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <ListItemButton>
+            <ListItemIcon>{data.icon}</ListItemIcon>
+            <ListItemText primary={data.label} />
+          </ListItemButton>
+        </Link>
+      )
     ))}
   </React.Fragment>
 );
 
-export const secondaryListItems = (
+
+export const secondaryListItems = (userRoles: string[]) => (
   <React.Fragment>
     <ListSubheader component="div" inset>
       Saved reports
     </ListSubheader>
     {secondaryNavList.map((data: any, index: any) => (
-      <Link
-        key={index}
-        to={data.link}
-        style={{ textDecoration: "none", color: "inherit" }}
-      >
-        <ListItemButton>
-          <ListItemIcon>{data.icon}</ListItemIcon>
-          <ListItemText primary={data.label} />
-        </ListItemButton>
-      </Link>
+      hasAccess(userRoles, data.link) && (
+        <Link
+          key={index}
+          to={data.link}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <ListItemButton>
+            <ListItemIcon>{data.icon}</ListItemIcon>
+            <ListItemText primary={data.label} />
+          </ListItemButton>
+        </Link>
+      )
     ))}
   </React.Fragment>
 );
