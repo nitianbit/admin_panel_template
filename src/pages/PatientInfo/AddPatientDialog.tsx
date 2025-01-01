@@ -63,7 +63,7 @@ export default function AddPatientDialog({
           </Button>
         </Box>
 
-        <AddSinglePatientContent open={isModalOpen} setOpen={toggleModal} create={create} fetchGrid={fetchGrid} selectedId={selectedId} />
+        <AddSinglePatientContent open={isModalOpen} setOpen={toggleModal} selectedId={selectedId} />
         <AddBulkUpload open={bulkOpen} setOpen={setbulkOpen}/>
       </Stack>
 

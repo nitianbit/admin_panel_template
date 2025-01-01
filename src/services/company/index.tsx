@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
 import { ENDPOINTS } from '../api/constants';
-import { CompanyState, CompanyFilters } from '../../types/company';
+import { CompanyState, CompanyFilters, Company } from '../../types/company';
 
 
 const store = create<CompanyState>((set, get) => ({
@@ -94,9 +94,9 @@ const store = create<CompanyState>((set, get) => ({
 
         }
     },
-    onUpdate: async (id: string, data: any) => {
+    onUpdate: async ( data: Company) => {
         try {
-            const response = await doPUT(ENDPOINTS.update('company', id), data);
+            const response = await doPUT(ENDPOINTS.update('company'), data);
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();

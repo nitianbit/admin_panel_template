@@ -19,13 +19,11 @@ const Transition = React.forwardRef(function Transition(
 interface AddPatientDialogProps {
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    create: (data: Patient) => void;
-    fetchGrid: () => void;
     selectedId?: string
 }
 
-const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpen, create, fetchGrid, selectedId }) => {
-    const { detail } = usePatientStore();
+const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpen, selectedId }) => {
+    const { detail, onUpdate, fetchGrid, onCreate: create } = usePatientStore();
     const {
         register,
         handleSubmit,
@@ -38,9 +36,11 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
     };
 
     const onSubmit = (data: Patient) => {
-        console.log(data);
-        create(data)
-        fetchGrid()
+        if (data?._id) {
+            onUpdate(data);
+        } else {
+            create(data)
+        }
         handleClose();
         reset()
     };
