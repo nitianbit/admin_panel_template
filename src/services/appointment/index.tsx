@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { AppointmentFilters, AppointmentState } from '../../types/appointment';
+import { Appointment, AppointmentFilters, AppointmentState } from '../../types/appointment';
 import { ENDPOINTS } from '../api/constants';
 
 
@@ -88,9 +88,9 @@ const store = create<AppointmentState>((set, get) => ({
 
         }
     },
-    onUpdate: async (id: string, data: any) => {
+    onUpdate: async (data: Appointment) => {
         try {
-            const response = await doPUT(ENDPOINTS.update('appointments', id), data);
+            const response = await doPUT(ENDPOINTS.update('appointments'), data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();

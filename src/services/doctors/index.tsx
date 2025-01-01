@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { DoctorFilters, DoctorState } from '../../types/doctors';
+import { Doctor, DoctorFilters, DoctorState } from '../../types/doctors';
 import { ENDPOINTS } from '../api/constants';
 
 
@@ -90,9 +90,9 @@ const store = create<DoctorState>((set, get) => ({
             
         }
     },
-    onUpdate:async (id:string,data:any)=>{
+    onUpdate:async (data:Doctor)=>{
         try {
-            const response=await doPUT(ENDPOINTS.update('doctors',id),data);
+            const response=await doPUT(ENDPOINTS.update('doctors'),data);
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();

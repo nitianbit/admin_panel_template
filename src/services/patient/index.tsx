@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { PatientFilters, PatientState } from '../../types/patient';
+import { Patient, PatientFilters, PatientState } from '../../types/patient';
 import { ENDPOINTS } from '../api/constants';
 
 
@@ -96,9 +96,9 @@ const store = create<PatientState>((set, get) => ({
 
         }
     },
-    onUpdate: async (id: string, data: any) => {
+    onUpdate: async (data: Patient) => {
         try {
-            const response = await doPUT(ENDPOINTS.update('patients', id), data);
+            const response = await doPUT(ENDPOINTS.update('patients'), data);
             console.log(response);
         } catch (error) {
 

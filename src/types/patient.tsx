@@ -18,6 +18,7 @@ export interface Patient {
   password: string;
   disabled: boolean;
   isVerified: boolean;
+  _id:string
 }
 
 

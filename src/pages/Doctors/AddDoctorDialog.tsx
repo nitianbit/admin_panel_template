@@ -38,7 +38,7 @@ export default function AddDoctorDialog({
   selectedId
 }: any) {
 
-  const { onCreate,detail } = useDoctorStore();
+  const { onCreate,detail,onUpdate } = useDoctorStore();
 
   const {
     register,
@@ -56,7 +56,11 @@ export default function AddDoctorDialog({
   };
 
   const onSubmit = (data: Doctor) => {
-    onCreate(data);
+    if(data?._id){
+     onUpdate(data);
+    }else{
+      onCreate(data);
+    }
     handleClose();
   };
 

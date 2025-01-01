@@ -14,7 +14,7 @@ export const ENDPOINTS = {
     profile: '/profile',
     create: (module:string)=>`/${module}/create`,
     bulkCreate: (module:string)=>`/bulk-upload/${module}`,
-    update: (module: string, id: string)=>`/${module}/${id}/update`,
+    update: (module: string)=>`/${module}/update`,
     delete: (module:string,id:string)=>`/${module}/${id}/delete`,
     detail: (module:string,id:string)=>`/${module}/${id}/detail`,
     grid: (module:string)=>`/${module}/grid`,

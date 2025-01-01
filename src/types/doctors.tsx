@@ -17,6 +17,7 @@
   createdAt: number;
   updatedAt?: number; // Optional field
   company: string;
+  _id:string
 }
 
 export interface DoctorResponse {
