@@ -5,6 +5,7 @@ import React from "react";
 import { TransitionProps } from "@mui/material/transitions";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
+import { usePatientStore } from "../../services/patient";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -20,9 +21,11 @@ interface AddPatientDialogProps {
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     create: (data: Patient) => void;
     fetchGrid: () => void;
+    selectedId?: string
 }
 
-const AddSinglePatientContent:React.FC<AddPatientDialogProps> = ({ open, setOpen, create, fetchGrid }) => {
+const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpen, create, fetchGrid, selectedId }) => {
+    const { detail } = usePatientStore();
     const {
         register,
         handleSubmit,
@@ -41,6 +44,21 @@ const AddSinglePatientContent:React.FC<AddPatientDialogProps> = ({ open, setOpen
         handleClose();
         reset()
     };
+
+    const fetchDetail = async (selectedId: string) => {
+        try {
+            const data = await detail(selectedId);
+            reset(data?.data)
+        } catch (error) {
+
+        }
+    }
+
+    React.useEffect(() => {
+        if (selectedId) {
+            fetchDetail(selectedId)
+        }
+    }, [selectedId]);
 
     return (
         <Dialog
