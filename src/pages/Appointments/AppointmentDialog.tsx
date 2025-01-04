@@ -125,12 +125,14 @@ export default function AppointmentDialog({
 
   const handleSave = async () => {
 
+    const data = { ...appointMentData }
+
     const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
-    const startTime = dayjs(appointMentData.timeSlot.start).format("HHMM");
-    const endTime = dayjs(appointMentData.timeSlot.end).format("HHMM");
-    appointMentData.appointmentDate = date;
-    appointMentData.timeSlot["start"] = startTime
-    appointMentData.timeSlot["end"] = endTime;
+    const startTime = dayjs(appointMentData.timeSlot.start).format("HHmm");
+    const endTime = dayjs(appointMentData.timeSlot.end).format("HHmm");
+    data.appointmentDate = date;
+    data.timeSlot["start"] = startTime
+    data.timeSlot["end"] = endTime;
 
     if (appointMentData.patient?.length === 0) return showError("Please select a patient")
     onCreate(appointMentData)
