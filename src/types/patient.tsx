@@ -3,22 +3,22 @@
 export interface Patient {
   name: string;
   phone: number;
-  age?: number;
-  email: string;
-  countryCode: number;
-  gender: 'Male' | 'Female' | 'Other';
-  createdAt: number;
-  balance: number;
-  role: string;
+  age: number;
+  email?: string;
+  countryCode?: number;
+  gender: string;
+  createdAt?: number;
+  balance?: number;
+  role?: string;
   address: string;
-  city: string;
+  city?: string;
   company: string;
-  state: string;
-  profiePic: string;
-  password: string;
-  disabled: boolean;
-  isVerified: boolean;
-  _id:string
+  state?: string;
+  profiePic?: string;
+  password?: string;
+  disabled?: boolean;
+  isVerified?: boolean;
+  _id?: string;
 }
 
 
