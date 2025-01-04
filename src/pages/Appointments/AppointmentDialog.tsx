@@ -134,8 +134,8 @@ export default function AppointmentDialog({
     data.timeSlot["start"] = startTime
     data.timeSlot["end"] = endTime;
 
-    if (appointMentData.patient?.length === 0) return showError("Please select a patient")
-    onCreate(appointMentData)
+    if (data.patient?.length === 0) return showError("Please select a patient")
+    onCreate(data)
     toggleModal()
   }
 
