@@ -27,6 +27,9 @@ export const moduleRoles = {
   },
   "/company":{
     role:[MODULES.ADMIN]
+  },
+  "/push-notification":{
+    role:[MODULES.ADMIN]
   }
 }
 

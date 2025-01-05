@@ -81,6 +81,7 @@ const store = create<PatientState>((set, get) => ({
         try {
             const response = await doPOST(ENDPOINTS.create('patients'), data);
             console.log(response);
+            get().fetchGrid();
         } catch (error) {
 
         }
@@ -100,6 +101,7 @@ const store = create<PatientState>((set, get) => ({
         try {
             const response = await doPUT(ENDPOINTS.update('patients'), data);
             console.log(response);
+            get().fetchGrid();
         } catch (error) {
 
         }
@@ -108,6 +110,7 @@ const store = create<PatientState>((set, get) => ({
         try {
             const response = await doDELETE(ENDPOINTS.delete('patients', id));
             console.log(response);
+            get().fetchGrid();
         } catch (error) {
 
         }

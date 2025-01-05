@@ -20,6 +20,7 @@ import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import BusinessIcon from '@mui/icons-material/Business';
 import { hasAccess } from "../utils/helper";
+import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 
 const primarynavList = [
   {
@@ -46,6 +47,11 @@ const primarynavList = [
     link: "/appointments",
     label: "Appointments",
     icon: <BookOnlineIcon />,
+  },
+  {
+    link: "/push-notification",
+    label: "Push Notifications",
+    icon: <CircleNotificationsIcon />,
   },
   {
     link: "/kanban",

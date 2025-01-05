@@ -24,22 +24,34 @@ interface AddPatientDialogProps {
 
 const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpen, selectedId }) => {
     const { detail, onUpdate, fetchGrid, onCreate: create } = usePatientStore();
+    const [patientData, setPatientData] = React.useState<Patient>({
+        name: "",
+        gender: "",
+        company: "",
+        phone: 0,
+        address: "",
+        age: 0,
+    });
     const {
-        register,
         handleSubmit,
-        formState: { errors },
-        reset
+        reset,
     } = useForm<Patient>();
 
     const handleClose = () => {
         setOpen(false);
     };
 
-    const onSubmit = (data: Patient) => {
-        if (data?._id) {
-            onUpdate(data);
+    const handleChange = (key: any, value: any) => {
+
+        setPatientData({ ...patientData, [key]: value });
+    };
+
+
+    const onSubmit = () => {
+        if (patientData?._id) {
+            onUpdate(patientData);
         } else {
-            create(data)
+            create(patientData)
         }
         handleClose();
         reset()
@@ -49,6 +61,7 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
         try {
             const data = await detail(selectedId);
             reset(data?.data)
+            setPatientData(data?.data)
         } catch (error) {
 
         }
@@ -79,11 +92,8 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         type="fullName"
                         fullWidth
                         variant="outlined"
-                        {...register("name", {
-                            required: "Name is required"
-                        })}
-                        error={!!errors.name}
-                        helperText={errors.name?.message}
+                        value={patientData.name}
+                        onChange={(e) => handleChange("name", e.target.value)}
                     />
                     <FormControl fullWidth margin="dense">
                         <InputLabel id="gender">Gender</InputLabel>
@@ -91,7 +101,8 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                             labelId="gender"
                             id="gender"
                             label="Gender"
-                            {...register("gender")}
+                            value={patientData.gender}
+                            onChange={(e) => handleChange("gender", e.target.value)}
                         >
                             <MenuItem value={"Male"}>Male</MenuItem>
                             <MenuItem value={"Female"}>Female</MenuItem>
@@ -99,7 +110,9 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         </Select>
                     </FormControl>
 
-                    <CompanySelect register={register} module={MODULES.PATIENTS} />
+                    <CompanySelect value={patientData.company} onChange={(value) => {
+                        handleChange("company", value)
+                    }} module={MODULES.PATIENTS} />
 
                     <TextField
                         margin="dense"
@@ -109,11 +122,8 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         fullWidth
                         variant="outlined"
                         placeholder="0 123456789"
-                        {...register("phone", {
-                            required: "Phone no is required"
-                        })}
-                        error={!!errors.phone}
-                        helperText={errors.phone?.message}
+                        value={patientData.phone}
+                        onChange={(e) => handleChange("phone", e.target.value)}
                     />
                     <TextField
                         margin="dense"
@@ -123,11 +133,8 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         fullWidth
                         variant="outlined"
                         placeholder="ex: street name, number, postal code"
-                        {...register("address", {
-                            required: "Address is required"
-                        })}
-                        error={!!errors.address}
-                        helperText={errors.address?.message}
+                        value={patientData.address}
+                        onChange={(e) => handleChange("address", e.target.value)}
                     />
                     <TextField
                         margin="dense"
@@ -137,11 +144,8 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         fullWidth
                         variant="outlined"
                         placeholder="ex: 18"
-                        {...register("age", {
-                            required: "Age is required"
-                        })}
-                        error={!!errors.age}
-                        helperText={errors.age?.message}
+                        value={patientData.age}
+                        onChange={(e) => handleChange("age", e.target.value)}
                     />
                 </DialogContent>
                 <DialogActions>

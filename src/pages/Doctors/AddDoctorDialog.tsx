@@ -39,6 +39,18 @@ export default function AddDoctorDialog({
 }: any) {
 
   const { onCreate,detail,onUpdate } = useDoctorStore();
+  const [doctorData, setDoctorData] = React.useState<Doctor>({
+    name:"",
+    gender:"",
+    email:"",
+    phone:0,
+    company:"",
+    specialization:""
+  })
+
+  const handleChange = (key: any, value: any) => {
+    setDoctorData({ ...doctorData, [key]: value });
+  }
 
   const {
     register,
@@ -55,11 +67,11 @@ export default function AddDoctorDialog({
     toggleModal(false);
   };
 
-  const onSubmit = (data: Doctor) => {
-    if(data?._id){
-     onUpdate(data);
+  const onSubmit = () => {
+    if(doctorData?._id){
+     onUpdate(doctorData);
     }else{
-      onCreate(data);
+      onCreate(doctorData);
     }
     handleClose();
   };
@@ -68,6 +80,7 @@ export default function AddDoctorDialog({
     try {
       const data=await detail(selectedId);
       reset(data?.data)
+      setDoctorData(data?.data)
     } catch (error) {
       
     }
@@ -116,19 +129,17 @@ export default function AddDoctorDialog({
               type="name"
               fullWidth
               variant="outlined"
-              {...register("name", {
-                required: "Name is required"
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}
-            />
+              value={doctorData.name} 
+              onChange={(e) => handleChange("name", e.target.value)}
+               />
             <FormControl fullWidth margin="dense">
               <InputLabel id="gender">Gender</InputLabel>
               <Select
                 labelId="gender"
                 id="gender"
                 label="Gender"
-                {...register("gender")}
+                value={doctorData.gender}
+                onChange={(e) => handleChange("gender", e.target.value) }
               >
                 <MenuItem value={"Male"}>Male</MenuItem>
                 <MenuItem value={"Female"}>Female</MenuItem>
@@ -136,7 +147,9 @@ export default function AddDoctorDialog({
               </Select>
             </FormControl>
 
-            <CompanySelect register={register} module={MODULES.DOCTOR} />
+            <CompanySelect  value={doctorData.company} onChange={(value)=>{
+              handleChange("company", value)
+            }} module={MODULES.DOCTOR} />
 
             <TextField
               margin="dense"
@@ -146,11 +159,8 @@ export default function AddDoctorDialog({
               fullWidth
               variant="outlined"
               placeholder="0 123456789"
-              {...register("phone", {
-                required: "Phone no is required"
-              })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
+              value={doctorData.phone}
+              onChange={(e) => handleChange("phone", e.target.value)}
             />
             <TextField
               margin="dense"
@@ -160,11 +170,8 @@ export default function AddDoctorDialog({
               fullWidth
               variant="outlined"
               placeholder="ex: test@test.com"
-              {...register("email", {
-                required: "Email is required"
-              })}
-              error={!!errors.email}
-              helperText={errors.email?.message}
+              value={doctorData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
             />
 
             <TextField
@@ -175,11 +182,8 @@ export default function AddDoctorDialog({
               fullWidth
               variant="outlined"
               placeholder="ex: Cardiologist, Dentist"
-              {...register("specialization", {
-                required: "Specialist is required"
-              })}
-              error={!!errors.specialization}
-              helperText={errors.specialization?.message}
+              value={doctorData.specialization}
+              onChange={(e) => handleChange("specialization", e.target.value)}
             />
           </DialogContent>
           <DialogActions>

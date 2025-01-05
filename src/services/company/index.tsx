@@ -115,6 +115,14 @@ const store = create<CompanyState>((set, get) => ({
         } catch (error) {
 
         }
+    },
+    detail: async (id: string) => {
+        try {
+            const response = await doGET(ENDPOINTS.detail('company', id));
+            return response.data;
+        } catch (error) {
+
+        }
     }
 }));
 

@@ -3,21 +3,21 @@
  export interface Doctor {
   name: string;
   specialization: string; // Optional field
-  email: string;
+  email?: string;
   phone: number;
-  countryCode: number;
-  gender: 'Male' | 'Female' | 'Other';
-  isIndividual: boolean;
-  role: string[];
+  countryCode?: number;
+  gender: string;
+  isIndividual?: boolean;
+  role?: string[];
   hospital?: string; // Reference to Hospital schema
   departments?: string[]; // References to Department schema
   fee?: number; // Optional field
-  isActive: boolean;
-  isVerified: boolean;
-  createdAt: number;
+  isActive?: boolean;
+  isVerified?: boolean;
+  createdAt?: number;
   updatedAt?: number; // Optional field
   company: string;
-  _id:string
+  _id?:string
 }
 
 export interface DoctorResponse {

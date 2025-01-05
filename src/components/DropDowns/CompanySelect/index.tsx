@@ -3,11 +3,13 @@ import React from 'react'
 import { useCompanyStore } from '../../../services/company';
 
 interface Props {
-    register: any;
-    module: string
+    register?: any;
+    module: string;
+    value?: string;
+    onChange?: (value: string | unknown) => void
 }
 
-const CompanySelect: React.FC<Props> = ({ register, module }) => {
+const CompanySelect: React.FC<Props> = ({ module,value,onChange=()=>{} }) => {
     const { data } = useCompanyStore();
    
     return (
@@ -17,9 +19,8 @@ const CompanySelect: React.FC<Props> = ({ register, module }) => {
                 labelId={`company-${module}-label`}
                 id={`company-${module}`}
                 label="Company"
-                {...register("company",{
-                     required: "Company is required"
-                })}
+                value={value}
+                onChange={(e) =>  onChange(e.target.value)}
             >
                 {
                     data?.map((item: any) => {

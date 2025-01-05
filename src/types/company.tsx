@@ -40,4 +40,5 @@ export interface CompanyState {
     onCreate: (...args: any) => Promise<void>;
     onUpdate: (...args: any) => Promise<void>;
     onDelete: (...args: any) => Promise<void>;
+    detail: (id:string) => Promise<any>;
 }
