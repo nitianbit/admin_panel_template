@@ -25,6 +25,12 @@ export const moduleRoles = {
   "/doctor-list":{
     role:[MODULES.ADMIN]
   },
+  "/laboratory-list":{
+    role:[MODULES.ADMIN]
+  },
+  "/admin":{
+    role:[MODULES.SUPERVISOR]
+  },
   "/company":{
     role:[MODULES.ADMIN]
   },

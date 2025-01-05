@@ -17,6 +17,8 @@ import { hasAccess } from "../utils/helper";
 import { useAppContext } from "../services/context/AppContext";
 import Company from "../pages/Company/Company";
 import PushNotification from "../pages/PushNotification";
+import LaboratoryList from "../pages/Laboratory/LaboratoryList";
+import AdminList from "../pages/Admin/AdminList";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -105,6 +107,22 @@ export const protectedRoutes = [
     element: (
       <AdminElement>
         <DoctorList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/laboratory-list",
+    element: (
+      <AdminElement>
+        <LaboratoryList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/admin",
+    element: (
+      <AdminElement>
+        <AdminList />
       </AdminElement>
     )
   },
