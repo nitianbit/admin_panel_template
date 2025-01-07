@@ -3,35 +3,28 @@ import { Grid, Box } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
-import AppointmentDialog from "./AppointmentDialog";
-import { useAppointmentStore } from "../../services/appointment";
+import CompanyDialog from "./CompanyDialog";
 import GeneralTable from '../../components/GridTable/index'
 import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
-import Layout from "../../components/Layout";
 import { useCompanyStore } from "../../services/company";
+import Layout from "../../components/Layout";
 
-function Appointments() {
-  const { data, totalPages, total, rows, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
-  const { globalCompanyId } = useCompanyStore();
-
+function Company() {
+  const { data, totalPages, total,rows, currentPage, filters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useCompanyStore();
   useEffect(() => {
-    if (globalCompanyId) {
-      setFilters({ company: globalCompanyId })
-    } else {
-      fetchGrid()
-    }
-  }, [globalCompanyId])
+    fetchGrid()
+  }, [])
 
 
   return (
-    <Layout appBarTitle="Appointment">
-      <Layout.Header component={AppointmentDialog} />
+    <Layout appBarTitle="Patient">
+      <Layout.Header component={CompanyDialog} />
       <Layout.Body
         component={GeneralTable}
         props={{
-          data,
-          columns: COLUMNS,
+          data,  
+          columns: COLUMNS,  
           currentPage,
           totalPages,
           total,
@@ -49,7 +42,7 @@ function Appointments() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <Appbar appBarTitle="Appointment" />
+      <Appbar appBarTitle="Company" />
       <Box
         component="main"
         sx={{
@@ -65,25 +58,30 @@ function Appointments() {
         <Toolbar />
 
         <Container sx={{ mt: 4, mb: 4 }}>
-          <AppointmentDialog />
-          <GeneralTable
-            data={data}
-            columns={COLUMNS}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            total={total}
-            loading={isLoading}
-            onPageChange={onPageChange}
-            module={MODULES.DOCTOR}
-            onDelete={(data: any) => {
-              onDelete(data._id)
-            }}
-          />
-
+          <CompanyDialog />
+          <Grid
+            container
+            spacing={2}
+            sx={{ marginleft: "10px", marginTop: "40px" }}
+          >
+            <GeneralTable
+              data={data}
+              columns={COLUMNS}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              total={total}
+              loading={isLoading}
+              onPageChange={onPageChange}
+              module={MODULES.DOCTOR}
+              onDelete={(data: any) => {
+                onDelete(data._id)
+              }}
+            />
+          </Grid>
         </Container>
       </Box>
     </Box>
   );
 }
 
-export default Appointments;
+export default Company;

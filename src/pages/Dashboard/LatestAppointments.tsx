@@ -1,7 +1,6 @@
 import * as React from "react";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import Title from "../../components/Title";
 import AppointmentTableData from "../Appointments/AppointmentTableData";
 import { appointmentsData } from "../../mockData";
 import { useNavigate } from "react-router-dom";

@@ -11,44 +11,38 @@ import PeopleIcon from "@mui/icons-material/People";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import LatestAppointments from "../Dashboard/LatestAppointments";
 import PieChart from "./PieChart";
+import { useAppContext } from "../../services/context/AppContext";
 
 const infoData = [
   {
     icon: <EmailIcon />,
     title: "Email",
-    value: "test@test.com"
+    value: (userData:any) => userData.email || "Not available",
   },
   {
     icon: <PhoneIcon />,
     title: "Contact no",
-    value: "+11 123456789"
+    value: (userData:any) => userData.contactNo || "Not available",
   },
   {
     icon: <PeopleIcon />,
     title: "Successful Patients",
-    value: "200"
+    value: (userData:any) => userData.patients || "Not available",
   },
   {
     icon: <MedicalServicesIcon />,
     title: "Experience",
-    value: "10+ years"
-  }
+    value: (userData:any) => userData.experience || "Not available",
+  },
 ];
 
-const profileData = {
-  avatarUrl: "https://i.pravatar.cc/300",
-  name: "Dr. John Doe",
-  specialization: "Cardiologist",
-  email: "john.doe@example.com",
-  contactNo: "+1 123-456-7890",
-  experience: "10 years",
-  patients: "1000+",
-  biography:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed auctor velit eu orci aliquam ultrices. Etiam quis purus euismod, faucibus leo eu, vestibulum odio.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed auctor velit eu orci aliquam ultrices. Etiam quis purus euismod, faucibus leo eu, vestibulum odio."
-};
-
 export default function Profile() {
-  const { avatarUrl, name, specialization, biography } = profileData;
+  const { userData } = useAppContext(); // Assuming userData contains the required profile data
+  const { avatarUrl, name, specialization, biography } = userData || {}; // Fallback to empty object if userData is undefined
+
+  if (!userData) {
+    return <Typography>Loading...</Typography>; // Display loading state if userData is not available
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -62,7 +56,7 @@ export default function Profile() {
               : theme.palette.grey[900],
           flexGrow: 1,
           height: "100vh",
-          overflow: "auto"
+          overflow: "auto",
         }}
       >
         <Toolbar />
@@ -77,16 +71,16 @@ export default function Profile() {
                   flexDirection: "column",
                   height: 445,
                   justifyContent: "center",
-                  alignItems: "center"
+                  alignItems: "center",
                 }}
               >
                 <Stack spacing={2} direction="column" alignItems="center">
                   <Stack>
                     <Avatar
-                      src={avatarUrl}
+                      src={avatarUrl || "https://i.pravatar.cc/300"} // Fallback to a default avatar
                       sx={{
                         height: "100%",
-                        width: "100%"
+                        width: "100%",
                       }}
                     />
                   </Stack>
@@ -101,7 +95,7 @@ export default function Profile() {
             <Grid item xs={12} md={8} lg={8}>
               <Box
                 sx={{
-                  flexGrow: 0
+                  flexGrow: 0,
                 }}
               >
                 <Grid item xs={12}>
@@ -109,11 +103,11 @@ export default function Profile() {
                     sx={{
                       display: "flex",
                       flexDirection: "column",
-                      mb: 1
+                      mb: 1,
                     }}
                   >
                     <Typography variant="body1" gutterBottom sx={{ m: 1.5 }}>
-                      {biography}
+                      {biography || "Biography not available."}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -125,12 +119,12 @@ export default function Profile() {
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          height: 150
+                          height: 150,
                         }}
                       >
                         <Box
                           sx={{
-                            flexGrow: 1
+                            flexGrow: 1,
                           }}
                         >
                           <Stack
@@ -163,7 +157,7 @@ export default function Profile() {
                                 align="center"
                                 variant="h5"
                               >
-                                {item.value}
+                                {item.value(userData)}
                               </Typography>
                             </Stack>
                           </Stack>
@@ -194,7 +188,7 @@ export default function Profile() {
                   p: 2,
                   display: "flex",
                   flexDirection: "column",
-                  height: 370
+                  height: 370,
                 }}
               >
                 <PieChart />
