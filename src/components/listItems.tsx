@@ -39,6 +39,17 @@ const primarynavList = [
     icon: <PeopleIcon />,
   },
   {
+    link: "/laboratory-list",
+    label: "Laboratory  List",
+    icon: <PeopleIcon />,
+  },
+
+  {
+    link: "/admin",
+    label: "Laboratory  List",
+    icon: <PeopleIcon />,
+  },
+  {
     link: "/patient-list",
     label: "Patient List",
     icon: <SickIcon />,
