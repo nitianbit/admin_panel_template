@@ -19,6 +19,10 @@ import Company from "../pages/Company/Company";
 import PushNotification from "../pages/PushNotification";
 import LaboratoryList from "../pages/Laboratory/LaboratoryList";
 import AdminList from "../pages/Admin/AdminList";
+import WellnessForm from "../pages/Wellness";
+import Departments from "../pages/Departments";
+import Services from "../pages/Services";
+import Offers from "../pages/Offers";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -168,6 +172,30 @@ export const protectedRoutes = [
     path: "/push-notification",
     element: <AdminElement>
       <PushNotification />
+    </AdminElement>,
+  },
+  {
+    path: "/wellness-events",
+    element: <AdminElement>
+      <WellnessForm />
+    </AdminElement>,
+  },
+  {
+    path: "/departments",
+    element: <AdminElement>
+      <Departments />
+    </AdminElement>,
+  },
+  {
+    path: "/services",
+    element: <AdminElement>
+      <Services />
+    </AdminElement>,
+  },
+  {
+    path: "/offers",
+    element: <AdminElement>
+      <Offers />
     </AdminElement>,
   },
 

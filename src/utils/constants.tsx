@@ -25,7 +25,8 @@ export const MODULES = {
     APPOINTMENT: "appointments",
     REVIEW: "reviews",
     OFFER: "offer",
-    PATIENTS:'patients'
+    PATIENTS:'patients',
+    SERVICES:'services'
 };
 
 
