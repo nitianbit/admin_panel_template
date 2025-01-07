@@ -46,7 +46,7 @@ const primarynavList = [
 
   {
     link: "/admin",
-    label: "Laboratory  List",
+    label: "Admin",
     icon: <PeopleIcon />,
   },
   {

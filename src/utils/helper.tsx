@@ -14,6 +14,8 @@ export const moduleRoles = {
   "/profile": [MODULES.DOCTOR],
   "/appointments": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
   "/doctor-list": [MODULES.ADMIN],
+  "/laboratory-list": [MODULES.ADMIN],
+  "/admin": [MODULES.SUPERVISOR],
   "/company": [MODULES.ADMIN],
   "/push-notification": [MODULES.ADMIN],
   "/wellness-events": [MODULES.ADMIN],
