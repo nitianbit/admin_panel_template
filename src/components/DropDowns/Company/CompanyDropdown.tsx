@@ -10,7 +10,6 @@ const CompanyDropDown = () => {
 
     return (
        <>
-       {globalCompanyId}
         <FormControl
             variant="outlined"
             size="small"

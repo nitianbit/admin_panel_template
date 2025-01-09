@@ -1,4 +1,5 @@
 import { MODULES } from "./constants";
+import { doPOST } from "./HttpUtils";
 
 export function isError(e: unknown): e is Error {
   return e instanceof Error;
@@ -7,36 +8,20 @@ export function isError(e: unknown): e is Error {
 
 
 export const moduleRoles = {
-  "/dashboard": {
-    role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
-  },
-  "/patient-list": {
-    role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
-  },
-  "/patient-info/1": {
-    role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
-  },
-  "/profile": {
-    role: [ MODULES.DOCTOR]
-  },
-  "/appointments":{
-    role: [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR]
-  },
-  "/doctor-list":{
-    role:[MODULES.ADMIN]
-  },
-  "/laboratory-list":{
-    role:[MODULES.ADMIN]
-  },
-  "/admin":{
-    role:[MODULES.SUPERVISOR]
-  },
-  "/company":{
-    role:[MODULES.ADMIN]
-  },
-  "/push-notification":{
-    role:[MODULES.ADMIN]
-  }
+  "/dashboard": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
+  "/patient-list": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
+  "/patient-info/1": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
+  "/profile": [MODULES.DOCTOR],
+  "/appointments": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
+  "/doctor-list": [MODULES.ADMIN],
+  "/laboratory-list": [MODULES.ADMIN],
+  "/admin": [MODULES.SUPERVISOR],
+  "/company": [MODULES.ADMIN],
+  "/push-notification": [MODULES.ADMIN],
+  "/wellness-events": [MODULES.ADMIN],
+  "/departments": [MODULES.ADMIN],
+  "/services": [MODULES.ADMIN],
+  "/offers": [MODULES.ADMIN],
 }
 
 
@@ -45,9 +30,25 @@ export const hasAccess = (roles: string[], module: string | null = null) => {
   if (pathname in moduleRoles) {
     const role = moduleRoles[pathname as keyof typeof moduleRoles];
     if (role) {
-      return role.role.some((r: any) => roles.includes(r));
+      return role.some((r: any) => roles.includes(r));
     }
     return false;
   }
   return false;
+}
+
+
+export const uploadFile = async (data: any,files: any) => {
+  const formData = new FormData();
+
+  Array.from(files).forEach((file: any) => {
+    formData.append('pic', file);
+  });
+
+  Object.keys(data).forEach((key) => {
+    formData.append(key, data[key]);
+  });
+  const response = await doPOST('/file/upload', formData);
+ 
+  return response;
 }

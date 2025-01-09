@@ -2,14 +2,18 @@ import axios from "axios";
 import { STORAGE_KEYS, getValue } from '../Storage/index';
 import { API_METHODS } from "./constants";
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: 'http://localhost:4030/api',
     // baseURL: "https://api.apkiproperty.com/api",
     // timeout: 10000,
 });
 
+const isFormData = (value: unknown): value is FormData => value instanceof FormData;
+
+
 const apiHandler = async (endPoint: any, method: string, data = null) => {
     try {
+        const contentType: string = isFormData(data) ? "multipart/form-data" : "application/json";
         const response = await api({
             method: method,
             url: endPoint,

@@ -46,7 +46,7 @@ const primarynavList = [
 
   {
     link: "/admin",
-    label: "Laboratory  List",
+    label: "Admin",
     icon: <PeopleIcon />,
   },
   {
@@ -75,10 +75,36 @@ const primarynavList = [
     icon: <ManageAccountsIcon />,
   },
   {
+    link: "/wellness-events",
+    label: "Wellness ",
+    icon: <CircleNotificationsIcon />,
+  },
+  {
+    link: "/departments",
+    label: "Departments",
+    icon: <CircleNotificationsIcon />,
+  },
+  {
+    link: "/services",
+    label: "Services",
+    icon: <CircleNotificationsIcon />,
+  },
+  {
     link: "/company",
     label: "Company",
     icon: <BusinessIcon />,
   },
+  {
+    link: "/offers",
+    label: "Offers",
+    icon: <CircleNotificationsIcon />,
+  },
+  {
+    link: "/push-notification",
+    label: "Push Notifications",
+    icon: <CircleNotificationsIcon />,
+  },
+
 ];
 
 const secondaryNavList = [
