@@ -6,10 +6,11 @@ interface Props {
     register?: any;
     module: string;
     value?: string;
+    required?: boolean;
     onChange?: (value: string | unknown) => void
 }
 
-const CompanySelect: React.FC<Props> = ({ module,value,onChange=()=>{} }) => {
+const CompanySelect: React.FC<Props> = ({ required=true, module,value,onChange=()=>{} }) => {
     const { data } = useCompanyStore();
    
     return (
@@ -20,6 +21,7 @@ const CompanySelect: React.FC<Props> = ({ module,value,onChange=()=>{} }) => {
                 id={`company-${module}`}
                 label="Company"
                 value={value}
+                required={required}
                 onChange={(e) =>  onChange(e.target.value)}
             >
                 {
