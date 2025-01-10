@@ -45,6 +45,11 @@ const primarynavList = [
   },
 
   {
+    link: "/hr-list",
+    label: "HR",
+    icon: <PeopleIcon />,
+  },
+  {
     link: "/admin",
     label: "Admin",
     icon: <PeopleIcon />,

@@ -22,6 +22,7 @@ export const moduleRoles = {
   "/departments": [MODULES.ADMIN],
   "/services": [MODULES.ADMIN],
   "/offers": [MODULES.ADMIN],
+  "/hr-list": [MODULES.ADMIN, MODULES.SUPERVISOR]
 }
 
 
@@ -38,7 +39,7 @@ export const hasAccess = (roles: string[], module: string | null = null) => {
 }
 
 
-export const uploadFile = async (data: any,files: any) => {
+export const uploadFile = async (data: any, files: any) => {
   const formData = new FormData();
 
   Array.from(files).forEach((file: any) => {
@@ -49,6 +50,6 @@ export const uploadFile = async (data: any,files: any) => {
     formData.append(key, data[key]);
   });
   const response = await doPOST('/file/upload', formData);
- 
+
   return response;
 }
