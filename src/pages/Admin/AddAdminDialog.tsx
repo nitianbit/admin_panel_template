@@ -7,7 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { Stack } from "@mui/material";
+import { MenuItem, Select, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
@@ -33,13 +33,14 @@ export default function AddAdminDialog({
   selectedId
 }: any) {
 
-  const { onCreate,detail,onUpdate } = useAdminStore();
+  const { onCreate, detail, onUpdate } = useAdminStore();
   const [adminData, setAdminData] = React.useState<Admin>({
-    name:"",
-    email:"",
-    phone:0,
-    company:"",
-    address:"",
+    name: "",
+    email: "",
+    phone: 0,
+    company: "",
+    role:["admin"],
+    address: "",
   })
 
   const handleChange = (key: any, value: any) => {
@@ -60,38 +61,38 @@ export default function AddAdminDialog({
   const handleClose = () => {
     toggleModal(false);
     setAdminData({
-      name:"",
-      email:"",
-      phone:0,
-      company:"",
-      address:"",
-      _id:""
+      name: "",
+      email: "",
+      phone: 0,
+      company: "",
+      address: "",
+      _id: ""
     })
   };
 
   const onSubmit = () => {
-    
-    if(adminData?._id){
-     onUpdate(adminData);
-    }else{
+
+    if (adminData?._id) {
+      onUpdate(adminData);
+    } else {
       onCreate(adminData);
     }
     handleClose();
   };
 
-  const fetchDetail=async(selectedId:string)=>{
+  const fetchDetail = async (selectedId: string) => {
     try {
-      const data=await detail(selectedId);
+      const data = await detail(selectedId);
       reset(data?.data)
       setAdminData(data?.data)
     } catch (error) {
-      
+
     }
   }
 
   React.useEffect(() => {
     if (selectedId) {
-     fetchDetail(selectedId)
+      fetchDetail(selectedId)
     }
   }, [selectedId]);
 
@@ -132,12 +133,12 @@ export default function AddAdminDialog({
               type="name"
               fullWidth
               variant="outlined"
-              value={adminData.name} 
+              value={adminData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-               />
+            />
 
 
-            <CompanySelect  value={adminData.company} onChange={(value)=>{
+            <CompanySelect value={adminData.company} onChange={(value) => {
               handleChange("company", value)
             }} module={MODULES.ADMIN} />
 
@@ -163,6 +164,16 @@ export default function AddAdminDialog({
               value={adminData.email}
               onChange={(e) => handleChange("email", e.target.value)}
             />
+            {/* <Select
+              labelId="role"
+              id="role"
+              label="Role"
+              value={adminData.role}
+              onChange={(e) => handleChange("role", e.target.value)}
+            >
+              <MenuItem value={"admin"}>Admin</MenuItem>
+              <MenuItem value={"supervisor"}>Supervisor</MenuItem>
+            </Select> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
