@@ -198,7 +198,7 @@ export default function SignUp() {
                 <MenuItem value={"doctors"}>Doctor</MenuItem>
                 <MenuItem value={"laboratories"}>Laboratory</MenuItem>
                 <MenuItem value={"admin"}>Admin</MenuItem>
-                <MenuItem value={"supervisor"}>Super Visor</MenuItem>
+                {/* <MenuItem value={"supervisor"}>Super Visor</MenuItem> */}
               </Select>
             </Grid>
           </Grid>}

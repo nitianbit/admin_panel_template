@@ -23,6 +23,7 @@ import WellnessForm from "../pages/Wellness";
 import Departments from "../pages/Departments";
 import Services from "../pages/Services";
 import Offers from "../pages/Offers";
+import HRList from "../pages/HR/HRList";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -111,6 +112,14 @@ export const protectedRoutes = [
     element: (
       <AdminElement>
         <DoctorList />
+      </AdminElement>
+    )
+  },
+   {
+    path: "/hr-list",
+    element: (
+      <AdminElement>
+        <HRList />
       </AdminElement>
     )
   },

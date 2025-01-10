@@ -46,7 +46,7 @@ export default function SignInSide() {
     formState: { errors }
   } = useForm<FormValues>();
 
-  const options = ['doctors', 'laboratories', "admin", 'superadmin'];
+  const options = ['doctors', 'laboratories', "admin", 'supervisor'];
 
   const handleRoleSelect = (role: any) => {
     setData((prev) => {
