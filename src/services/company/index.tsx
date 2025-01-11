@@ -39,7 +39,7 @@ const store = create<CompanyState>((set, get) => ({
                 showError(response.message);
             }
         } catch (err) {
-            showError('Failed to fetch doctors');
+            showError('Failed to fetch company');
         } finally {
             set({ isLoading: false });
         }
@@ -91,7 +91,7 @@ const store = create<CompanyState>((set, get) => ({
                 get().fetchGrid();
             }
         } catch (error) {
-
+            showError('Failed to create company');
         }
     },
     onUpdate: async ( data: Company) => {
@@ -102,7 +102,7 @@ const store = create<CompanyState>((set, get) => ({
                 get().fetchGrid();
             }
         } catch (error) {
-
+            showError('Failed to update company');
         }
     },
     onDelete: async (id: string) => {
@@ -113,7 +113,7 @@ const store = create<CompanyState>((set, get) => ({
                 get().fetchGrid();
             }
         } catch (error) {
-
+            showError('Failed to delete company');
         }
     },
     detail: async (id: string) => {
