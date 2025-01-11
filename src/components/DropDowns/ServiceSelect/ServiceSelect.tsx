@@ -1,5 +1,5 @@
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
-import React from 'react'
+import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select } from '@mui/material'
+import React, { useEffect } from 'react'
 import { useServicestore } from '../../../services/services';
 
 interface Props {
@@ -12,9 +12,25 @@ interface Props {
 }
 
 const ServiceSelect: React.FC<Props> = ({ required = true, isMultiple = true, module, value, onChange = () => { } }) => {
-    const { data } = useServicestore();
+    const { data, fetchGrid } = useServicestore();
 
-    
+    const renderSelectedValue = (selected: any) => {
+        if (!Array.isArray(selected)) {
+            return '';
+        }
+        return selected.map((id) => {
+            const item = data?.find((item: any) => item._id === id);
+            return item ? item.name : '';
+        }).join(', ');
+    };
+
+       useEffect(()=>{
+            if(data.length === 0){
+                fetchGrid()
+            }
+        },[])
+
+
 
     return (
         <FormControl fullWidth margin="dense">
@@ -27,11 +43,15 @@ const ServiceSelect: React.FC<Props> = ({ required = true, isMultiple = true, mo
                 value={value}
                 required={required}
                 onChange={(e) => onChange(e.target.value)}
+                renderValue={renderSelectedValue}
             >
                 {
-                    data?.map((item: any) => {
-                        return <MenuItem key={item._id} value={item._id}>{item.name}</MenuItem>
-                    })
+                    data?.map((item: any) => (
+                        <MenuItem key={item._id} value={item._id}>
+                            <Checkbox checked={Array.isArray(value) && value.includes(item._id)} />
+                            <ListItemText primary={item.name} />
+                        </MenuItem>
+                    ))
                 }
             </Select>
         </FormControl>
