@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
-import { showError } from '../toaster';
+import { showError, showSuccess } from '../toaster';
 import { ENDPOINTS } from '../api/constants';
 import { ServiceState ,Service,ServiceFilters} from '../../types/services';
 
@@ -85,11 +85,12 @@ const store = create<ServiceState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Service create successfully")
             }else{
                 showError(response.message);
             }
         } catch (error) {
-            
+            showError('Failed to create service');
         }
     },
     onUpdate:async (data:Service)=>{
@@ -98,9 +99,10 @@ const store = create<ServiceState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Service updated successfully")
             }
         } catch (error) {
-            
+            showError('Failed to update service');
         }
     },
     onDelete:async (id:string)=>{
@@ -109,9 +111,10 @@ const store = create<ServiceState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Service deleted successfully")
             }
         } catch (error) {
-            
+            showError('Failed to delete service');
         }
     },
     detail: async (id: string) => {
