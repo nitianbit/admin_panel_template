@@ -2,7 +2,7 @@
 
  export interface Doctor {
   name: string;
-  specialization: string; // Optional field
+  specialization?: string; // Optional field
   email?: string;
   phone: number;
   countryCode?: number;
@@ -15,6 +15,7 @@
   fee?: number; // Optional field
   isActive?: boolean;
   isVerified?: boolean;
+  description?: string; // Optional field
   createdAt?: number;
   updatedAt?: number; // Optional field
   company: string;

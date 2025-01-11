@@ -39,4 +39,8 @@ export const COLUMNS = [
         accessor: "departments",
         render:(data: any)=><DepartmentDetail _id={data?.departments}/>
     },
+    {
+        header: "Description",
+        accessor: "description",
+    },
 ]

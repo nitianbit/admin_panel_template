@@ -49,7 +49,8 @@ export default function AddDoctorDialog({
     company: "",
     services: [],
     departments: [],
-    specialization: ""
+    description: ""
+    // specialization: ""
   })
 
   const handleChange = (key: any, value: any) => {
@@ -190,6 +191,19 @@ export default function AddDoctorDialog({
 
             <TextField
               margin="dense"
+              id="description"
+              rows={4}
+              label="Description"
+              // type="description"
+              fullWidth
+              variant="outlined"
+              placeholder=""
+              value={doctorData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+            />
+
+            {/* <TextField
+              margin="dense"
               id="specialist"
               label="Specialist"
               type="specialist"
@@ -198,7 +212,7 @@ export default function AddDoctorDialog({
               placeholder="ex: Cardiologist, Dentist"
               value={doctorData.specialization}
               onChange={(e) => handleChange("specialization", e.target.value)}
-            />
+            /> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
