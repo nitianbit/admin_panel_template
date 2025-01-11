@@ -6,6 +6,8 @@ import { TransitionProps } from "@mui/material/transitions";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
 import { usePatientStore } from "../../services/patient";
+import { useAppContext } from "../../services/context/AppContext";
+import { useCompanyStore } from "../../services/company";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -24,10 +26,12 @@ interface AddPatientDialogProps {
 
 const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpen, selectedId }) => {
     const { detail, onUpdate, fetchGrid, onCreate: create } = usePatientStore();
+    const {globalCompanyId} = useCompanyStore();
+    const {userData} = useAppContext();
     const [patientData, setPatientData] = React.useState<Patient>({
         name: "",
         gender: "",
-        company: "",
+        company: userData.role.includes("hr") && globalCompanyId ? globalCompanyId : "",
         phone: 0,
         address: "",
         age: 0,
@@ -110,7 +114,7 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         </Select>
                     </FormControl>
 
-                    <CompanySelect value={patientData.company} onChange={(value) => {
+                    <CompanySelect disabled={userData.role.includes("hr")} value={patientData.company} onChange={(value) => {
                         handleChange("company", value)
                     }} module={MODULES.PATIENTS} />
 
