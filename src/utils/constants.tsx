@@ -16,6 +16,7 @@ export const ENDPOINTS = {
 
 export const MODULES = {
     ADMIN: "admin",
+    COMPANY: "company",
     SUPERVISOR: "supervisor",
     DOCTOR: "doctors",
     HOSPITAL: "hospitals",
