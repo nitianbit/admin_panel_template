@@ -21,6 +21,7 @@ import { Laboratory } from "../../types/laboratory";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
 import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
+import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
 
 
 
@@ -48,6 +49,7 @@ export default function AddLaboratoryDialog({
     address: "",
     hospital: "",
     services: [],
+    departments: [],
   })
 
   const handleChange = (key: any, value: any) => {
@@ -75,6 +77,7 @@ export default function AddLaboratoryDialog({
       address: "",
       hospital: "",
       services: [],
+      departments:[],
       _id: ""
     })
   };
@@ -153,6 +156,10 @@ export default function AddLaboratoryDialog({
 
             <ServiceSelect value={laboratoryData.services} onChange={(value) => {
               handleChange("services", value)
+            }} module={MODULES.LABORATORY} />
+
+            <DepartmentSelect value={laboratoryData.departments} onChange={(value) => {
+              handleChange("departments", value)
             }} module={MODULES.LABORATORY} />
 
             <TextField
