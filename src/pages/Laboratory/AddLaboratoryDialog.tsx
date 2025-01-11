@@ -20,6 +20,7 @@ import { useLaboratoryStore } from "../../services/laboratory";
 import { Laboratory } from "../../types/laboratory";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
+import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
 
 
 
@@ -38,15 +39,15 @@ export default function AddLaboratoryDialog({
   selectedId
 }: any) {
 
-  const { onCreate,detail,onUpdate } = useLaboratoryStore();
+  const { onCreate, detail, onUpdate } = useLaboratoryStore();
   const [laboratoryData, setLaboratoryData] = React.useState<Laboratory>({
-    name:"",
-    email:"",
-    phone:0,
-    company:"",
-    address:"",
-    hospital:"",
-    services:[],
+    name: "",
+    email: "",
+    phone: 0,
+    company: "",
+    address: "",
+    hospital: "",
+    services: [],
   })
 
   const handleChange = (key: any, value: any) => {
@@ -67,40 +68,40 @@ export default function AddLaboratoryDialog({
   const handleClose = () => {
     toggleModal(false);
     setLaboratoryData({
-      name:"",
-      email:"",
-      phone:0,
-      company:"",
-      address:"",
-      hospital:"",
-      services:[],
-      _id:""
+      name: "",
+      email: "",
+      phone: 0,
+      company: "",
+      address: "",
+      hospital: "",
+      services: [],
+      _id: ""
     })
   };
 
   const onSubmit = () => {
-    
-    if(laboratoryData?._id){
-     onUpdate(laboratoryData);
-    }else{
+
+    if (laboratoryData?._id) {
+      onUpdate(laboratoryData);
+    } else {
       onCreate(laboratoryData);
     }
     handleClose();
   };
 
-  const fetchDetail=async(selectedId:string)=>{
+  const fetchDetail = async (selectedId: string) => {
     try {
-      const data=await detail(selectedId);
+      const data = await detail(selectedId);
       reset(data?.data)
       setLaboratoryData(data?.data)
     } catch (error) {
-      
+
     }
   }
 
   React.useEffect(() => {
     if (selectedId) {
-     fetchDetail(selectedId)
+      fetchDetail(selectedId)
     }
   }, [selectedId]);
 
@@ -141,13 +142,17 @@ export default function AddLaboratoryDialog({
               type="name"
               fullWidth
               variant="outlined"
-              value={laboratoryData.name} 
+              value={laboratoryData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-               />
+            />
 
 
-            <CompanySelect  value={laboratoryData.company} onChange={(value)=>{
+            <CompanySelect value={laboratoryData.company} onChange={(value) => {
               handleChange("company", value)
+            }} module={MODULES.LABORATORY} />
+
+            <ServiceSelect value={laboratoryData.services} onChange={(value) => {
+              handleChange("services", value)
             }} module={MODULES.LABORATORY} />
 
             <TextField
