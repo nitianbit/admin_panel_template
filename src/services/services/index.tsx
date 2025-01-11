@@ -15,6 +15,7 @@ const store = create<ServiceState>((set, get) => ({
     isLoading: false,
     rows: 20,
     total:0,
+    allData:[],
 
     fetchGrid: async () => {
         try {
@@ -44,6 +45,26 @@ const store = create<ServiceState>((set, get) => ({
             set({ isLoading: false });
         }
     },
+
+     fetchGridAll: async (filters: ServiceFilters) => {
+            try {
+                const { allData } = get();
+                if (allData.length > 0) return allData;
+                const queryParams = new URLSearchParams(filters);
+                queryParams.append('rows', String(-1));
+                const apiUrl = `${ENDPOINTS.grid('services')}?${queryParams.toString()}`;
+    
+                const response = await doGET(apiUrl);
+    
+                if (response.status >= 200 && response.status < 400) {
+                    set({ allData: response.data.data.rows, });
+                }
+                return get().allData;
+            } catch (err) {
+                showError('Failed to fetch services');
+                return get().allData
+            }
+        },
 
     setFilters: (newFilters: ServiceFilters) => {
         set({ filters: newFilters,currentPage:1 });
