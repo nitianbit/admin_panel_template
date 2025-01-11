@@ -3,29 +3,40 @@ import { useServicestore } from '../../services/services';
 import { useEffect, useState } from 'react';
 
 interface ServiceDetailProps {
-  ids: string[]
+  _id: string[]
 }
 
-const ServiceDetail: React.FC<ServiceDetailProps> = ({ ids }) => {
+const ServiceDetail: React.FC<ServiceDetailProps> = ({ _id }) => {
   const [data, setData] = useState<Service[]>([]);
-  const { detail } = useServicestore();
 
-  const fetchDetails = async () => {
-    try {
-      const promises = ids.map(id => detail(id));
-      const results = await Promise.all(promises);
-      const services = results.map(result => result.data);
-      setData(services);
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
-  useEffect(() => {
-    if (ids.length > 0) {
-      fetchDetails();
-    }
-  }, [ids]);
+  const { detail, allData, fetchGridAll } = useServicestore();
+  
+      useEffect(() => {
+          fetchGridAll({})
+      }, [])
+  
+      useEffect(() => {
+          if (_id && allData.length > 0) {
+              fetchDetail();
+          }
+      }, [_id, allData])
+  
+      const fetchDetail = async () => {
+          try {
+            const services = allData.filter((item: any) => _id.includes(item._id));
+              setData(services ? services : []);
+          } catch (error) {
+  
+          }
+      }
+  
+  
+      useEffect(() => {
+          if (_id) {
+              fetchDetail()
+          }
+      }, [_id])
 
   return (
     <div>
