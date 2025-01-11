@@ -10,6 +10,7 @@ export interface Laboratory {
     role?: string[];
     services: string[];
     departments: string[];
+    description?: string; // Optional field
     hospital?: string; // Reference to Hospital schema
     fee?: number; 
     isVerified?: boolean;

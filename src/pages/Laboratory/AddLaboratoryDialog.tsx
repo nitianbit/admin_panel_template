@@ -50,6 +50,7 @@ export default function AddLaboratoryDialog({
     hospital: "",
     services: [],
     departments: [],
+    description:""
   })
 
   const handleChange = (key: any, value: any) => {
@@ -77,8 +78,9 @@ export default function AddLaboratoryDialog({
       address: "",
       hospital: "",
       services: [],
-      departments:[],
-      _id: ""
+      departments: [],
+      _id: "",
+      description:""
     })
   };
 
@@ -149,6 +151,18 @@ export default function AddLaboratoryDialog({
               onChange={(e) => handleChange("name", e.target.value)}
             />
 
+            <TextField
+              margin="dense"
+              id="email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              variant="outlined"
+              placeholder="ex: test@test.com"
+              value={laboratoryData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+            />
+
 
             <CompanySelect value={laboratoryData.company} onChange={(value) => {
               handleChange("company", value)
@@ -173,16 +187,18 @@ export default function AddLaboratoryDialog({
               value={laboratoryData.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
             />
+
             <TextField
               margin="dense"
-              id="email"
-              label="Email Address"
-              type="email"
+              id="description"
+              rows={4}
+              label="Description"
+              // type="description"
               fullWidth
               variant="outlined"
-              placeholder="ex: test@test.com"
-              value={laboratoryData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
+              placeholder=""
+              value={laboratoryData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
             />
           </DialogContent>
           <DialogActions>
