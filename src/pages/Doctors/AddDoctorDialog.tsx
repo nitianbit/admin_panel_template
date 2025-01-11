@@ -21,6 +21,7 @@ import { Doctor } from "../../types/doctors";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
 import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
+import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
 
 
 
@@ -46,7 +47,8 @@ export default function AddDoctorDialog({
     email: "",
     phone: 0,
     company: "",
-    services:[],
+    services: [],
+    departments: [],
     specialization: ""
   })
 
@@ -157,6 +159,10 @@ export default function AddDoctorDialog({
 
             <ServiceSelect value={doctorData.services} onChange={(value) => {
               handleChange("services", value)
+            }} module={MODULES.DOCTOR} />
+
+            <DepartmentSelect value={doctorData.departments} onChange={(value) => {
+              handleChange("departments", value)
             }} module={MODULES.DOCTOR} />
 
             <TextField

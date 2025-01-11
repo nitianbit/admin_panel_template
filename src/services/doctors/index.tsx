@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
-import { showError } from '../toaster';
+import { showError, showSuccess } from '../toaster';
 import { Doctor, DoctorFilters, DoctorState } from '../../types/doctors';
 import { ENDPOINTS } from '../api/constants';
 
@@ -85,9 +85,10 @@ const store = create<DoctorState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Doctor created successfully")
             }
         } catch (error) {
-            
+            showError('Failed to create doctors');
         }
     },
     onUpdate:async (data:Doctor)=>{
@@ -96,9 +97,10 @@ const store = create<DoctorState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Doctor updated successfully")
             }
         } catch (error) {
-            
+            showError('Failed to update doctors');
         }
     },
     onDelete:async (id:string)=>{
@@ -107,9 +109,10 @@ const store = create<DoctorState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Doctor deleted successfully")
             }
         } catch (error) {
-            
+            showError('Failed to delete doctors');
         }
     },
     detail: async (id: string) => {
