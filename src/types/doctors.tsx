@@ -18,7 +18,7 @@
   description?: string; // Optional field
   createdAt?: number;
   updatedAt?: number; // Optional field
-  company: string;
+  company?: string;
   _id?:string
 }
 

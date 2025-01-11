@@ -16,7 +16,7 @@ export interface Laboratory {
     isVerified?: boolean;
     createdAt?: number;
     updatedAt?: number; // Optional field
-    company: string;
+    company?: string;
     _id?:string;
   }
   

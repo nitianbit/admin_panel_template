@@ -18,7 +18,6 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { useDoctorStore } from "../../services/doctors";
 import { Doctor } from "../../types/doctors";
-import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
 import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
 import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
@@ -46,7 +45,6 @@ export default function AddDoctorDialog({
     gender: "",
     email: "",
     phone: 0,
-    company: "",
     services: [],
     departments: [],
     description: ""
@@ -154,9 +152,9 @@ export default function AddDoctorDialog({
 
 
 
-            <CompanySelect value={doctorData.company} onChange={(value) => {
+            {/* <CompanySelect value={doctorData.company} onChange={(value) => {
               handleChange("company", value)
-            }} module={MODULES.DOCTOR} />
+            }} module={MODULES.DOCTOR} /> */}
 
             <ServiceSelect value={doctorData.services} onChange={(value) => {
               handleChange("services", value)

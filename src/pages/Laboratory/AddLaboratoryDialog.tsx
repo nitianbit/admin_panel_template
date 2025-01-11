@@ -11,14 +11,8 @@ import { Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
-
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 import { useLaboratoryStore } from "../../services/laboratory";
 import { Laboratory } from "../../types/laboratory";
-import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
 import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
 import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
@@ -74,7 +68,7 @@ export default function AddLaboratoryDialog({
       name: "",
       email: "",
       phone: 0,
-      company: "",
+      // company: "",
       address: "",
       hospital: "",
       services: [],
@@ -164,9 +158,9 @@ export default function AddLaboratoryDialog({
             />
 
 
-            <CompanySelect value={laboratoryData.company} onChange={(value) => {
+            {/* <CompanySelect value={laboratoryData.company} onChange={(value) => {
               handleChange("company", value)
-            }} module={MODULES.LABORATORY} />
+            }} module={MODULES.LABORATORY} /> */}
 
             <ServiceSelect value={laboratoryData.services} onChange={(value) => {
               handleChange("services", value)
