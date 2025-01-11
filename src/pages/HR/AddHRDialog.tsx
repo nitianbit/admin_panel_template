@@ -15,6 +15,7 @@ import { HR } from "../../types/hr";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
 import { useHRStore } from "../../services/hr";
+import { showError } from "../../services/toaster";
 
 
 
@@ -61,6 +62,9 @@ export default function AddHRDialog({
   };
 
   const onSubmit = () => {
+    if(!hRData.company || !hRData.email || !hRData.name || !hRData.phone){
+      return showError("All fields are required")
+    }
     if(hRData?._id){
      onUpdate(hRData);
     }else{
@@ -112,7 +116,7 @@ export default function AddHRDialog({
         sx={{ height: "100%" }}
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Add Dcotor</DialogTitle>
+          <DialogTitle>Add HR</DialogTitle>
 
           <DialogContent dividers>
             <TextField
@@ -121,6 +125,7 @@ export default function AddHRDialog({
               label="Full Name"
               type="name"
               fullWidth
+              required
               variant="outlined"
               value={hRData.name} 
               onChange={(e) => handleChange("name", e.target.value)}
@@ -133,6 +138,7 @@ export default function AddHRDialog({
             <TextField
               margin="dense"
               id="phone"
+              required
               label="Phone no"
               type="phone"
               fullWidth
@@ -144,6 +150,7 @@ export default function AddHRDialog({
             <TextField
               margin="dense"
               id="email"
+              required
               label="Email Address"
               type="email"
               fullWidth

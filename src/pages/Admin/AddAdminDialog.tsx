@@ -132,6 +132,7 @@ export default function AddAdminDialog({
               label="Full Name"
               type="name"
               fullWidth
+              required
               variant="outlined"
               value={adminData.name}
               onChange={(e) => handleChange("name", e.target.value)}
@@ -148,6 +149,7 @@ export default function AddAdminDialog({
               label="Phone no"
               type="phone"
               fullWidth
+              required
               variant="outlined"
               placeholder="0 123456789"
               value={adminData.phone}
@@ -159,6 +161,7 @@ export default function AddAdminDialog({
               label="Email Address"
               type="email"
               fullWidth
+              required
               variant="outlined"
               placeholder="ex: test@test.com"
               value={adminData.email}
