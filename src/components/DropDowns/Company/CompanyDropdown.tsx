@@ -1,12 +1,22 @@
 import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { useCompanyStore } from "../../../services/company";
+import { useAppContext } from "../../../services/context/AppContext";
+import { useEffect } from "react";
 
 const CompanyDropDown = () => {
     const { data, globalCompanyId, setGlobalCompanyId } = useCompanyStore();
 
+    const {userData} = useAppContext();
+
     const handleChange = (event: any) => {
         setGlobalCompanyId(event.target.value);
     };
+
+    useEffect(()=>{
+        if(userData.role.includes("hr")){
+            setGlobalCompanyId(userData.company)
+        }
+    },[])
 
     return (
        <>
@@ -40,6 +50,7 @@ const CompanyDropDown = () => {
                 labelId="company-dropdown-label"
                 id="company-dropdown"
                 value={globalCompanyId}
+                disabled={userData.role.includes("hr")}
                 onChange={handleChange}
                 label="Select Company"
                 sx={{
