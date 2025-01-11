@@ -17,8 +17,12 @@ import Menu from "@mui/material/Menu";
 import { Link } from "react-router-dom";
 import { settings } from "../constant";
 import { AppBar, Drawer } from "../styles";
+import { useAppContext } from "../services/context/AppContext";
+import logo from '../../src/assets/images/EWA_logo.webp'
+import CompanyDropDown from "./DropDowns/Company/CompanyDropdown";
 
 export default function Appbar(props: { appBarTitle: string }) {
+  const { userData } = useAppContext();
   const [open, setOpen] = React.useState(true);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
@@ -64,6 +68,10 @@ export default function Appbar(props: { appBarTitle: string }) {
             {props.appBarTitle}
           </Typography>
 
+          {/* Company Selection Dropdown */}
+          <CompanyDropDown />
+
+
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton
               size="large"
@@ -102,7 +110,7 @@ export default function Appbar(props: { appBarTitle: string }) {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting, index) => (
+              {settings.map((setting: any, index: any) => (
                 <MenuItem key={index} onClick={handleCloseUserMenu}>
                   <Link
                     to={setting.url}
@@ -121,23 +129,22 @@ export default function Appbar(props: { appBarTitle: string }) {
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            px: [1]
+            px: [1],
           }}
         >
-          <Typography variant="h4" align="center">
-            <img src="hospital.svg" height="40px" />
-            <span style={{ color: "#005B93" }}>EALTHY</span>
-          </Typography>
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+            <img src={logo} height="50px" alt="Logo" />
+          </Box>
           <IconButton onClick={toggleDrawer}>
             <ChevronLeftIcon />
           </IconButton>
         </Toolbar>
+
         <Divider />
         <List component="nav">
-          {mainListItems}
+          {mainListItems(userData?.role)}
           <Divider sx={{ my: 1 }} />
-          {secondaryListItems}
+          {secondaryListItems(userData?.role)}
         </List>
       </Drawer>
     </Box>

@@ -1,21 +1,24 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 //import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import GoogleIcon from "@mui/icons-material/Google";
-import FacebookIcon from "@mui/icons-material/Facebook";
 import Typography from "@mui/material/Typography";
 import { Link, useNavigate } from "react-router-dom";
 import { Divider } from "@mui/material";
 import HeartRateLoader from "../../components/HeartRateLoader";
 import { useForm } from "react-hook-form";
+import ToggleButton from "../../components/Toggle/ToggleButton";
+import { doPOST } from '../../utils/HttpUtils'
+import { AUTHENDPOINTS } from "../../EndPoints/Auth";
+import { useAppContext } from "../../services/context/AppContext";
+import { OTP } from "../../components/OTP/OTP";
+import { isError } from "../../utils/helper";
+import { setValue, STORAGE_KEYS } from "../../services/Storage";
 
 type FormValues = {
   email: string;
@@ -23,23 +26,128 @@ type FormValues = {
 };
 
 export default function SignInSide() {
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+
+  const { success, error, setIsLoggedIn, isLoggedIn,setIsTokenVerified, verifyToken } = useAppContext()
+
+  const [loading, setLoading] = useState(false);
+  const [isOTPSend, setIsOTPSend] = useState(false);
+  const [data, setData] = useState({
+    role: "doctors",
+    email: ""
+  });
+
+  const [otp, setOTP] = useState("")
+
+  const [otpData, setOtpData] = React.useState({ otp: ''.padEnd(4, ' ') });
+
   const navigate = useNavigate();
   const {
     register,
-    handleSubmit,
     formState: { errors }
   } = useForm<FormValues>();
 
-  const onSubmit = (data: FormValues) => {
-    setLoading(true);
-    console.log(data);
-    setTimeout(() => {
-      setLoading(false);
-      navigate(`/dashboard`);
-    }, 3000);
+  const options = ['doctors', 'laboratories', "admin", 'supervisor'];
+
+  const handleRoleSelect = (role: any) => {
+    setData((prev) => {
+      return { ...prev, role: role };
+    });
   };
+
+  const handleChange = (key: any, value: any) => {
+    setData((prev) => {
+      return { ...prev, [key]: value };
+    });
+  }
+
+  const VerifyOTP = async () => {
+    try {
+      if (otp.length != 4) {
+        error("Please enter 4 digit OTP")
+        return;
+      }
+
+      const updatedOTpData = {
+        ...otpData,
+        otp: otp,
+        role:data.role,
+        isTokenRequired:true
+      };
+      setOtpData(updatedOTpData)
+      const response = await doPOST(AUTHENDPOINTS.verifyotp, updatedOTpData);
+      if (response.status >= 200 && response.status < 300) {
+        success("Login Successfully")
+        setIsLoggedIn(true)
+        setValue(STORAGE_KEYS.TOKEN, response.data?.data)
+        navigate(`/dashboard`)
+        verifyToken(response.data?.data);
+        setIsTokenVerified(true);
+      }
+      else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e);
+      }
+
+    }
+  }
+
+  const sendOTP = async (userData: any) => {
+    try {
+      const response = await doPOST(AUTHENDPOINTS.sentotp, userData);
+      if (response.status >= 200 && response.status < 300) {
+        // navigate(`/otp`)
+        setIsOTPSend(true)
+        setOtpData((prev: any) => ({
+          ...prev,
+          otpId: response.data.data.otpId,
+          userId: response.data.data.userId
+        }))
+        success("OTP Send Successfully")
+      }else if (response.status >= 400 && response.status <= 500) {
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e.message);
+      }
+    }
+  }
+
+  const signIn = async () => {
+    try {
+      if (!data.email) {
+        error("Please enter email")
+        return;
+      }
+      const response = await doPOST(AUTHENDPOINTS.login, data);
+      if (response.status >= 200 && response.status < 300) {
+        await sendOTP(response.data.data);
+      }else if(response.status >= 400 && response.status <= 500){
+        error(response.message)
+      }
+    } catch (e) {
+      if (isError(e)) {
+        console.log(e);
+      }
+    }
+  }
+
+  const handleSendButton = async () => {
+    if (isOTPSend) {
+      await VerifyOTP();
+    } else {
+      await signIn();
+    }
+  }
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(`/dashboard`)
+    }
+  }, [isLoggedIn])
 
   return (
     <>
@@ -85,73 +193,47 @@ export default function SignInSide() {
                 <LockOutlinedIcon />
               </Avatar>
               <Typography component="h1" variant="h5">
-                Sign in
+                Sign In
               </Typography>
+
               <Box sx={{ mt: 1 }}>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <TextField
+               {!isOTPSend && <ToggleButton
+                  options={options}
+                  onSelect={handleRoleSelect}
+                  style={{
+                    marginTop: 4
+                  }}
+                />}
+                {isOTPSend ?
+
+                  <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={4} />
+                  : <TextField
                     margin="normal"
                     //required
                     fullWidth
                     id="email"
                     label="Email Address"
-                    //name="email"
+                    onChange={(e: any) => {
+                      handleChange("email", e?.target?.value)
+                    }}
+                    // name="email"
                     //autoComplete="email"
                     //autoFocus
-                    value="test@test.com"
-                    {...register("email", {
-                      required: "Email is required"
-                    })}
+                    value={data?.email}
                     error={!!errors.email}
                     helperText={errors.email?.message}
-                  />
-                  <TextField
-                    margin="normal"
-                    //required
-                    fullWidth
-                    //name="password"
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value="1234"
-                    //autoComplete="current-password"
-                    {...register("password", {
-                      required: "Password is required"
-                    })}
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    InputProps={{
-                      endAdornment: (
-                        <Button onClick={() => setShowPassword(!showPassword)}>
-                          {showPassword ? "Hide" : "Show"}
-                        </Button>
-                      )
-                    }}
-                  />
-                  <FormControlLabel
-                    control={<Checkbox value="remember" color="primary" />}
-                    label="Remember me"
-                  />
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                  >
-                    Sign In
-                  </Button>
-                </form>
+                  />}
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  onClick={handleSendButton}
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  {isOTPSend ? "Verify Otp" : "Send OTP"}
+                </Button>
                 <Grid container>
                   <Grid item xs>
-                    <Link
-                      to={"/forgot"}
-                      style={{
-                        textDecoration: "none",
-                        color: "inherit"
-                      }}
-                    >
-                      Forgot password?
-                    </Link>
                   </Grid>
                   <Grid item>
                     <Link
@@ -166,30 +248,8 @@ export default function SignInSide() {
                   </Grid>
                 </Grid>
                 <Divider sx={{ mt: 2 }} light variant="middle">
-                  OR
+                  {/* OR */}
                 </Divider>
-                <Button
-                  fullWidth
-                  startIcon={<GoogleIcon />}
-                  variant="outlined"
-                  sx={{
-                    mt: 2
-                  }}
-                >
-                  Continue with google
-                </Button>
-
-                <Button
-                  fullWidth
-                  startIcon={<FacebookIcon />}
-                  variant="outlined"
-                  sx={{
-                    mt: 2
-                  }}
-                >
-                  Continue with facebook
-                </Button>
-
                 <Typography align="center" variant="subtitle2" sx={{ mt: 2 }}>
                   By continuing, you agree to{" "}
                   <span style={{ color: "green" }}>Terms of Service</span> and
