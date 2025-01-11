@@ -6,6 +6,11 @@ export interface Company {
     website: string,
     logo?: string,
     isActive: boolean,
+    email:string,
+    phone: number;
+    countryCode?: number;
+    contactperson: string;
+    noOfUser: number;
 }
 
 export interface CompanyResponse {
