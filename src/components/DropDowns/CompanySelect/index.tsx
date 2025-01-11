@@ -10,9 +10,9 @@ interface Props {
     onChange?: (value: string | unknown) => void
 }
 
-const CompanySelect: React.FC<Props> = ({ required=true, module,value,onChange=()=>{} }) => {
+const CompanySelect: React.FC<Props> = ({ required = true, module, value, onChange = () => { } }) => {
     const { data } = useCompanyStore();
-   
+
     return (
         <FormControl fullWidth margin="dense">
             <InputLabel id={`company-${module}-label`}>Company</InputLabel>
@@ -22,7 +22,7 @@ const CompanySelect: React.FC<Props> = ({ required=true, module,value,onChange=(
                 label="Company"
                 value={value}
                 required={required}
-                onChange={(e) =>  onChange(e.target.value)}
+                onChange={(e) => onChange(e.target.value)}
             >
                 {
                     data?.map((item: any) => {
