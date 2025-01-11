@@ -1,4 +1,5 @@
 import { Avatar } from "@mui/material";
+import ServiceDetail from "../../components/ServiceDetail";
 
 export const COLUMNS = [
     {
@@ -26,5 +27,10 @@ export const COLUMNS = [
     {
         header: "SPECIALIST",
         accessor: "specialization",
+    },
+    {
+        header: "Service",
+        accessor: "services",
+        render:(data: any)=><ServiceDetail ids={data?.services}/>
     },
 ]

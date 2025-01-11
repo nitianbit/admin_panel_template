@@ -9,6 +9,7 @@
   gender: string;
   isIndividual?: boolean;
   role?: string[];
+  services?: string[]; // References to Service schema
   hospital?: string; // Reference to Hospital schema
   departments?: string[]; // References to Department schema
   fee?: number; // Optional field
