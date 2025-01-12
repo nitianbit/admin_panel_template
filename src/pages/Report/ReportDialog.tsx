@@ -232,7 +232,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                         // Infer file type from the string (assuming it's a URL or file path)
                                         const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(attachment);
                                         const isPdf = /\.(pdf)$/i.test(attachment);
-
+                                       /* //TODO  make component */
                                         return isImage ? (
                                             <CustomImage
                                                 key={index}
