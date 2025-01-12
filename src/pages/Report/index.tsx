@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Box } from "@mui/material";
-import Toolbar from "@mui/material/Toolbar";
-import Container from "@mui/material/Container";
-import Appbar from "../../components/Appbar";
+
 
 import GeneralTable from '../../components/GridTable/index'
 import { COLUMNS } from "./constants";

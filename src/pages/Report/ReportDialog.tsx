@@ -27,6 +27,7 @@ import { useReportStore } from "../../services/report";
 import { useCompanyStore } from "../../services/company";
 import { ApiResponse } from "../../types/general";
 import { uploadFile } from "../../utils/helper";
+import CustomImage from "../../components/CustomImage";
 
 
 const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
@@ -81,19 +82,22 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                 toast.error("File upload is required.");
                 return;
             }
-            let response: ApiResponse<Report> | null = null
+            let response: ApiResponse<Report> | null = null;
             if (formData?._id) {
+                const { lab,doctor, ...rest } = formData;
                 response = await onUpdate({
                     ...formData,
                     company: globalCompanyId,
-                    ...(formData.lab && { lab: formData?.lab })
+                    ...(formData.lab && { lab: formData?.lab }),
+                    ...(formData.doctor && { doctor: formData?.doctor })
                 })
             } else {
-                const { lab, ...rest } = formData
+                const { lab,doctor, ...rest } = formData;
                 response = await onCreate({
                     ...rest,
                     company: globalCompanyId,
-                    ...(formData.lab && { lab: formData?.lab })
+                    ...(formData.lab && { lab: formData?.lab }),
+                    ...(formData.doctor && { doctor: formData?.doctor })
                 })
             }
 
@@ -206,6 +210,14 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                             />
                         </Grid>
 
+                        {
+                            formData?.attachments?.length ? (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, borderWidth: 1, borderColor: '#bbb', borderStyle: 'solid', padding: 10, borderRadius: 20, margin: '10px 0' }}>
+                                    {formData?.attachments?.map((attachment, index) => <CustomImage key={attachment} src={attachment} style={{ width: 200, height: 100, objectFit: 'contain' }} />)}
+                                </div>
+                            ) : null
+                        }
+
                         {/* File Upload */}
 
                         <Grid item xs={12}>
@@ -236,27 +248,6 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 </FormHelperText>
                             </FormControl>
                         </Grid>
-
-                        <Grid item xs={12}>
-                            <FormControl fullWidth>
-                                <input
-                                    accept="application/pdf,image/*"
-                                    type="file"
-                                    id="file-upload"
-                                    onChange={handleFileUpload}
-                                    style={{ display: "none" }}
-                                />
-                                <label htmlFor="file-upload">
-                                    <Button variant="outlined" color="primary" component="span">
-                                        Upload File
-                                    </Button>
-                                </label>
-                                {/* {formData.file && (
-                  <FormHelperText>{formData.file.name}</FormHelperText>
-                )} */}
-                            </FormControl>
-                        </Grid>
-
                     </Grid>
                 </DialogContent>
                 <DialogActions>

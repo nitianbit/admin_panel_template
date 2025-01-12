@@ -1,44 +1,28 @@
 
-
-import { Avatar } from "@mui/material";
-import { Company } from "../../types/company";
+import { Report } from "../../types/report";
+import CompanyDetail from "../../components/CompanyDetail";
+import moment from "moment";
+ import PatientDetail from "../../components/PatientDetail";
 
 export const COLUMNS = [
     {
-        header: "AVATAR",
-        accessor:"image",
-        render: () => <Avatar
-            src={"https://i.pravatar.cc/300"}
-            sx={{
-                height: "25%"
-            }}
-        />,
-    },
-    {
-        header: "Company NAME",
+        header: "Company Name",
         accessor: `name`,
+        render: (data:Report) => <CompanyDetail _id={data?.company}/>,
     },
     {
-        header: "Company Website",
-        accessor: "website",
+        header: "Date",
+        accessor: "date",
+        render: (data:Report) => moment.unix(data.date).format("DD-MM-YYYY"),
     },
     {
-        header: "Contact Person",
-        accessor: "contactperson",
+        header: "Patient",
+        accessor: "patient",
+        render: (data:Report) => <PatientDetail _id={data?.patient}/>,
     },
     {
-        header: "Contact Email",
-        accessor: "email",
-    },
-    {
-        header: "Total Users",
-        accessor: "noOfUser",
-    },
-    {
-        header: "Is Active",
-        accessor: "isActive",
-        render: (data:Company) => <>
-            {data.isActive ? "Yes" : "No"}
-        </>,
-    },
+        header: "Type",
+        accessor: "type",
+        render:(data:Report) => data.type === 1 ? "Report" : "Prescription",
+    }
 ]
