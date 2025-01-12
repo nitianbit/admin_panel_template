@@ -28,6 +28,7 @@ import { useCompanyStore } from "../../services/company";
 import { ApiResponse } from "../../types/general";
 import { uploadFile } from "../../utils/helper";
 import CustomImage from "../../components/CustomImage";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; // Import a PDF icon from Material-UI
 
 
 const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
@@ -49,7 +50,9 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
 
     useEffect(() => {
         if (selectedId && isModalOpen) {
-            detail(selectedId)
+            detail(selectedId).then(data=>{
+                setFormData(data?.data)
+            }).catch(error=>console.log(error));
         }
     }, [selectedId, isModalOpen])
 
@@ -84,7 +87,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             }
             let response: ApiResponse<Report> | null = null;
             if (formData?._id) {
-                const { lab,doctor, ...rest } = formData;
+                const { lab, doctor, ...rest } = formData;
                 response = await onUpdate({
                     ...formData,
                     company: globalCompanyId,
@@ -92,7 +95,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                     ...(formData.doctor && { doctor: formData?.doctor })
                 })
             } else {
-                const { lab,doctor, ...rest } = formData;
+                const { lab, doctor, ...rest } = formData;
                 response = await onCreate({
                     ...rest,
                     company: globalCompanyId,
@@ -212,11 +215,75 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
 
                         {
                             formData?.attachments?.length ? (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, borderWidth: 1, borderColor: '#bbb', borderStyle: 'solid', padding: 10, borderRadius: 20, margin: '10px 0' }}>
-                                    {formData?.attachments?.map((attachment, index) => <CustomImage key={attachment} src={attachment} style={{ width: 200, height: 100, objectFit: 'contain' }} />)}
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 10,
+                                        borderWidth: 1,
+                                        borderColor: "#bbb",
+                                        borderStyle: "solid",
+                                        padding: 10,
+                                        borderRadius: 20,
+                                        margin: "10px 0",
+                                    }}
+                                >
+                                    {formData?.attachments?.map((attachment, index) => {
+                                        // Infer file type from the string (assuming it's a URL or file path)
+                                        const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(attachment);
+                                        const isPdf = /\.(pdf)$/i.test(attachment);
+
+                                        return isImage ? (
+                                            <CustomImage
+                                                key={index}
+                                                src={attachment} // Use the file URL or path
+                                                style={{
+                                                    width: 200,
+                                                    height: 100,
+                                                    objectFit: "contain",
+                                                }}
+                                            />
+                                        ) : isPdf ? (
+                                            <div
+                                                key={index}
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    width: 200,
+                                                    height: 100,
+                                                    border: "1px solid #ccc",
+                                                    borderRadius: 8,
+                                                    backgroundColor: "#f5f5f5",
+                                                }}
+                                            >
+                                                <PictureAsPdfIcon style={{ fontSize: 40, color: "#d32f2f" }} />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                key={index}
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    width: 200,
+                                                    height: 100,
+                                                    border: "1px solid #ccc",
+                                                    borderRadius: 8,
+                                                    backgroundColor: "#e0e0e0",
+                                                    color: "#555",
+                                                    fontSize: "14px",
+                                                }}
+                                            >
+                                                Unknown File
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : null
                         }
+
+
 
                         {/* File Upload */}
 
