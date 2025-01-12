@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import DoctorDetail from "../DoctorDetail";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import { usePatientStore } from "../../services/patient";
+import PatientDetail from "../PatientDetail";
 
 interface Props {
   onSelect: (id: string) => void; // Callback when a doctor is selected
@@ -49,7 +50,7 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
           Select Patient -
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          {value ? <DoctorDetail _id={value} /> : "Select Doctor"}
+          {value ? <PatientDetail _id={value} /> : "Select Patient"}
           <PersonSearchIcon  sx={{ cursor: "pointer", ml: 2 }}/>
         </Box>
       </Box>
@@ -65,7 +66,7 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
         onPageChange={onPageChange}
         fetchGrid={fetchGrid}
         onDelete={onDelete}
-        title="Doctor"
+        title="Patient"
       />
     </>
   );

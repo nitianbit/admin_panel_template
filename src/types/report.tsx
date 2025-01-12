@@ -1,11 +1,15 @@
+import { ApiResponse } from "./general";
+
 export interface Report {
+    _id?: string;
     doctor?: string; // Reference to Doctor ID
     lab?: string; // Reference to Lab ID
     type: 1 | 2; // 1: Report, 2: Prescription
     notes?: string; // Additional notes
     date: number; // Timestamp for the report or prescription date
     patient: string; // Reference to Patient ID
-    attachments:string[]
+    attachments:string[],
+    company:string
 }
 
 export interface ReportResponse {
@@ -40,8 +44,8 @@ export interface ReportState {
     nextPage: () => void; // Go to the next page
     prevPage: () => void; // Go to the previous page
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void; // Handle page changes
-    onCreate: (report: Report) => Promise<void>; // Create a new report
-    onUpdate: ( updatedReport: Partial<Report>) => Promise<Report>; // Update an existing report
+    onCreate: (report:  Partial<Report>) => Promise<ApiResponse<Report>>; // Create a new report
+    onUpdate: ( updatedReport: Partial<Report>) => Promise<ApiResponse<Report>>; // Update an existing report
     onDelete: (id: string) => Promise<void>; // Delete a report
     detail: (id: string) => Promise<{ data: Report }>; // Fetch details of a specific report
 }

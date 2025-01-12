@@ -77,13 +77,14 @@ const store = create<ReportState>((set, get) => ({
         }
     },
 
-    onCreate: async (data: any) => {
+    onCreate: async (data:  Partial<Report>) => {
         try {
             const response = await doPOST(ENDPOINTS.create('report'), data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
+            return response
         } catch (error) {
 
         }
@@ -91,7 +92,6 @@ const store = create<ReportState>((set, get) => ({
     onUpdate: async (data: Partial<Report>) => {
         try {
             const response = await doPUT(ENDPOINTS.update('report'), data);
-            console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
