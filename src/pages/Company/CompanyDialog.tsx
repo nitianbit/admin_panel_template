@@ -42,8 +42,6 @@ export default function CompanyDialog({
     noOfEmployees: 0,
     website: "",
     isActive: true,
-    email: "",
-    phone: 0,
     contactperson: "",
     noOfUser: 0
   })
