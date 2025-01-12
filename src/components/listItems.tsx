@@ -65,6 +65,11 @@ const primarynavList = [
     icon: <BookOnlineIcon />,
   },
   {
+    link: "/report",
+    label: "Report/Prescription",
+    icon: <BookOnlineIcon />,
+  },
+  {
     link: "/push-notification",
     label: "Push Notifications",
     icon: <CircleNotificationsIcon />,

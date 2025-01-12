@@ -32,8 +32,7 @@ export interface WellnessState {
     globalWellnessId?:string;
     fetchGrid: (page?: number, filters?: WellnessFilters) => Promise<void>;
     setFilters: (newFilters: WellnessFilters) => void;
-    setGlobalWellnessId: (id: string) => void;
-    nextPage: () => void;
+     nextPage: () => void;
     prevPage: () => void;
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void;
     onCreate: (...args: any) => Promise<void>;

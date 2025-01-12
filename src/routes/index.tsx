@@ -24,6 +24,7 @@ import Departments from "../pages/Departments";
 import Services from "../pages/Services";
 import Offers from "../pages/Offers";
 import HRList from "../pages/HR/HRList";
+import Report from "../pages/Report";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -193,6 +194,12 @@ export const protectedRoutes = [
     path: "/departments",
     element: <AdminElement>
       <Departments />
+    </AdminElement>,
+  },
+  {
+    path: "/report",
+    element: <AdminElement>
+      <Report />
     </AdminElement>,
   },
   {

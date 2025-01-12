@@ -21,6 +21,18 @@ export const COLUMNS = [
         accessor: "website",
     },
     {
+        header: "Contact Person",
+        accessor: "contactperson",
+    },
+    {
+        header: "Contact Email",
+        accessor: "email",
+    },
+    {
+        header: "Total Users",
+        accessor: "noOfUser",
+    },
+    {
         header: "Is Active",
         accessor: "isActive",
         render: (data:Company) => <>
