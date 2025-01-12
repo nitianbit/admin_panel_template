@@ -15,6 +15,7 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
+    Stack,
 } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import Layout from "../../components/Layout";
@@ -29,6 +30,8 @@ import { uploadFile } from "../../utils/helper";
 import CustomImage from "../../components/CustomImage";
 import { TransitionProps } from "@mui/material/transitions";
 import { useWellnessStore } from "../../services/wellness";
+import AddIcon from "@mui/icons-material/Add";
+import "./styles.css"
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -144,6 +147,7 @@ const EditWellnessDialog = ({
                 }
                 //upload Image
             }
+            handleClose();
         } catch (error) {
 
         }
@@ -156,132 +160,149 @@ const EditWellnessDialog = ({
     }
 
     return (
-        <Dialog
-            open={isModalOpen}
-            onClose={handleClose}
-            TransitionComponent={Transition}
-            maxWidth="lg"
-            fullWidth
-            sx={{ height: "100%", padding: { lg: 4 }, }}
-        >
-            <DialogTitle>Wellness</DialogTitle>
-            <DialogContent dividers>
-                {/* Form Section */}
+        <>
+            <Stack
+                direction="row"
+                justifyContent="flex-end"
+                alignItems="center"
+                spacing={2}
+            >
 
-                <Card>
-                    <CardContent>
-                        {/* Title */}
-                        <TextField
-                            fullWidth
-                            label="Event Title"
-                            value={data.title}
-                            onChange={(e) => handleChange('title', e.target.value)}
-                            margin="dense"
-                            variant="outlined"
-                        />
-
-                        {/* Description */}
-                        <TextField
-                            fullWidth
-                            label="Event Description"
-                            value={data.description}
-                            onChange={(e) => handleChange('description', e.target.value)}
-                            margin="dense"
-                            variant="outlined"
-                            multiline
-                            rows={4}
-                        />
-
-                        {
-                            data?.images?.length ? (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, borderWidth: 1, borderColor: '#bbb', borderStyle: 'solid', padding: 10, borderRadius: 20, margin: '10px 0' }}>
-                                    {data?.images?.map((image, index) => <CustomImage key={image} src={image} style={{ width: 200, height: 100, objectFit: 'contain' }} />)}
-                                </div>
-                            ) : null
-                        }
-
-                        {/* Image Upload */}
-                        <FormControl fullWidth margin="dense">
-                            <InputLabel>Upload Images</InputLabel>
-                            <input
-                                accept="image/*"
-                                type="file"
-                                multiple
-                                onChange={handleImageUpload}
-                                style={{ display: "none" }}
-                                id="image-upload"
-                            />
-                            <label htmlFor="image-upload">
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    component="span"
-                                    fullWidth
-                                >
-                                    Upload Images (Max 4)
-                                </Button>
-                            </label>
-                            <FormHelperText>
-                                {images.length > 0
-                                    ? `${images.length} image(s) selected`
-                                    : "No images selected"}
-                            </FormHelperText>
-                        </FormControl>
-
-                        {/* Display Uploaded Images */}
-                        <Box mt={2} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                            {images.map((image, index) => (
-                                <Box key={index} sx={{ position: "relative" }}>
-                                    <img
-                                        src={image.preview}
-                                        alt="Uploaded Preview"
-                                        style={{
-                                            width: "100px",
-                                            height: "100px",
-                                            objectFit: "cover",
-                                            borderRadius: "8px",
-                                            border: "1px solid #ccc",
-                                        }}
-                                    />
-                                    <IconButton
-                                        size="small"
-                                        sx={{
-                                            position: "absolute",
-                                            top: 0,
-                                            right: 0,
-                                            backgroundColor: "white",
-                                        }}
-                                        onClick={() => handleImageDelete(index)}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </Box>
-                            ))}
-                        </Box>
-
-                        <DateTimePickerWithInterval
-                            value={data.startTime} // Pass timestamp value
-                            onChange={(newTimestamp: number) => handleChange('startTime', newTimestamp)}
-                            placeholder="Select Date and Time"
-                            showTimeSelect={true}
-                        />
-
-                    </CardContent>
-                </Card>
-
-
-                {/* Submit Button */}
                 <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={handleSubmit}
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={handleClickOpen}
                 >
-                    Submit Event
+                    Add Wellness
                 </Button>
-            </DialogContent>
+            </Stack>
+            <Dialog
+                open={isModalOpen}
+                onClose={handleClose}
+                TransitionComponent={Transition}
+                maxWidth="lg"
+                fullWidth
+                sx={{ height: "100%", padding: { lg: 4 }, overflow:'visible'}}
+            >
+                <DialogTitle>Wellness</DialogTitle>
+                <DialogContent dividers>
+                    {/* Form Section */}
 
-        </Dialog>
+                    <Card>
+                        <CardContent>
+                            {/* Title */}
+                            <TextField
+                                fullWidth
+                                label="Event Title"
+                                value={data.title}
+                                onChange={(e) => handleChange('title', e.target.value)}
+                                margin="dense"
+                                variant="outlined"
+                            />
+
+                            {/* Description */}
+                            <TextField
+                                fullWidth
+                                label="Event Description"
+                                value={data.description}
+                                onChange={(e) => handleChange('description', e.target.value)}
+                                margin="dense"
+                                variant="outlined"
+                                multiline
+                                rows={4}
+                            />
+
+                            {
+                                data?.images?.length ? (
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, borderWidth: 1, borderColor: '#bbb', borderStyle: 'solid', padding: 10, borderRadius: 20, margin: '10px 0' }}>
+                                        {data?.images?.map((image, index) => <CustomImage key={image} src={image} style={{ width: 200, height: 100, objectFit: 'contain' }} />)}
+                                    </div>
+                                ) : null
+                            }
+
+                            {/* Image Upload */}
+                            <FormControl fullWidth margin="dense">
+                                <InputLabel>Upload Images</InputLabel>
+                                <input
+                                    accept="image/*"
+                                    type="file"
+                                    multiple
+                                    onChange={handleImageUpload}
+                                    style={{ display: "none" }}
+                                    id="image-upload"
+                                />
+                                <label htmlFor="image-upload">
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        component="span"
+                                        fullWidth
+                                    >
+                                        Upload Images (Max 4)
+                                    </Button>
+                                </label>
+                                <FormHelperText>
+                                    {images.length > 0
+                                        ? `${images.length} image(s) selected`
+                                        : "No images selected"}
+                                </FormHelperText>
+                            </FormControl>
+
+                            {/* Display Uploaded Images */}
+                            <Box mt={2} sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                                {images.map((image, index) => (
+                                    <Box key={index} sx={{ position: "relative" }}>
+                                        <img
+                                            src={image.preview}
+                                            alt="Uploaded Preview"
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                objectFit: "cover",
+                                                borderRadius: "8px",
+                                                border: "1px solid #ccc",
+                                            }}
+                                        />
+                                        <IconButton
+                                            size="small"
+                                            sx={{
+                                                position: "absolute",
+                                                top: 0,
+                                                right: 0,
+                                                backgroundColor: "white",
+                                            }}
+                                            onClick={() => handleImageDelete(index)}
+                                        >
+                                            <DeleteIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                            </Box>
+
+                            <DateTimePickerWithInterval
+                                value={data.startTime} // Pass timestamp value
+                                onChange={(newTimestamp: number) => handleChange('startTime', newTimestamp)}
+                                placeholder="Select Date and Time"
+                                showTimeSelect={true}
+                            />
+
+                        </CardContent>
+                    </Card>
+
+
+                    {/* Submit Button */}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={handleSubmit}
+                    >
+                        Submit Event
+                    </Button>
+                </DialogContent>
+
+            </Dialog>
+        </>
     );
 };
 
