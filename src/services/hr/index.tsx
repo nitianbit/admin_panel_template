@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
-import { showError } from '../toaster';
+import { showError, showSuccess } from '../toaster';
 import { ENDPOINTS } from '../api/constants';
 import { HR, HRFilters, HRState } from '../../types/hr';
 
@@ -85,9 +85,10 @@ const store = create<HRState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("HR created successfully")
             }
         } catch (error) {
-            
+            showError('Failed to create hr');
         }
     },
     onUpdate:async (data:HR)=>{
@@ -96,9 +97,10 @@ const store = create<HRState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("HR updated successfully")
             }
         } catch (error) {
-            
+            showError('Failed to update hr');
         }
     },
     onDelete:async (id:string)=>{
@@ -107,9 +109,10 @@ const store = create<HRState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("HR deleted successfully")
             }
         } catch (error) {
-            
+            showError('Failed to delete hr');
         }
     },
     detail: async (id: string) => {

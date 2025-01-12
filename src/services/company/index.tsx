@@ -12,12 +12,12 @@ const store = create<CompanyState>((set, get) => ({
     filters: {},
     isLoading: false,
     rows: 2,
-    total:0,
-    globalCompanyId : "",
+    total: 0,
+    globalCompanyId: "",
 
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows, isLoading, total } = get();
+            const { filters, currentPage, rows, isLoading, total, globalCompanyId } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
@@ -33,13 +33,14 @@ const store = create<CompanyState>((set, get) => ({
                 set({
                     data: response.data.data.rows,
                     ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows) }),
-                    total : response.data.data.total ? response.data.data.total : total
+                    total: response.data.data.total ? response.data.data.total : total,
+                    globalCompanyId: globalCompanyId ? globalCompanyId : (response.data.data.rows.length ? response.data.data.rows[0]?._id : "") 
                 });
             } else {
                 showError(response.message);
             }
         } catch (err) {
-            showError('Failed to fetch doctors');
+            showError('Failed to fetch company');
         } finally {
             set({ isLoading: false });
         }
@@ -77,7 +78,7 @@ const store = create<CompanyState>((set, get) => ({
         const { currentPage, filters, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page+1
+                currentPage: page + 1
             })
             fetchGrid();
         }
@@ -87,33 +88,33 @@ const store = create<CompanyState>((set, get) => ({
         try {
             const response = await doPOST(ENDPOINTS.create('company'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
         } catch (error) {
-
+            showError('Failed to create company');
         }
     },
-    onUpdate: async ( data: Company) => {
+    onUpdate: async (data: Company) => {
         try {
             const response = await doPUT(ENDPOINTS.update('company'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
         } catch (error) {
-
+            showError('Failed to update company');
         }
     },
     onDelete: async (id: string) => {
         try {
             const response = await doDELETE(ENDPOINTS.delete('company', id));
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
         } catch (error) {
-
+            showError('Failed to delete company');
         }
     },
     detail: async (id: string) => {

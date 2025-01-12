@@ -88,7 +88,7 @@ const store = create<AdminState>((set, get) => ({
                 showSuccess("Admin created successfully")
             }
         } catch (error) {
-            
+            showError('Failed to create admin');
         }
     },
     onUpdate:async (data:Admin)=>{
@@ -100,7 +100,7 @@ const store = create<AdminState>((set, get) => ({
                 showSuccess("Admin updated successfully")
             }
         } catch (error) {
-            
+            showError('Failed to update admin');
         }
     },
     onDelete:async (id:string)=>{
@@ -112,7 +112,7 @@ const store = create<AdminState>((set, get) => ({
                 showSuccess("Admin deleted successfully")
             }
         } catch (error) {
-            
+            showError('Failed to delete admin');
         }
     },
     detail: async (id: string) => {

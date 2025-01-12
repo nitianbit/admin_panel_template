@@ -38,6 +38,7 @@ export default function AddHRDialog({
   const [hRData, setHRData] = React.useState<HR>({
     name:"",
     email:"",
+    role:["hr"],
     phone:"",
     company:"",
   })
@@ -59,6 +60,14 @@ export default function AddHRDialog({
 
   const handleClose = () => {
     toggleModal(false);
+    setHRData({
+      name:"",
+      email:"",
+      phone:"",
+      role:["hr"],
+      company:"",
+      _id:""
+    })
   };
 
   const onSubmit = () => {

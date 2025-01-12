@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
-import { showError } from '../toaster';
+import { showError, showSuccess } from '../toaster';
 import { ENDPOINTS } from '../api/constants';
 import { ServiceState ,Service,ServiceFilters} from '../../types/services';
 
@@ -15,6 +15,7 @@ const store = create<ServiceState>((set, get) => ({
     isLoading: false,
     rows: 20,
     total:0,
+    allData:[],
 
     fetchGrid: async () => {
         try {
@@ -44,6 +45,26 @@ const store = create<ServiceState>((set, get) => ({
             set({ isLoading: false });
         }
     },
+
+     fetchGridAll: async (filters: ServiceFilters) => {
+            try {
+                const { allData } = get();
+                if (allData.length > 0) return allData;
+                const queryParams = new URLSearchParams(filters);
+                queryParams.append('rows', String(-1));
+                const apiUrl = `${ENDPOINTS.grid('services')}?${queryParams.toString()}`;
+    
+                const response = await doGET(apiUrl);
+    
+                if (response.status >= 200 && response.status < 400) {
+                    set({ allData: response.data.data.rows, });
+                }
+                return get().allData;
+            } catch (err) {
+                showError('Failed to fetch services');
+                return get().allData
+            }
+        },
 
     setFilters: (newFilters: ServiceFilters) => {
         set({ filters: newFilters,currentPage:1 });
@@ -85,11 +106,12 @@ const store = create<ServiceState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Service create successfully")
             }else{
                 showError(response.message);
             }
         } catch (error) {
-            
+            showError('Failed to create service');
         }
     },
     onUpdate:async (data:Service)=>{
@@ -98,9 +120,10 @@ const store = create<ServiceState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Service updated successfully")
             }
         } catch (error) {
-            
+            showError('Failed to update service');
         }
     },
     onDelete:async (id:string)=>{
@@ -109,9 +132,10 @@ const store = create<ServiceState>((set, get) => ({
             console.log(response);
             if(response.status>=200 && response.status<400){
                 get().fetchGrid();
+                showSuccess("Service deleted successfully")
             }
         } catch (error) {
-            
+            showError('Failed to delete service');
         }
     },
     detail: async (id: string) => {

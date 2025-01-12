@@ -11,15 +11,11 @@ import { Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
-
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 import { useLaboratoryStore } from "../../services/laboratory";
 import { Laboratory } from "../../types/laboratory";
-import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
+import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
+import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
 
 
 
@@ -38,15 +34,17 @@ export default function AddLaboratoryDialog({
   selectedId
 }: any) {
 
-  const { onCreate,detail,onUpdate } = useLaboratoryStore();
+  const { onCreate, detail, onUpdate } = useLaboratoryStore();
   const [laboratoryData, setLaboratoryData] = React.useState<Laboratory>({
-    name:"",
-    email:"",
-    phone:0,
-    company:"",
-    address:"",
-    hospital:"",
-    services:[],
+    name: "",
+    email: "",
+    phone: 0,
+    company: "",
+    address: "",
+    hospital: "",
+    services: [],
+    departments: [],
+    description:""
   })
 
   const handleChange = (key: any, value: any) => {
@@ -67,40 +65,42 @@ export default function AddLaboratoryDialog({
   const handleClose = () => {
     toggleModal(false);
     setLaboratoryData({
-      name:"",
-      email:"",
-      phone:0,
-      company:"",
-      address:"",
-      hospital:"",
-      services:[],
-      _id:""
+      name: "",
+      email: "",
+      phone: 0,
+      // company: "",
+      address: "",
+      hospital: "",
+      services: [],
+      departments: [],
+      _id: "",
+      description:""
     })
   };
 
   const onSubmit = () => {
-    
-    if(laboratoryData?._id){
-     onUpdate(laboratoryData);
-    }else{
+
+    if (laboratoryData?._id) {
+      onUpdate(laboratoryData);
+    } else {
       onCreate(laboratoryData);
     }
     handleClose();
   };
 
-  const fetchDetail=async(selectedId:string)=>{
+  const fetchDetail = async (selectedId: string) => {
     try {
-      const data=await detail(selectedId);
+      const data = await detail(selectedId);
       reset(data?.data)
       setLaboratoryData(data?.data)
     } catch (error) {
-      
+
     }
   }
 
   React.useEffect(() => {
     if (selectedId) {
-     fetchDetail(selectedId)
+      fetchDetail(selectedId)
     }
   }, [selectedId]);
 
@@ -141,13 +141,33 @@ export default function AddLaboratoryDialog({
               type="name"
               fullWidth
               variant="outlined"
-              value={laboratoryData.name} 
+              value={laboratoryData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-               />
+            />
+
+            <TextField
+              margin="dense"
+              id="email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              variant="outlined"
+              placeholder="ex: test@test.com"
+              value={laboratoryData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+            />
 
 
-            <CompanySelect  value={laboratoryData.company} onChange={(value)=>{
+            {/* <CompanySelect value={laboratoryData.company} onChange={(value) => {
               handleChange("company", value)
+            }} module={MODULES.LABORATORY} /> */}
+
+            <ServiceSelect value={laboratoryData.services} onChange={(value) => {
+              handleChange("services", value)
+            }} module={MODULES.LABORATORY} />
+
+            <DepartmentSelect value={laboratoryData.departments} onChange={(value) => {
+              handleChange("departments", value)
             }} module={MODULES.LABORATORY} />
 
             <TextField
@@ -161,16 +181,18 @@ export default function AddLaboratoryDialog({
               value={laboratoryData.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
             />
+
             <TextField
               margin="dense"
-              id="email"
-              label="Email Address"
-              type="email"
+              id="description"
+              rows={4}
+              label="Description"
+              // type="description"
               fullWidth
               variant="outlined"
-              placeholder="ex: test@test.com"
-              value={laboratoryData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
+              placeholder=""
+              value={laboratoryData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
             />
           </DialogContent>
           <DialogActions>

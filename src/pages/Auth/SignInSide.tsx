@@ -27,7 +27,7 @@ type FormValues = {
 
 export default function SignInSide() {
 
-  const { success, error, setIsLoggedIn, isLoggedIn,setIsTokenVerified, verifyToken } = useAppContext()
+  const { success, error, setIsLoggedIn, isLoggedIn, setIsTokenVerified, verifyToken } = useAppContext()
 
   const [loading, setLoading] = useState(false);
   const [isOTPSend, setIsOTPSend] = useState(false);
@@ -46,7 +46,7 @@ export default function SignInSide() {
     formState: { errors }
   } = useForm<FormValues>();
 
-  const options = ['doctors', 'laboratories', "admin", 'supervisor'];
+  const options = ['doctors', 'laboratories', "admin", 'supervisor', "hr"];
 
   const handleRoleSelect = (role: any) => {
     setData((prev) => {
@@ -70,8 +70,8 @@ export default function SignInSide() {
       const updatedOTpData = {
         ...otpData,
         otp: otp,
-        role:data.role,
-        isTokenRequired:true
+        role: data.role,
+        isTokenRequired: true
       };
       setOtpData(updatedOTpData)
       const response = await doPOST(AUTHENDPOINTS.verifyotp, updatedOTpData);
@@ -106,7 +106,7 @@ export default function SignInSide() {
           userId: response.data.data.userId
         }))
         success("OTP Send Successfully")
-      }else if (response.status >= 400 && response.status <= 500) {
+      } else if (response.status >= 400 && response.status <= 500) {
         error(response.message)
       }
     } catch (e) {
@@ -125,7 +125,7 @@ export default function SignInSide() {
       const response = await doPOST(AUTHENDPOINTS.login, data);
       if (response.status >= 200 && response.status < 300) {
         await sendOTP(response.data.data);
-      }else if(response.status >= 400 && response.status <= 500){
+      } else if (response.status >= 400 && response.status <= 500) {
         error(response.message)
       }
     } catch (e) {
@@ -197,7 +197,7 @@ export default function SignInSide() {
               </Typography>
 
               <Box sx={{ mt: 1 }}>
-               {!isOTPSend && <ToggleButton
+                {!isOTPSend && <ToggleButton
                   options={options}
                   onSelect={handleRoleSelect}
                   style={{

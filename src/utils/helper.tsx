@@ -8,13 +8,13 @@ export function isError(e: unknown): e is Error {
 
 
 export const moduleRoles = {
-  "/dashboard": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
-  "/patient-list": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
+  "/dashboard": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR],
+  "/patient-list": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR],
   "/patient-info/1": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
   "/profile": [MODULES.DOCTOR],
-  "/appointments": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
-  "/doctor-list": [MODULES.ADMIN],
-  "/laboratory-list": [MODULES.ADMIN],
+  "/appointments": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR],
+  "/doctor-list": [MODULES.ADMIN, MODULES.HR],
+  "/laboratory-list": [MODULES.ADMIN, MODULES.HR],
   "/admin": [MODULES.SUPERVISOR],
   "/company": [MODULES.ADMIN],
   "/push-notification": [MODULES.ADMIN],

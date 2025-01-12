@@ -4,6 +4,7 @@ export interface HR {
     name: string;
     email: string,
     phone?: string,
+    role: string[];
     countryCode?: string,
     company: string,
 }

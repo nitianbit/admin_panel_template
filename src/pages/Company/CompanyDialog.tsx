@@ -36,6 +36,10 @@ export default function CompanyDialog({
 
   const [comapnyData, setCompanyData] = React.useState<Company>({
     name: "",
+    email: "",
+    phone: "",
+    contactPerson: "",
+    noOfEmployees: 0,
     website: "",
     isActive: true,
     email: "",

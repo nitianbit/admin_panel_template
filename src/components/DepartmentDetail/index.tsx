@@ -1,7 +1,5 @@
 
 import React, { useEffect, useState } from 'react'
-import { Doctor } from '../../types/doctors';
-import { useCompanyStore } from '../../services/company';
 import { useDepartmentStore } from '../../services/departments';
 import { Department } from '../../types/departments';
 
@@ -10,7 +8,7 @@ interface DepartmentDetailProps {
 }
 
 const DepartmentDetail: React.FC<DepartmentDetailProps> = ({ _id }) => {
-    const [data, setData] = useState<null | Department>(null);
+    const [data, setData] = useState<Department[]>([]);
     const { detail, allData, fetchGridAll } = useDepartmentStore();
 
     useEffect(() => {
@@ -25,7 +23,8 @@ const DepartmentDetail: React.FC<DepartmentDetailProps> = ({ _id }) => {
 
     const fetchDetail = async () => {
         try {
-            setData(allData.find((item: any) => item._id === _id) ?? null);
+            const departments = allData.filter((item: any) => _id.includes(item._id));
+            setData(departments ? departments : []);
         } catch (error) {
 
         }
@@ -39,7 +38,13 @@ const DepartmentDetail: React.FC<DepartmentDetailProps> = ({ _id }) => {
     }, [_id])
 
     return (
-        <div>{data?.name ?? "--"}</div>
+        <div>
+            {data.length > 0 ? (
+                data.map((service: Department) => <div key={service._id}>{service.name}</div>)
+            ) : (
+                "No Services Selected"
+            )}
+        </div>
     )
 }
 

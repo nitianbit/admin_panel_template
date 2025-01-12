@@ -3,6 +3,11 @@
 export interface Company {
     _id?: string;
     name: string;
+    email: string;
+    phone: string;
+    countryCode?: string;
+    contactPerson: string;
+    noOfEmployees: number;
     website: string,
     logo?: string,
     isActive: boolean,

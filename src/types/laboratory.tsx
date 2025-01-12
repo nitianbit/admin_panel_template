@@ -9,12 +9,14 @@ export interface Laboratory {
     isIndividual?: boolean;
     role?: string[];
     services: string[];
+    departments: string[];
+    description?: string; // Optional field
     hospital?: string; // Reference to Hospital schema
     fee?: number; 
     isVerified?: boolean;
     createdAt?: number;
     updatedAt?: number; // Optional field
-    company: string;
+    company?: string;
     _id?:string;
   }
   

@@ -18,8 +18,9 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { useDoctorStore } from "../../services/doctors";
 import { Doctor } from "../../types/doctors";
-import CompanySelect from "../../components/DropDowns/CompanySelect";
 import { MODULES } from "../../utils/constants";
+import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
+import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
 
 
 
@@ -38,14 +39,16 @@ export default function AddDoctorDialog({
   selectedId
 }: any) {
 
-  const { onCreate,detail,onUpdate } = useDoctorStore();
+  const { onCreate, detail, onUpdate } = useDoctorStore();
   const [doctorData, setDoctorData] = React.useState<Doctor>({
-    name:"",
-    gender:"",
-    email:"",
-    phone:0,
-    company:"",
-    specialization:""
+    name: "",
+    gender: "",
+    email: "",
+    phone: 0,
+    services: [],
+    departments: [],
+    description: ""
+    // specialization: ""
   })
 
   const handleChange = (key: any, value: any) => {
@@ -68,27 +71,27 @@ export default function AddDoctorDialog({
   };
 
   const onSubmit = () => {
-    if(doctorData?._id){
-     onUpdate(doctorData);
-    }else{
+    if (doctorData?._id) {
+      onUpdate(doctorData);
+    } else {
       onCreate(doctorData);
     }
     handleClose();
   };
 
-  const fetchDetail=async(selectedId:string)=>{
+  const fetchDetail = async (selectedId: string) => {
     try {
-      const data=await detail(selectedId);
+      const data = await detail(selectedId);
       reset(data?.data)
       setDoctorData(data?.data)
     } catch (error) {
-      
+
     }
   }
 
   React.useEffect(() => {
     if (selectedId) {
-     fetchDetail(selectedId)
+      fetchDetail(selectedId)
     }
   }, [selectedId]);
 
@@ -129,9 +132,9 @@ export default function AddDoctorDialog({
               type="name"
               fullWidth
               variant="outlined"
-              value={doctorData.name} 
+              value={doctorData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-               />
+            />
             <FormControl fullWidth margin="dense">
               <InputLabel id="gender">Gender</InputLabel>
               <Select
@@ -139,7 +142,7 @@ export default function AddDoctorDialog({
                 id="gender"
                 label="Gender"
                 value={doctorData.gender}
-                onChange={(e) => handleChange("gender", e.target.value) }
+                onChange={(e) => handleChange("gender", e.target.value)}
               >
                 <MenuItem value={"Male"}>Male</MenuItem>
                 <MenuItem value={"Female"}>Female</MenuItem>
@@ -147,8 +150,18 @@ export default function AddDoctorDialog({
               </Select>
             </FormControl>
 
-            <CompanySelect  value={doctorData.company} onChange={(value)=>{
+
+
+            {/* <CompanySelect value={doctorData.company} onChange={(value) => {
               handleChange("company", value)
+            }} module={MODULES.DOCTOR} /> */}
+
+            <ServiceSelect value={doctorData.services} onChange={(value) => {
+              handleChange("services", value)
+            }} module={MODULES.DOCTOR} />
+
+            <DepartmentSelect value={doctorData.departments} onChange={(value) => {
+              handleChange("departments", value)
             }} module={MODULES.DOCTOR} />
 
             <TextField
@@ -176,6 +189,19 @@ export default function AddDoctorDialog({
 
             <TextField
               margin="dense"
+              id="description"
+              rows={4}
+              label="Description"
+              // type="description"
+              fullWidth
+              variant="outlined"
+              placeholder=""
+              value={doctorData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+            />
+
+            {/* <TextField
+              margin="dense"
               id="specialist"
               label="Specialist"
               type="specialist"
@@ -184,7 +210,7 @@ export default function AddDoctorDialog({
               placeholder="ex: Cardiologist, Dentist"
               value={doctorData.specialization}
               onChange={(e) => handleChange("specialization", e.target.value)}
-            />
+            /> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>

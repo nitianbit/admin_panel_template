@@ -2,21 +2,23 @@
 
  export interface Doctor {
   name: string;
-  specialization: string; // Optional field
+  specialization?: string; // Optional field
   email?: string;
   phone: number;
   countryCode?: number;
   gender: string;
   isIndividual?: boolean;
   role?: string[];
+  services?: string[]; // References to Service schema
   hospital?: string; // Reference to Hospital schema
   departments?: string[]; // References to Department schema
   fee?: number; // Optional field
   isActive?: boolean;
   isVerified?: boolean;
+  description?: string; // Optional field
   createdAt?: number;
   updatedAt?: number; // Optional field
-  company: string;
+  company?: string;
   _id?:string
 }
 

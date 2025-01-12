@@ -70,7 +70,7 @@ export default function AppointmentDialog({
     },
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
     patient: "",
-    company: globalCompanyId ??""
+    company: globalCompanyId ?? ""
   })
 
   const fetchData = async (id: string) => {
@@ -288,7 +288,7 @@ export default function AppointmentDialog({
             </Select>
           </FormControl>
 
-          <CompanySelect register={()=>{}} value={appointMentData?.company} onChange={(value) => handleChange("company", value)} module={MODULES.APPOINTMENT} />
+          <CompanySelect register={() => { }} value={appointMentData?.company} onChange={(value) => handleChange("company", value)} module={MODULES.APPOINTMENT} />
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
 

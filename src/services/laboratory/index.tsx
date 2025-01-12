@@ -88,7 +88,7 @@ const store = create<LaboratoryState>((set, get) => ({
                 showSuccess("Laboratory created successfully")
             }
         } catch (error) {
-            
+            showError('Failed to create laboratory');
         }
     },
     onUpdate:async (data:Laboratory)=>{
@@ -100,7 +100,7 @@ const store = create<LaboratoryState>((set, get) => ({
                 showSuccess("Laboratory updated successfully")
             }
         } catch (error) {
-            
+            showError('Failed to update laboratory');
         }
     },
     onDelete:async (id:string)=>{
@@ -112,7 +112,7 @@ const store = create<LaboratoryState>((set, get) => ({
                 showSuccess("Laboratory deleted successfully")
             }
         } catch (error) {
-            
+            showError('Failed to fetch laboratory');
         }
     },
     detail: async (id: string) => {

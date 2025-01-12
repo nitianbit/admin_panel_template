@@ -8,7 +8,7 @@ export interface Service {
 
 }
 
-export interface AppointmentResponse {
+export interface ServiceResponse {
     data: {
         rows: Service[];
         totalPages: number;
@@ -24,6 +24,7 @@ export interface ServiceFilters {
 
 export interface ServiceState {
     data: Service[];
+    allData: Service[];
     totalPages: number;
     total: number;
     currentPage: number;
@@ -31,6 +32,7 @@ export interface ServiceState {
     isLoading: boolean;
     rows: number;
     fetchGrid: (page?: number, filters?: ServiceFilters) => Promise<void>;
+    fetchGridAll: ( filters: ServiceFilters) => Promise<Service[]>;
     setFilters: (newFilters:ServiceFilters) => void;
     nextPage: () => void;
     prevPage: () => void;
