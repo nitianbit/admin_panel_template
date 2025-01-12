@@ -12,14 +12,19 @@ export default function LaboratoryList() {
   const [open, setOpen] = React.useState(false);
 
   const { globalCompanyId } = useCompanyStore();
-
   React.useEffect(() => {
-    if (globalCompanyId) {
-      setFilters({ company: globalCompanyId })
-    } else {
-      fetchGrid()
-    }
-  }, [globalCompanyId])
+     fetchGrid() 
+ }, [])
+
+ //no need to filter
+
+  // React.useEffect(() => {
+  //   if (globalCompanyId) {
+  //     setFilters({ company: globalCompanyId })
+  //   } else {
+  //     fetchGrid()
+  //   }
+  // }, [globalCompanyId])
 
   const handleClickOpen = () => {
     setOpen(true);

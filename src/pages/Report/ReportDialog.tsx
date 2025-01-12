@@ -29,6 +29,7 @@ import { ApiResponse } from "../../types/general";
 import { uploadFile } from "../../utils/helper";
 import CustomImage from "../../components/CustomImage";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; // Import a PDF icon from Material-UI
+import LabSelect from "../../components/LabSelect";
 
 
 const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
@@ -73,15 +74,15 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                 toast.error("Patient selection is required.");
                 return;
             }
-            if (type === 1 && !doctor) {
+            if (type === 2 && !doctor) {
                 toast.error("Doctor is required for prescriptions.");
                 return;
             }
-            if (type === 2 && !lab) {
+            if (type === 1 && !lab) {
                 toast.error("Lab name is required for reports.");
                 return;
             }
-            if (!files?.length) {
+            if (!files?.length && !attachments?.length) {
                 toast.error("File upload is required.");
                 return;
             }
@@ -183,7 +184,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                         </Grid>
 
                         {/* Doctor Name or Lab Name */}
-                        {formData.type === 2 || true && (
+                        {formData.type === 2 && (
                             <Grid item xs={12}>
 
                                 <DoctorSelect
@@ -191,6 +192,18 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                     value={formData.doctor}
                                     onSelect={function (id: string): void {
                                         handleChange("doctor", id)
+                                    }} />
+                            </Grid>
+                        )}
+                        {formData.type === 1 && (
+                            <Grid item xs={12}>
+
+                                <LabSelect
+                                    sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                                    value={formData.lab}
+                                    onSelect={function (id: string): void {
+                                        console.log(id);
+                                        handleChange("lab", id)
                                     }} />
                             </Grid>
                         )}

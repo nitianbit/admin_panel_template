@@ -73,17 +73,18 @@ export default function AddLaboratoryDialog({
       hospital: "",
       services: [],
       departments: [],
-      _id: "",
       description:""
     })
   };
 
   const onSubmit = () => {
 
+    const {hospital,_id,...data}=laboratoryData
+    const payload={...data, ...(hospital && {hospital})}
     if (laboratoryData?._id) {
-      onUpdate(laboratoryData);
+      onUpdate({...payload, _id: laboratoryData?._id});
     } else {
-      onCreate(laboratoryData);
+      onCreate(payload);
     }
     handleClose();
   };
