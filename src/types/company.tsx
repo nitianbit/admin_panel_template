@@ -3,16 +3,13 @@
 export interface Company {
     _id?: string;
     name: string;
-    email: string;
-    phone: string;
-    countryCode?: string;
     contactPerson: string;
     noOfEmployees: number;
     website: string,
     logo?: string,
     isActive: boolean,
     email:string,
-    phone: number;
+    phone: number | null;
     countryCode?: number;
     contactperson: string;
     noOfUser: number;
