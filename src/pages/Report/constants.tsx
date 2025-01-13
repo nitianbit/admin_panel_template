@@ -3,6 +3,8 @@ import { Report } from "../../types/report";
 import CompanyDetail from "../../components/CompanyDetail";
 import moment from "moment";
  import PatientDetail from "../../components/PatientDetail";
+import LabDetail from "../../components/LabDetail";
+import DoctorDetail from "../../components/DoctorDetail";
 
 export const COLUMNS = [
     {
@@ -24,5 +26,10 @@ export const COLUMNS = [
         header: "Type",
         accessor: "type",
         render:(data:Report) => data.type === 1 ? "Report" : "Prescription",
+    },
+    {
+        header:  "Doctor/Lab",
+        accessor: "type",
+        render:(data:Report) => data.type === 1 ?(data?.lab? <LabDetail _id={data?.lab}/>: null) : (data?.doctor? <DoctorDetail _id={data?.doctor}/>: null),
     }
 ]
