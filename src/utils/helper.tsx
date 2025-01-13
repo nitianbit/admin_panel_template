@@ -1,5 +1,6 @@
 import { MODULES } from "./constants";
 import { doPOST } from "./HttpUtils";
+import { api } from "../services/api/apiHandler";
 
 export function isError(e: unknown): e is Error {
   return e instanceof Error;
