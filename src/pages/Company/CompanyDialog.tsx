@@ -49,7 +49,8 @@ export default function CompanyDialog({
   const handleClickOpen = () => toggleModal(true);
   const handleClose = () => toggleModal(false);
 
-  const handleSave = async () => {
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault(); 
     const {name,contactperson,email,phone,website}=comapnyData;
     if(!name || !contactperson || !email || !phone || !website){
       toast.error("All fields are required")
