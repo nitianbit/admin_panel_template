@@ -115,6 +115,7 @@ export default function Appbar(props: { appBarTitle: string }) {
                   <Link
                     to={setting.url}
                     style={{ textDecoration: "none", color: "inherit" }}
+                    onClick={setting.onClick && setting.onClick}
                   >
                     <Typography textAlign="center">{setting.text}</Typography>
                   </Link>
