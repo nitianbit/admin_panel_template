@@ -11,7 +11,7 @@ const store = create<CompanyState>((set, get) => ({
     currentPage: 1,
     filters: {},
     isLoading: false,
-    rows: 2,
+    rows: 20,
     total: 0,
     globalCompanyId: "",
 
