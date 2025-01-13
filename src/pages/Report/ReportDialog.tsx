@@ -26,11 +26,12 @@ import PatientSelect from "../../components/PatientSelect";
 import { useReportStore } from "../../services/report";
 import { useCompanyStore } from "../../services/company";
 import { ApiResponse } from "../../types/general";
-import { uploadFile } from "../../utils/helper";
+import { downloadFile, uploadFile } from "../../utils/helper";
 import CustomImage from "../../components/CustomImage";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; // Import a PDF icon from Material-UI
 import LabSelect from "../../components/LabSelect";
-
+import GetAppIcon from "@mui/icons-material/GetApp"; 
+import "./styles.css"
 
 const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [formData, setFormData] = useState<Report>({
@@ -247,15 +248,19 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                         const isPdf = /\.(pdf)$/i.test(attachment);
                                        /* //TODO  make component */
                                         return isImage ? (
-                                            <CustomImage
-                                                key={index}
-                                                src={attachment} // Use the file URL or path
-                                                style={{
-                                                    width: 200,
-                                                    height: 100,
-                                                    objectFit: "contain",
-                                                }}
-                                            />
+                                            <div className="preview">
+                                                <CustomImage
+                                                    key={index}
+                                                    src={attachment} // Use the file URL or path
+                                                    style={{
+                                                        width: 200,
+                                                        height: 100,
+                                                        objectFit: "contain",
+                                                    }}
+                                                />
+                                                <GetAppIcon className="download-icon" onClick={() => downloadFile(attachment)} />
+                                            </div>
+                                            
                                         ) : isPdf ? (
                                             <div
                                                 key={index}
@@ -268,9 +273,11 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                                     border: "1px solid #ccc",
                                                     borderRadius: 8,
                                                     backgroundColor: "#f5f5f5",
+                                                    position: "relative",
                                                 }}
                                             >
                                                 <PictureAsPdfIcon style={{ fontSize: 40, color: "#d32f2f" }} />
+                                                <GetAppIcon className="download-icon" onClick={() => downloadFile(attachment)} />
                                             </div>
                                         ) : (
                                             <div

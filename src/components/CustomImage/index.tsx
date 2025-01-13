@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Modal, ModalBody } from 'reactstrap'; 
+import { Modal, ModalBody } from 'reactstrap';
 import { api } from '../../services/api/apiHandler';
+import { Dialog } from '@mui/material';
 
 interface CustomImageProps {
     src: string;
@@ -69,11 +70,31 @@ const CustomImage: React.FC<CustomImageProps> = ({
                         onClick={toggleModal}
                         {...restProps}
                     />
-                    <Modal isOpen={modal} toggle={toggleModal} centered>
-                        <ModalBody>
-                            <img src={imageSrc} alt="Modal Image" style={{ width: '100%' }} />
-                        </ModalBody>
-                    </Modal>
+
+                    <Dialog
+                        open={modal}
+                        onClose={toggleModal}
+                        fullScreen
+                        fullWidth
+                        sx={{
+                            height: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            "& .MuiDialog-paper": { backgroundColor: "black", padding: 0 },
+                        }}
+                    >
+                        <img
+                            src={imageSrc}
+                            alt="Modal Image"
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                            }}
+                        />
+                    </Dialog>
+
                 </>
             ) : (
                 <i className='bx bx-image-alt font-size-20' />

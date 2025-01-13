@@ -1,0 +1,12 @@
+
+
+.preview{
+    position: relative;
+}
+
+.download-icon{
+    position: absolute;
+    right: 0;
+    top:0;
+    cursor: pointer;
+}
