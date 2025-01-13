@@ -54,3 +54,26 @@ export const uploadFile = async (data: any, files: any) => {
 
   return response;
 }
+
+export const downloadFile = async (src:string) => {
+  try {
+      const response = await api({
+          url: src,
+          headers: {
+              Authorization: localStorage.getItem("BearerToken") || '',
+          },
+          withCredentials: false,
+          responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", src.split("/").pop() || "file");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+  } catch (error) {
+      console.error("Error downloading file:", error);
+  }
+};
