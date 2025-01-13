@@ -65,8 +65,7 @@ export default function AddHRDialog({
       email:"",
       phone:"",
       role:["hr"],
-      company:"",
-      _id:""
+      company:""
     })
   };
 
