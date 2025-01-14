@@ -2,9 +2,11 @@
 
 export interface Appointment {
     patient: string;
-    doctor: string;
+    doctor?: string;
+    lab?: string; // Reference to Lab ID
     hospital?: string;
     department?: string;
+    type: string // 1: Report, 2: Prescription
     appointmentDate: string;
     timeSlot: {
         start: string;

@@ -33,6 +33,8 @@ import DoctorDetail from "../../components/DoctorDetail";
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import { useCompanyStore } from "../../services/company";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
+import DoctorSelect from "../../components/DoctorSelect";
+import LabSelect from "../../components/LabSelect";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -61,6 +63,7 @@ export default function AppointmentDialog({
 
   const [appointMentData, setAppointMentData] = React.useState<Appointment>({
     fee: 0,
+    type: "1",
     status: "SCHD",
     paymentStatus: "PND",
     appointmentDate: "",
@@ -68,6 +71,7 @@ export default function AppointmentDialog({
       start: "",
       end: ""
     },
+    lab: "",
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
     patient: "",
     company: globalCompanyId ?? ""
@@ -172,20 +176,6 @@ export default function AppointmentDialog({
         title="Patient"
       />
 
-      {userData?.role?.includes("admin") && <GridDialog
-        open={doctorDialogOpen}
-        handleClose={handleDoctorDialogClose}
-        handleSave={handleDoctorDialogSave}
-        data={doctorData}
-        totalPages={doctorTotalPages}
-        total={doctorTotal}
-        currentPage={doctorCurrentPage}
-        isLoading={doctorIsLoading}
-        onPageChange={doctorOnPageChange}
-        fetchGrid={doctorFetchtGrid}
-        onDelete={doctorOnDelete}
-        title="Doctor"
-      />}
 
       <Dialog
         open={isModalOpen}
@@ -217,31 +207,45 @@ export default function AppointmentDialog({
               }} />
             </Box>
           </Box>
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="type">Select Type</InputLabel>
+            <Select
+              labelId="type"
+              id="type"
+              label="Select Type"
+              value={appointMentData?.type}
+              onChange={(e) => handleChange("type", e.target.value)}
+            >
+              <MenuItem value={"1"}>Report</MenuItem>
+              <MenuItem value={"2"}>Prescription</MenuItem>
+            </Select>
+          </FormControl>
 
 
 
-          {userData.role.includes("admin") &&
-            <Box sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              my: 1
-            }}>
-              <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
-                Select Doctor -
-              </Typography>
-              <Box sx={{
-                display: "flex",
-                alignItems: "center",
-              }}>
-                <DoctorDetail _id={appointMentData?.doctor} />
-                <PersonSearchIcon sx={{ cursor: "pointer", ml: 2 }} onClick={() => {
-                  setDoctorDialogOpen(true)
-                }} />
-              </Box>
-
-            </Box>
-          }
+          {userData.role.includes("admin") && (
+            <>
+              {appointMentData?.type == "2" && (
+                <DoctorSelect
+                  sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                  value={appointMentData.doctor}
+                  onSelect={(id: string): void => {
+                    handleChange("doctor", id);
+                  }}
+                />
+              )}
+              {appointMentData?.type == "1" && (
+                <LabSelect
+                  sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                  value={appointMentData.lab}
+                  onSelect={(id: string): void => {
+                    console.log(id);
+                    handleChange("lab", id);
+                  }}
+                />
+              )}
+            </>
+          )}
 
           <TextField
             margin="dense"
