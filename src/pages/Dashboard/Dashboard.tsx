@@ -15,29 +15,9 @@ import PeopleIcon from "@mui/icons-material/People";
 import TodayIcon from "@mui/icons-material/Today";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-
-const cardData = [
-  {
-    icon: <PeopleIcon />,
-    title: "Patients",
-    value: 1000
-  },
-  {
-    icon: <TodayIcon />,
-    title: "Appointments",
-    value: 80
-  },
-  {
-    icon: <VolunteerActivismIcon />,
-    title: "Treatments",
-    value: 200
-  },
-  {
-    icon: <CurrencyRupeeIcon />,
-    title: "Income",
-    value: "₹40000"
-  }
-];
+import { useCompanyStore } from "../../services/company";
+import { getAppointmentsCount, getDoctorsCount } from "./ApiCalling";
+import moment from "moment";
 
 const chartData = [
   { chartName: <PieChart /> },
@@ -45,7 +25,114 @@ const chartData = [
   //{ chartName: <OrganData /> }
 ];
 
+
 export default function Dashboard() {
+  const { globalCompanyId } = useCompanyStore();
+
+  const [data, setData] = React.useState({
+    labAppointmentToday: 0,
+    labAppointmentTotal: 0,
+    doctorAppointmentToday: 0,
+    doctorAppointmentTotal: 0,
+    doctorsToday: 0,
+    doctorsTotal: 0
+  });
+
+
+  const [cardData, setCartData] = React.useState(
+    [
+      {
+        icon: <PeopleIcon />,
+        title: "Today's Lab Appointments",
+        value: data.labAppointmentToday
+      },
+      {
+        icon: <TodayIcon />,
+        title: "Total Lab Appointments",
+        value: data.labAppointmentTotal
+      },
+      {
+        icon: <VolunteerActivismIcon />,
+        title: "Today's Doctor Appointments",
+        value: data.doctorAppointmentToday
+      },
+      {
+        icon: <PeopleIcon />,
+        title: "Total Doctor Appointments",
+        value: data.doctorAppointmentTotal
+      },
+      {
+        icon: <PeopleIcon />,
+        title: "Doctors Joined Today",
+        value: data.doctorsToday
+      },
+      {
+        icon: <TodayIcon />,
+        title: "Total Doctors",
+        value: data.doctorsTotal
+      }
+    ]
+  )
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const labAppointmentToday = await getAppointmentsCount({ filters: { companyId: globalCompanyId, type: 2, updatedAt: moment().unix() } });
+      const labAppointmentTotal = await getAppointmentsCount({ filters: { companyId: globalCompanyId, type: 2 } });
+      const doctorAppointmentToday = await getAppointmentsCount({ filters: { companyId: globalCompanyId, type: 1, updatedAt: moment().unix() } });
+      const doctorAppointmentTotal = await getAppointmentsCount({ filters: { companyId: globalCompanyId, type: 1 } });
+      const doctorsToday = await getDoctorsCount({ filters: { companyId: globalCompanyId, updatedAt: moment().unix() } });
+      const doctorsTotal = await getDoctorsCount({ filters: { companyId: globalCompanyId } });
+
+      setData({
+        labAppointmentToday,
+        labAppointmentTotal,
+        doctorAppointmentToday,
+        doctorAppointmentTotal,
+        doctorsToday,
+        doctorsTotal
+      });
+    }
+
+    if (globalCompanyId) {
+      fetchData();
+    }
+  }, [globalCompanyId]);
+
+  React.useEffect(() => {
+    setCartData([
+      {
+        icon: <PeopleIcon />,
+        title: "Today's Lab Appointments",
+        value: data.labAppointmentToday,
+      },
+      {
+        icon: <TodayIcon />,
+        title: "Total Lab Appointments",
+        value: data.labAppointmentTotal,
+      },
+      {
+        icon: <VolunteerActivismIcon />,
+        title: "Today's Doctor Appointments",
+        value: data.doctorAppointmentToday,
+      },
+      {
+        icon: <PeopleIcon />,
+        title: "Total Doctor Appointments",
+        value: data.doctorAppointmentTotal,
+      },
+      {
+        icon: <PeopleIcon />,
+        title: "Doctors Joined Today",
+        value: data.doctorsToday,
+      },
+      {
+        icon: <TodayIcon />,
+        title: "Total Doctors",
+        value: data.doctorsTotal,
+      },
+    ]);
+  }, [data]);
+
   return (
     <Box sx={{ display: "flex" }}>
       <Appbar appBarTitle="Dashboard" />
@@ -85,7 +172,6 @@ export default function Dashboard() {
               </Grid>
             ))}
 
-            {/* Chart */}
             {chartData.map((item, index) => (
               <Grid key={index} item xs={12} md={6} lg={6}>
                 <Paper
@@ -100,7 +186,6 @@ export default function Dashboard() {
                 </Paper>
               </Grid>
             ))}
-            {/* <img src="https://echarts.apache.org/examples/data/asset/geo/Veins_Medical_Diagram_clip_art.svg" /> */}
             <Grid item xs={12}>
               <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
                 <LatestAppointments />
