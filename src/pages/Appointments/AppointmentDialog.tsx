@@ -216,8 +216,8 @@ export default function AppointmentDialog({
               value={appointMentData?.type}
               onChange={(e) => handleChange("type", e.target.value)}
             >
-              <MenuItem value={"1"}>Diagonsitic</MenuItem>
-              <MenuItem value={"2"}>Consultation</MenuItem>
+              <MenuItem value={"1"}>Report</MenuItem>
+              <MenuItem value={"2"}>Prescription</MenuItem>
             </Select>
           </FormControl>
 
