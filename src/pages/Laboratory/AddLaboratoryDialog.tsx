@@ -44,7 +44,8 @@ export default function AddLaboratoryDialog({
     hospital: "",
     services: [],
     departments: [],
-    description:""
+    description:"",
+    role:[MODULES.LABORATORY]
   })
 
   const handleChange = (key: any, value: any) => {

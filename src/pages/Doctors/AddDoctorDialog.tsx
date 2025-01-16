@@ -38,18 +38,19 @@ export default function AddDoctorDialog({
   toggleModal,
   selectedId
 }: any) {
-
-  const { onCreate, detail, onUpdate } = useDoctorStore();
-  const [doctorData, setDoctorData] = React.useState<Doctor>({
+  const defaultData={
     name: "",
     gender: "",
     email: "",
     phone: 0,
     services: [],
     departments: [],
-    description: ""
+    description: "",
+    role:[MODULES.DOCTOR]
     // specialization: ""
-  })
+  }
+  const { onCreate, detail, onUpdate } = useDoctorStore();
+  const [doctorData, setDoctorData] = React.useState<Doctor>(defaultData)
 
   const handleChange = (key: any, value: any) => {
     setDoctorData({ ...doctorData, [key]: value });
@@ -90,6 +91,7 @@ export default function AddDoctorDialog({
   }
 
   React.useEffect(() => {
+    setDoctorData(defaultData)
     if (selectedId) {
       fetchDetail(selectedId)
     }
