@@ -30,8 +30,9 @@ import { downloadFile, uploadFile } from "../../utils/helper";
 import CustomImage from "../../components/CustomImage";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; // Import a PDF icon from Material-UI
 import LabSelect from "../../components/LabSelect";
-import GetAppIcon from "@mui/icons-material/GetApp"; 
+import GetAppIcon from "@mui/icons-material/GetApp";
 import "./styles.css"
+import ImageUpload from "../../components/ImageUploader";
 
 const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [formData, setFormData] = useState<Report>({
@@ -52,14 +53,23 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
 
     useEffect(() => {
         if (selectedId && isModalOpen) {
-            detail(selectedId).then(data=>{
+            detail(selectedId).then(data => {
                 setFormData(data?.data)
-            }).catch(error=>console.log(error));
+            }).catch(error => console.log(error));
         }
     }, [selectedId, isModalOpen])
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files ? Array.from(event.target.files) : [];
+        const validFiles = files.filter((file) => file.type.startsWith("image/") || file.type === "application/pdf");
+        if (validFiles.length + files.length > 4) {
+            alert("You can upload a maximum of 4 files.");
+            return;
+        }
+        setFiles((prev) => [...prev, ...validFiles]);
+    };
+    const handleFileChange = (uploadedFiles: File[]) => {
+        const files = uploadedFiles ? Array.from(uploadedFiles) : [];
         const validFiles = files.filter((file) => file.type.startsWith("image/") || file.type === "application/pdf");
         if (validFiles.length + files.length > 4) {
             alert("You can upload a maximum of 4 files.");
@@ -115,7 +125,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                 const res = await uploadFile({ module: 'report', record_id: response?.data?.data?._id }, files);
                 if (res.status >= 200 && res.status < 400) {
                     const filePaths = res.data?.data?.length ? res.data?.data : [];
-                    await onUpdate({ attachments: filePaths, _id: response?.data?.data?._id })
+                    await onUpdate({ attachments: [...attachments, ...filePaths], _id: response?.data?.data?._id })
                     setFiles([])
                     if (response?.data?.data?._id) {
                         detail(response?.data?.data?._id);
@@ -134,8 +144,22 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
         }
     };
 
+    const resetForm = () => {
+        setFormData({
+            patient: "",
+            doctor: "",
+            lab: "",
+            type: 1,
+            attachments: [],
+            date: moment().unix(),
+            company: ""
+        });
+        setFiles([]);
+    };
+
+
     const handleClickOpen = () => toggleModal(true);
-    const handleClose = () => toggleModal(false);
+    const handleClose = () => { resetForm(); toggleModal(false); }
 
 
     return (
@@ -246,7 +270,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                         // Infer file type from the string (assuming it's a URL or file path)
                                         const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(attachment);
                                         const isPdf = /\.(pdf)$/i.test(attachment);
-                                       /* //TODO  make component */
+                                        /* //TODO  make component */
                                         return isImage ? (
                                             <div className="preview">
                                                 <CustomImage
@@ -260,7 +284,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                                 />
                                                 <GetAppIcon className="download-icon" onClick={() => downloadFile(attachment)} />
                                             </div>
-                                            
+
                                         ) : isPdf ? (
                                             <div
                                                 key={index}
@@ -307,7 +331,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
 
                         {/* File Upload */}
 
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             <FormControl fullWidth margin="dense">
                                 <InputLabel>Upload Files</InputLabel>
                                 <input
@@ -334,6 +358,9 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                         : "No Files selected"}
                                 </FormHelperText>
                             </FormControl>
+                        </Grid> */}
+                        <Grid item xs={12}>
+                            <ImageUpload onChange={handleFileChange} text="File(s)" />
                         </Grid>
                     </Grid>
                 </DialogContent>

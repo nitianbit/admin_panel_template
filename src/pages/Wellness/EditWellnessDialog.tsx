@@ -77,6 +77,11 @@ const EditWellnessDialog = ({
     }
 
     useEffect(() => {
+        setData({
+            title: "",
+            description: "",
+            startTime: moment().unix(),
+        })
         if (selectedId && isModalOpen) {
             fetchWellness(selectedId)
         }
@@ -141,7 +146,7 @@ const EditWellnessDialog = ({
                 const res = await uploadFile({ module: 'wellness', record_id: response?.data?.data?._id }, images);
                 if (res.status >= 200 && res.status < 400) {
                     const imagePaths = res.data?.data?.length ? res.data?.data : [];
-                    await doPUT(ENDPOINTS.update('wellness'), { images: imagePaths, _id: response?.data?.data?._id });
+                    await doPUT(ENDPOINTS.update('wellness'), { images: [...(data.images??[]),...imagePaths], _id: response?.data?.data?._id });
                     setImages([])
                     fetchWellness(response?.data?.data?._id);
                 }
