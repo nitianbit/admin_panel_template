@@ -139,6 +139,9 @@ export default function AppointmentDialog({
     data.timeSlot["end"] = endTime;
 
     if (data.patient?.length === 0) return showError("Please select a patient")
+     if(!data.doctor)delete data.doctor;
+    if(!data.lab)delete data.lab;
+// \    if(!data.lab)delete data.lab;
     onCreate(data)
     toggleModal()
   }
