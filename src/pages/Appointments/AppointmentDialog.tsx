@@ -145,7 +145,10 @@ export default function AppointmentDialog({
     onCreate(data)
     toggleModal()
   }
-
+  
+   if (Array.isArray(userData.role) && ![MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))) {
+    return null;
+  }
 
   return (
     <div>

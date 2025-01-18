@@ -7,6 +7,8 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import AddSinglePatientContent from "./AddSinglePatientContent";
 import AddBulkUpload from "./AddBulkUploadContent";
+import { MODULES } from "../../utils/constants";
+import { useAppContext } from "../../services/context/AppContext";
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
@@ -25,6 +27,7 @@ export default function AddPatientDialog({
   selectedId
 }: any) {
   const [bulkOpen, setbulkOpen] = React.useState(false);
+  const { userData } = useAppContext();
 
   
   const handleClickOpen = () => {
@@ -34,6 +37,10 @@ export default function AddPatientDialog({
   const handleBulkClickOpen = () => {
     setbulkOpen(true);
   };
+
+    if (Array.isArray(userData.role) && ![MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))) {
+      return null;
+    }
 
 
   return (

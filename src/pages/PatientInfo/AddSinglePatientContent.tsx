@@ -32,9 +32,10 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
         name: "",
         gender: "",
         company: userData.role.includes("hr") && globalCompanyId ? globalCompanyId : "",
-        phone: 0,
+        phone: "",
         address: "",
-        age: 0,
+        age: "",
+        email:""
     });
     const {
         handleSubmit,
@@ -128,6 +129,16 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         placeholder="0 123456789"
                         value={patientData.phone}
                         onChange={(e) => handleChange("phone", e.target.value)}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Patient Email"
+                        type="email"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="Enter Patient Email"
+                        value={patientData.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
                     />
                     <TextField
                         margin="dense"
