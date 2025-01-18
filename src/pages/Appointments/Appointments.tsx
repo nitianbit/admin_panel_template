@@ -10,14 +10,22 @@ import { COLUMNS } from "./constants";
 import { MODULES } from "../../utils/constants";
 import Layout from "../../components/Layout";
 import { useCompanyStore } from "../../services/company";
+import { useAppContext } from "../../services/context/AppContext";
 
 function Appointments() {
   const { data, totalPages, total, rows, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
   const { globalCompanyId } = useCompanyStore();
+  const { userData } = useAppContext();
 
   useEffect(() => {
-    if (globalCompanyId) {
-      setFilters({ company: globalCompanyId })
+    if (globalCompanyId && userData) {
+      const isDoctor = userData.role.includes(MODULES.DOCTOR);
+      const isLab = userData.role.includes(MODULES.LABORATORY);
+      setFilters({
+        company: globalCompanyId,
+        ...(isDoctor && { doctor: userData._id }),
+        ...(isLab && { laboratory: userData._id })
+      })
     } else {
       fetchGrid()
     }

@@ -2,8 +2,8 @@
 
 export interface Patient {
   name: string;
-  phone: number;
-  age: number;
+  phone: number | string;
+  age: number | string;
   email?: string;
   countryCode?: number;
   gender: string;
