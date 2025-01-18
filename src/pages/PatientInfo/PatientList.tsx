@@ -16,7 +16,7 @@ import { useCompanyStore } from "../../services/company";
 
 function PatientList({ }: any) {
 
-  const { data, totalPages, rows, total, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage } = usePatientStore();
+  const { data, totalPages, rows, total, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onCreate, onDelete, nextPage, prevPage, onUpdate } = usePatientStore();
   const { globalCompanyId } = useCompanyStore();
   const [patients, setPatients] = useState([]);
   const [searchedPatients, setSearchedPatients] = React.useState([]);
@@ -80,8 +80,9 @@ function PatientList({ }: any) {
             total,
             loading: isLoading,
             onPageChange,
-            module: MODULES.DOCTOR,
-            onDelete: (data: any) => onDelete(data._id)
+            module: MODULES.PATIENTS,
+            onDelete: (data: any) => onDelete(data._id),
+            onUpdate: (data: any) => onUpdate(data),
           }}
         />
   

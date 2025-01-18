@@ -17,6 +17,11 @@ import { GridTableProps } from "../../types/gridTable";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from "../ConfirmationDialog";
 import EditIcon from "@mui/icons-material/Edit";
+import VerifiedIcon from '@mui/icons-material/Verified';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
+import { MODULES } from "../../utils/constants";
+import { useAppContext } from "../../services/context/AppContext";
+import { isAdminOrSuperVisorOrHR } from "../../utils/helper";
 
 const GridTable: React.FC<GridTableProps> = ({
   data,
@@ -31,18 +36,26 @@ const GridTable: React.FC<GridTableProps> = ({
   selectedIds,
   setSelectedIds,
   toggleModal,
+  module,
+  onUpdate = (...args: any) => { },
 }) => {
-   const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: boolean | null }>({
+   const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: any | null,type:string | null }>({
     visible: false,
-    data: false
+    data: null,
+    type: null
   });
-
-  const handleOpenDialog = (data: any) => setDeleteConfirmation({ visible: true, data });
-  const handleCloseDialog = () => setDeleteConfirmation({ visible: false, data: null });
+ 
+  const handleOpenDialog = (data: any,type="Delete") => setDeleteConfirmation({ visible: true, data ,type});
+  const handleCloseDialog = () => setDeleteConfirmation({ visible: false, data: null,type:null });
+  const {userData}=useAppContext();
 
   const handleConfirm = () => {
     try {
-      onDelete(deleteConfirmation.data);
+      if(deleteConfirmation.type=="Delete"){
+        onDelete(deleteConfirmation.data);
+      }else if(deleteConfirmation.type=="Approval" && onUpdate){
+        onUpdate({...deleteConfirmation.data, isVerified: !deleteConfirmation.data?.isVerified});
+      }
       handleCloseDialog();
     } catch (error) {
 
@@ -133,6 +146,11 @@ const GridTable: React.FC<GridTableProps> = ({
                       }} />
 
                       <DeleteIcon color="error" onClick={() => onActionClick(row)} />
+                      {isAdminOrSuperVisorOrHR(userData)? (
+                        <span onClick={() => handleOpenDialog(row,"Approval")}>
+                          {row?.isVerified? <VerifiedIcon color="success"  /> : <NewReleasesIcon color="error"  />}
+                        </span>
+                      ): null}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -150,11 +168,11 @@ const GridTable: React.FC<GridTableProps> = ({
       </Grid>
       <ConfirmationDialog
         open={deleteConfirmation.visible}
-        title="Delete Confirmation"
-        message="Are you sure you want to delete this item? This action cannot be undone."
+        title={`${deleteConfirmation.type} Confirmation`}
+        message={deleteConfirmation.type === "Delete" ? "Are you sure you want to delete this item? This action cannot be undone." : `Are you sure you want to ${deleteConfirmation?.data?.isVerified ? "unverify" : "verify"}  this? `}
         onConfirm={handleConfirm}
         onCancel={handleCloseDialog}
-        confirmText="Delete"
+        confirmText={'Yes'}
         cancelText="Cancel"
       />
     </>

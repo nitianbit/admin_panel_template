@@ -78,3 +78,6 @@ export const downloadFile = async (src:string) => {
       console.error("Error downloading file:", error);
   }
 };
+
+
+export const isAdminOrSuperVisorOrHR = (userData:any) =>  Array.isArray(userData.role) && [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))
