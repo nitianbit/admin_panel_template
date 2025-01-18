@@ -35,7 +35,8 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
         phone: "",
         address: "",
         age: "",
-        email:""
+        email:"",
+        isVerified:true
     });
     const {
         handleSubmit,
