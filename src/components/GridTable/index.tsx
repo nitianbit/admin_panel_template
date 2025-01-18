@@ -146,7 +146,7 @@ const GridTable: React.FC<GridTableProps> = ({
                       }} />
 
                       <DeleteIcon color="error" onClick={() => onActionClick(row)} />
-                      {isAdminOrSuperVisorOrHR(userData)? (
+                      {isAdminOrSuperVisorOrHR(userData)&& module==MODULES.PATIENTS? (
                         <span onClick={() => handleOpenDialog(row,"Approval")}>
                           {row?.isVerified? <VerifiedIcon color="success"  /> : <NewReleasesIcon color="error"  />}
                         </span>
