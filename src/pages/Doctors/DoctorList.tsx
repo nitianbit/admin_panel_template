@@ -31,7 +31,7 @@ export default function DoctorList() {
 
 
   return (
-    <Layout appBarTitle="Patient">
+    <Layout appBarTitle="Doctors">
       <Layout.Header component={AddDoctorDialog} />
       <Layout.Body
         component={GeneralTable}

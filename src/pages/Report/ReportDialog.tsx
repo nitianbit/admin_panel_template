@@ -229,7 +229,8 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                     onSelect={function (id: string): void {
                                         console.log(id);
                                         handleChange("lab", id)
-                                    }} />
+                                    }}
+                                     />
                             </Grid>
                         )}
 
@@ -248,6 +249,9 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 rows={4}
                                 onChange={(e) => handleChange("notes", e.target.value)}
                                 multiline
+                                InputLabelProps={{
+                                    shrink: true, // Ensure the label shrinks when there's content
+                                  }}
                             />
                         </Grid>
 

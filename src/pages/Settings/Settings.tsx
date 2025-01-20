@@ -91,7 +91,7 @@ export default function Settings() {
                       label="Red"
                     />
                     <FormControlLabel
-                      value="#2C5F2D"
+                      value="#01999E"
                       control={<Radio />}
                       label="Green"
                     />
@@ -119,7 +119,7 @@ export default function Settings() {
                       label="Red"
                     />
                     <FormControlLabel
-                      value="#2C5F2D"
+                      value="#01999E"
                       control={<Radio />}
                       label="Green"
                     />

@@ -4,6 +4,7 @@ import ReactECharts from "echarts-for-react";
 
 export default function PieChart() {
   const option = {
+    color: ["#9CE0E2", "#079094", "#7FCC2C"],
     tooltip: {
       trigger: "item"
     },

@@ -4,10 +4,12 @@ export const themeOptions: ThemeOptions = {
   palette: {
     mode: "light",
     primary: {
-      main: "#2C5F2D"
+      // main: "#2C5F2D"
+      main: "#01999E"
     },
     secondary: {
-      main: "#97BC62"
+      // main: "#97BC62"
+      main:"#9CE0E2"
     }
   },
   shape: {

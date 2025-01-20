@@ -4,6 +4,7 @@ import Title from "../../components/Title";
 
 export default function BarChart() {
   const option = {
+    color: ["#079094"],
     tooltip: {
       trigger: "axis",
       axisPointer: {

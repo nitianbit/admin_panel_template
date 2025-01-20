@@ -133,9 +133,13 @@ export default function Appbar(props: { appBarTitle: string }) {
             px: [1],
           }}
         >
-          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+          {/* <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
             <img src={logo} height="50px" alt="Logo" />
-          </Box>
+          </Box> */}
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+  <img src={logo} height="50px" alt="Logo" />
+</Box>
+
           <IconButton onClick={toggleDrawer}>
             <ChevronLeftIcon />
           </IconButton>
