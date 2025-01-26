@@ -18,4 +18,6 @@ export const ENDPOINTS = {
     delete: (module:string,id:string)=>`/${module}/${id}/delete`,
     detail: (module:string,id:string)=>`/${module}/${id}/detail`,
     grid: (module:string)=>`/${module}/grid`,
+    dashboardStats: '/dashboard/stats',
+    stats:(module:string)=> `/dashboard/${module}`,
 }

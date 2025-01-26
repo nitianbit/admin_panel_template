@@ -15,6 +15,12 @@ import PeopleIcon from "@mui/icons-material/People";
 import TodayIcon from "@mui/icons-material/Today";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import { doGET } from "../../utils/HttpUtils";
+import { ENDPOINTS } from "../../services/api/constants";
+import { dashboard_default_stats, DASHBOARD_STATS, dashboardCards } from "./constants";
+import PatientsByCompany from "./PatientsByCompany";
+import PatientsByDoctor from "./PatientsByDoctor";
+import AppointmentsByCompany from "./AppointmentsByCompany";
 
 const cardData = [
   {
@@ -42,10 +48,26 @@ const cardData = [
 const chartData = [
   { chartName: <PieChart /> },
   { chartName: <BarChart /> }
-  //{ chartName: <OrganData /> }
 ];
 
 export default function Dashboard() {
+  const [data,setData]=React.useState<DASHBOARD_STATS>(dashboard_default_stats);
+
+  const fetchData=async()=>{
+    try {
+      const response=await doGET(`${ENDPOINTS.dashboardStats}`);
+      if(response.status==200){
+        setData(response.data?.data)
+      }
+    } catch (error) {
+      
+    }
+  }
+
+  React.useEffect(()=>{
+    fetchData();
+  },[])
+
   return (
     <Box sx={{ display: "flex" }}>
       <Appbar appBarTitle="Dashboard" />
@@ -66,7 +88,7 @@ export default function Dashboard() {
 
         <Container sx={{ mt: 4, mb: 4 }}>
           <Grid container spacing={3}>
-            {cardData.map((item, index) => (
+            {/* {cardData.map((item, index) => (
               <Grid key={index} item xs={12} md={4} lg={3}>
                 <Paper
                   sx={{
@@ -83,10 +105,33 @@ export default function Dashboard() {
                   />
                 </Paper>
               </Grid>
-            ))}
+            ))} */}
+            {
+              dashboardCards.map((item, index) => (
+                <Grid key={index} item xs={12} md={4} lg={3}>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      height: 200
+                    }}
+                  >
+                    <HealthCard
+                      icon={item.icon}
+                      title={item.title}
+                      value={data[item.value]}
+                    />
+                  </Paper>
+                </Grid>
+              ))
+            }
+            <PatientsByCompany />
+            <PatientsByDoctor />
+            <AppointmentsByCompany/>
 
             {/* Chart */}
-            {chartData.map((item, index) => (
+            {/* {chartData.map((item, index) => (
               <Grid key={index} item xs={12} md={6} lg={6}>
                 <Paper
                   sx={{
@@ -99,13 +144,13 @@ export default function Dashboard() {
                   {item.chartName}
                 </Paper>
               </Grid>
-            ))}
+            ))} */}
             {/* <img src="https://echarts.apache.org/examples/data/asset/geo/Veins_Medical_Diagram_clip_art.svg" /> */}
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
                 <LatestAppointments />
               </Paper>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Container>
       </Box>
