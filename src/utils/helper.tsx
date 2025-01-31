@@ -23,6 +23,7 @@ export const moduleRoles = {
   "/departments": [MODULES.ADMIN],
   "/services": [MODULES.ADMIN],
   "/offers": [MODULES.ADMIN],
+  "/services-images": [MODULES.ADMIN],
   "/hr-list": [MODULES.ADMIN, MODULES.SUPERVISOR],
   "/report": [MODULES.ADMIN, MODULES.DOCTOR, MODULES.LABORATORY],
 }
