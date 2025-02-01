@@ -51,22 +51,22 @@ const chartData = [
 ];
 
 export default function Dashboard() {
-  const [data,setData]=React.useState<DASHBOARD_STATS>(dashboard_default_stats);
+  const [data, setData] = React.useState<DASHBOARD_STATS>(dashboard_default_stats);
 
-  const fetchData=async()=>{
+  const fetchData = async () => {
     try {
-      const response=await doGET(`${ENDPOINTS.dashboardStats}`);
-      if(response.status==200){
+      const response = await doGET(`${ENDPOINTS.dashboardStats}`);
+      if (response.status == 200) {
         setData(response.data?.data)
       }
     } catch (error) {
-      
+
     }
   }
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     fetchData();
-  },[])
+  }, [])
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -126,9 +126,7 @@ export default function Dashboard() {
                 </Grid>
               ))
             }
-            <PatientsByCompany />
-            <PatientsByDoctor />
-            <AppointmentsByCompany/>
+
 
             {/* Chart */}
             {/* {chartData.map((item, index) => (
@@ -151,6 +149,11 @@ export default function Dashboard() {
                 <LatestAppointments />
               </Paper>
             </Grid> */}
+          </Grid>
+          <Grid container spacing={3} marginTop={1}>
+            <AppointmentsByCompany />
+            <PatientsByDoctor />
+            <PatientsByCompany />
           </Grid>
         </Container>
       </Box>
