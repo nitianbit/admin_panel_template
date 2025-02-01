@@ -3,6 +3,7 @@ import Title from "../../components/Title";
 import ReactECharts from "echarts-for-react";
 import { doGET } from "../../utils/HttpUtils";
 import { ENDPOINTS } from "../../services/api/constants";
+import { Grid, Paper } from "@mui/material";
 
 export default function PatientsByCompany() {
      const [data,setData]=React.useState([]);
@@ -57,14 +58,26 @@ export default function PatientsByCompany() {
         labelLine: {
           show: false
         },
-        data:[{name:'name',value:100},{name:'ndffame',value:1000}]
+        data
       }
     ]
   };
 
   return (
-    <React.Fragment>
-      <ReactECharts option={option} />
+    <React.Fragment> 
+      <Grid item xs={12} md={6} lg={6}>
+        <Paper
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: 400
+          }}
+        >
+          <Title>Patients By Company</Title>
+          <ReactECharts option={option} />
+        </Paper>
+      </Grid>
     </React.Fragment>
   );
 }
