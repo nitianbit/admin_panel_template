@@ -1,26 +1,25 @@
-import * as React from "react";
 import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import PieChart from "./PieChart";
-import BarChart from "./BarChart";
-import OrganData from "./OrganData";
-import HealthCard from "./HealthCard";
-import LatestAppointments from "./LatestAppointments";
+import Toolbar from "@mui/material/Toolbar";
+import * as React from "react";
 import Appbar from "../../components/Appbar";
+import BarChart from "./BarChart";
+import HealthCard from "./HealthCard";
+import PieChart from "./PieChart";
 
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import PeopleIcon from "@mui/icons-material/People";
 import TodayIcon from "@mui/icons-material/Today";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import { doGET } from "../../utils/HttpUtils";
 import { ENDPOINTS } from "../../services/api/constants";
+import { doGET } from "../../utils/HttpUtils";
+import AppointmentsByCompany from "./AppointmentsByCompany";
 import { dashboard_default_stats, DASHBOARD_STATS, dashboardCards } from "./constants";
 import PatientsByCompany from "./PatientsByCompany";
 import PatientsByDoctor from "./PatientsByDoctor";
-import AppointmentsByCompany from "./AppointmentsByCompany";
+import { useCompanyStore } from "../../services/company";
 
 const cardData = [
   {
@@ -50,23 +49,30 @@ const chartData = [
   { chartName: <BarChart /> }
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ companyWise = false }: { companyWise?: boolean }) {
   const [data, setData] = React.useState<DASHBOARD_STATS>(dashboard_default_stats);
+  const { globalCompanyId } = useCompanyStore();
 
   const fetchData = async () => {
     try {
-      const response = await doGET(`${ENDPOINTS.dashboardStats}`);
+      let url = ENDPOINTS.dashboardStats;
+
+      if (globalCompanyId && companyWise) {
+        url += `?company_id=${globalCompanyId}`;
+      }
+
+      const response = await doGET(url.toString());
       if (response.status == 200) {
         setData(response.data?.data)
       }
     } catch (error) {
-
+      console.log(error)
     }
   }
 
   React.useEffect(() => {
     fetchData();
-  }, [])
+  }, [companyWise, globalCompanyId])
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -151,9 +157,9 @@ export default function Dashboard() {
             </Grid> */}
           </Grid>
           <Grid container spacing={3} marginTop={1}>
-            <AppointmentsByCompany />
-            <PatientsByDoctor />
-            <PatientsByCompany />
+            <AppointmentsByCompany companyWise={companyWise}/>
+            <PatientsByDoctor companyWise={companyWise}/>
+            <PatientsByCompany companyWise={companyWise}/>
           </Grid>
         </Container>
       </Box>

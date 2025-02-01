@@ -4,13 +4,22 @@ import ReactECharts from "echarts-for-react";
 import { doGET } from "../../utils/HttpUtils";
 import { ENDPOINTS } from "../../services/api/constants";
 import { Grid, Paper } from "@mui/material";
+import { useCompanyStore } from "../../services/company";
 
-export default function AppointmentsByCompany() {
+export default function AppointmentsByCompany({ companyWise = false }: { companyWise?: boolean }) {
   const [data, setData] = React.useState([]);
+  const { globalCompanyId } = useCompanyStore();
+
 
   const fetchData = async () => {
     try {
-      const response = await doGET(`${ENDPOINTS.stats('appointments-company-stats')}`);
+
+      let url = ENDPOINTS.stats('appointments-company-stats');
+
+      if (globalCompanyId && companyWise) {
+        url += `?company_id=${globalCompanyId}`;
+      }
+      const response = await doGET(url);
       if (response.status == 200) {
         setData(response.data?.data)
       }
@@ -20,7 +29,7 @@ export default function AppointmentsByCompany() {
   }
   React.useEffect(() => {
     fetchData();
-  }, [])
+  }, [companyWise, globalCompanyId])
 
   const option = {
     color: ["#9CE0E2", "#079094", "#7FCC2C"],

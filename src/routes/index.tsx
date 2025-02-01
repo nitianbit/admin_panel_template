@@ -76,6 +76,12 @@ export const protectedRoutes = [
     </AdminElement>,
   },
   {
+    path: "/stats",
+    element: <AdminElement>
+      <Dashboard companyWise={true} />
+    </AdminElement>,
+  },
+  {
     path: "/orders",
     element: (
       <AdminElement>

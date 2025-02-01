@@ -4,24 +4,32 @@ import ReactECharts from "echarts-for-react";
 import { doGET } from "../../utils/HttpUtils";
 import { ENDPOINTS } from "../../services/api/constants";
 import { Grid, Paper } from "@mui/material";
+import { useCompanyStore } from "../../services/company";
 
-export default function PatientsByDoctor() {
-    const [data,setData]=React.useState();
-  
-    const fetchData=async()=>{
-      try {
-        const response=await doGET(`${ENDPOINTS.stats('patients-doctor-stats')}`);
-        if(response.status==200){
-          setData(response.data?.data)
-        }
-      } catch (error) {
-        
+export default function PatientsByDoctor({ companyWise = false }: { companyWise?: boolean }) {
+  const [data, setData] = React.useState();
+  const { globalCompanyId } = useCompanyStore();
+
+
+  const fetchData = async () => {
+    try {
+      let url = ENDPOINTS.stats('patients-doctor-stats');
+
+      if (globalCompanyId && companyWise) {
+        url += `?company_id=${globalCompanyId}`;
       }
+      const response = await doGET(url);
+      if (response.status == 200) {
+        setData(response.data?.data)
+      }
+    } catch (error) {
+
     }
-  
-    React.useEffect(()=>{
-      fetchData();
-    },[])
+  }
+
+  React.useEffect(() => {
+    fetchData();
+  }, [companyWise, globalCompanyId])
 
   const option = {
     color: ["#9CE0E2", "#079094", "#7FCC2C"],
@@ -62,7 +70,7 @@ export default function PatientsByDoctor() {
   };
   return (
     <React.Fragment>
-       <Grid item xs={12} md={6} lg={6}>
+      <Grid item xs={12} md={6} lg={6}>
         <Paper
           sx={{
             p: 2,
