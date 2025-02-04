@@ -79,7 +79,11 @@ export default function SignInSide() {
         success("Login Successfully")
         setIsLoggedIn(true)
         setValue(STORAGE_KEYS.TOKEN, response.data?.data)
-        navigate(`/dashboard`)
+        if (data.role == 'admin' || data.role == 'supervisor') {
+           navigate(`/dashboard`)
+        }else{
+          navigate(`/stats`)
+        }
         verifyToken(response.data?.data);
         setIsTokenVerified(true);
       }
@@ -145,7 +149,10 @@ export default function SignInSide() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate(`/dashboard`)
+      if (data.role == 'admin' || data.role == 'supervisor') {
+        return navigate(`/dashboard`)
+      }
+      navigate(`/stats`)
     }
   }, [isLoggedIn])
 
