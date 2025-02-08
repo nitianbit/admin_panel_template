@@ -7,6 +7,11 @@ import { useForm } from "react-hook-form";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
 import SearchInput from "../../components/SearchInput";
 import AddIcon from "@mui/icons-material/Add";
+import CustomImage from "../../components/CustomImage";
+import ImageUpload from "../../components/ImageUploader";
+import { uploadFile } from "../../utils/helper";
+import { MODULES } from "../../utils/constants";
+import _ from 'lodash';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -21,7 +26,8 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate } = useDepartmentStore();
     const [data, setData] = React.useState<Department>({
         name: "",
-        description: ""
+        description: "",
+        image: ""
     })
     const { register, handleSubmit, formState: { errors }, reset } = useForm<Department>();
 
@@ -29,13 +35,29 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const handleClickOpen = () => toggleModal(true);
     const handleClose = () => toggleModal(false);
 
-    const onSubmit = () => {
-        if (data?._id) {
-            onUpdate(data);
-        } else {
-            onCreate(data);
+    const onSubmit = async () => {
+        try {
+            let response: Department | null = null;
+            const payload: any = _.cloneDeep(data)
+            if (typeof data.image !== 'string') {
+                delete payload.image
+            }
+            if (data?._id) {
+                response = await onUpdate(payload);
+            } else {
+                response = await onCreate(payload);
+            }
+            if (response?._id && data?.image && typeof data.image === 'object') {
+                const res = await uploadFile({ module: MODULES.DEPARTMENT, record_id: response?._id }, [data?.image])
+                if (res.status >= 200 && res.status < 400) {
+                    const imagePaths = res.data?.data?.length ? res.data?.data[0] : '';
+                    await onUpdate({ image: imagePaths, _id: response?._id });
+                }
+            }
+            handleClose();
+        } catch (error) {
+
         }
-        handleClose();
     };
 
     const fetchDetail = async (selectedId: string) => {
@@ -49,6 +71,7 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     }
 
     React.useEffect(() => {
+        setData({ name: "", description: "", image: "" })
         if (selectedId) {
             fetchDetail(selectedId)
         }
@@ -98,6 +121,9 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             onChange={(e) => handleChange("description", e.target.value)}
                             multiline
                         />
+
+                        {data.image && typeof data.image === 'string' ? <CustomImage src={data.image} style={{ width: '50%', height: 200, objectFit: 'contain' }} /> :
+                            <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} />}
 
                     </DialogContent>
                     <DialogActions>

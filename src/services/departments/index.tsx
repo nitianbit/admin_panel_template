@@ -107,8 +107,9 @@ const store = create<DepartmentState>((set, get) => ({
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
+            return response?.data?.data
         } catch (error) {
-
+            return null;
         }
     },
     onUpdate: async (data: Department) => {
@@ -118,8 +119,9 @@ const store = create<DepartmentState>((set, get) => ({
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             }
+            return response?.data?.data
         } catch (error) {
-
+            return null;
         }
     },
     onDelete: async (id: string) => {

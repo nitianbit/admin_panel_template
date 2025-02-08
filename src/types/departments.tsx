@@ -5,6 +5,7 @@ export interface Department {
     name: string;
     description?: string;
     hospital?: string;
+    image?: string;
 
 }
 
@@ -36,8 +37,8 @@ export interface DepartmentState {
     nextPage: () => void;
     prevPage: () => void;
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void;
-    onCreate: (...args: any) => Promise<void>;
-    onUpdate: (...args: any) => Promise<void>;
+    onCreate: (...args: any) => Promise<Department | null>;
+    onUpdate: (...args: any) => Promise<Department | null>;
     onDelete: (...args: any) => Promise<void>;
     detail: (id: string) => Promise<{ data: Department }>;
     fetchGridAll: ( filters: DepartmentFilters) => Promise<Department[]>;
