@@ -8,7 +8,7 @@ import { COLUMNS } from './constants';
 import { MODULES } from '../../utils/constants';
 
 const Departments = () => {
-    const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDepartmentStore();
+    const { data, totalPages, currentPage, total,rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDepartmentStore();
     React.useEffect(() => {
         fetchGrid()
     }, [])
@@ -27,7 +27,8 @@ const Departments = () => {
                     loading: isLoading,
                     onPageChange,
                     module: MODULES.DEPARTMENT,
-                    onDelete: (data: any) => onDelete(data._id)
+                    onDelete: (data: any) => onDelete(data._id),
+                    rows
                 }}
             />
 
