@@ -46,7 +46,8 @@ function Appointments() {
           loading: isLoading,
           onPageChange,
           module: MODULES.DOCTOR,
-          onDelete: (data: any) => onDelete(data._id)
+          onDelete: (data: any) => onDelete(data._id),
+          rows
         }}
       />
 

@@ -25,10 +25,10 @@ interface AddPatientDialogProps {
 }
 
 const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpen, selectedId }) => {
+    const {userData} = useAppContext();
     const { detail, onUpdate, fetchGrid, onCreate: create } = usePatientStore();
     const {globalCompanyId} = useCompanyStore();
-    const {userData} = useAppContext();
-    const [patientData, setPatientData] = React.useState<Patient>({
+    const defaultData={
         name: "",
         gender: "",
         company: userData.role.includes("hr") && globalCompanyId ? globalCompanyId : "",
@@ -36,8 +36,9 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
         address: "",
         age: "",
         email:"",
-        isVerified:true
-    });
+        isVerified:true,
+    }
+    const [patientData, setPatientData] = React.useState<Patient>(defaultData);
     const {
         handleSubmit,
         reset,
@@ -74,6 +75,7 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
     }
 
     React.useEffect(() => {
+        setPatientData(defaultData)
         if (selectedId) {
             fetchDetail(selectedId)
         }
@@ -84,7 +86,7 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
             open={open}
             onClose={handleClose}
             TransitionComponent={Transition}
-            maxWidth="xs"
+            maxWidth="sm"
             fullWidth
             sx={{ height: "100%" }}
         >
@@ -162,6 +164,29 @@ const AddSinglePatientContent: React.FC<AddPatientDialogProps> = ({ open, setOpe
                         placeholder="ex: 18"
                         value={patientData.age}
                         onChange={(e) => handleChange("age", e.target.value)}
+                    />
+                     <TextField
+                        margin="dense"
+                        id="height"
+                        label="Height (in cm)"
+                        type="height"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="ex: 18"
+                        value={String(patientData.height??"")}
+                        typeof="number"
+                        onChange={(e) => handleChange("height", e.target.value)}
+                    />
+                     <TextField
+                        margin="dense"
+                        id="weight"
+                        label="Weight (in Kg)"
+                        type="weight"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="ex: 18"
+                        value={String(patientData.weight??"")}
+                        onChange={(e) => handleChange("weight", e.target.value)}
                     />
                 </DialogContent>
                 <DialogActions>

@@ -30,7 +30,9 @@ const GridDialog: React.FC<GridDialogProps> = ({
     onPageChange,
     fetchGrid,
     onDelete,
-    title=""
+    title="",
+    fullScreen=false,
+    hideAction=false
 }) => {
 
     const [selectedPatientIds, setSelectedPatientIds] = React.useState([]);
@@ -51,6 +53,7 @@ const GridDialog: React.FC<GridDialogProps> = ({
             maxWidth="lg"
             fullWidth
             sx={{ height: "100%" }}
+            fullScreen={fullScreen}
         >
             <DialogTitle>{title}</DialogTitle>
             <GeneralTable
@@ -67,6 +70,7 @@ const GridDialog: React.FC<GridDialogProps> = ({
                 }}
                 selectedIds={selectedPatientIds}
                 setSelectedIds={setSelectedPatientIds}
+                hideAction={hideAction}
             />
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>

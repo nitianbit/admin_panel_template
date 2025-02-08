@@ -46,7 +46,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
     });
 
     const [files, setFiles] = useState<File[]>([]);
-    const { onUpdate, onCreate, detail } = useReportStore();
+    const { onUpdate, onCreate, detail,filters,setFilters } = useReportStore();
     const { globalCompanyId } = useCompanyStore();
 
     const handleChange = (key: string, value: any) => setFormData({ ...formData, [key]: value });
@@ -170,7 +170,16 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                 alignItems="center"
                 spacing={2}
             >
-                <SearchInput />
+                        <div className="d-flex align-items-center" style={{ display: 'flex', alignItems: 'center' }}>
+                     
+                          <PatientSelect
+                            sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                            value={filters?.patient}
+                            onSelect={function (id: string): void {
+                              const filter=id?{ patient: id }:{}
+                              setFilters(filter)
+                            }} />
+                        </div>
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}

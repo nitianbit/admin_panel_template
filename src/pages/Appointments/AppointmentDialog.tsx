@@ -35,6 +35,10 @@ import { useCompanyStore } from "../../services/company";
 import CompanySelect from "../../components/DropDowns/CompanySelect";
 import DoctorSelect from "../../components/DoctorSelect";
 import LabSelect from "../../components/LabSelect";
+import PatientSelectDropdown from "../../components/PatientSelect/PatientSelectDropdown";
+import PatientSelect from "../../components/PatientSelect";
+import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
+import moment from "moment";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -51,7 +55,7 @@ export default function AppointmentDialog({
   selectedId
 }: any) {
 
-  const { onCreate, detail } = useAppointmentStore();
+  const { onCreate, detail,setFilters,filters ,onUpdate} = useAppointmentStore();
   const { globalCompanyId } = useCompanyStore();
   const { data: patientData, totalPages: patientTotalPages, total: patientTotal, currentPage: patientCurrentPage, isLoading: patientIsLoading, onPageChange: patientOnPageChange, fetchGrid: patientFetchtGrid, onDelete: patientOnDelete } = usePatientStore();
   const { data: doctorData, totalPages: doctorTotalPages, total: doctorTotal, currentPage: doctorCurrentPage, isLoading: doctorIsLoading, onPageChange: doctorOnPageChange, fetchGrid: doctorFetchtGrid, onDelete: doctorOnDelete } = useDoctorStore();
@@ -61,7 +65,7 @@ export default function AppointmentDialog({
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
   const [doctorDialogOpen, setDoctorDialogOpen] = React.useState(false);
 
-  const [appointMentData, setAppointMentData] = React.useState<Appointment>({
+  const defaultData={
     fee: 0,
     type: "1",
     status: "SCHD",
@@ -75,18 +79,21 @@ export default function AppointmentDialog({
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
     patient: "",
     company: globalCompanyId ?? ""
-  })
+  }
+
+  const [appointMentData, setAppointMentData] = React.useState<Appointment>(defaultData)
 
   const fetchData = async (id: string) => {
     try {
       const data = await detail(id)
-      setAppointMentData({ ...data?.data, appointmentDate: dayjs(data?.data?.appointmentDate, "YYYYMMDD").toISOString() })
+      setAppointMentData({ ...data?.data, appointmentDate: dayjs(String(data?.data?.appointmentDate), "YYYYMMDD")})
     } catch (error) {
-
+      console.log(error)
     }
   }
 
   React.useEffect(() => {
+    setAppointMentData(defaultData)
     if (selectedId) {
       fetchData(selectedId)
     }
@@ -139,14 +146,18 @@ export default function AppointmentDialog({
     data.timeSlot["end"] = endTime;
 
     if (data.patient?.length === 0) return showError("Please select a patient")
-     if(!data.doctor)delete data.doctor;
-    if(!data.lab)delete data.lab;
-// \    if(!data.lab)delete data.lab;
-    onCreate(data)
+    if (!data.doctor) delete data.doctor;
+    if (!data.lab) delete data.lab;
+    // \    if(!data.lab)delete data.lab;
+    if(data?._id){
+      onUpdate(data)
+    }else{
+      onCreate(data)
+    }
     toggleModal()
   }
-  
-   if (Array.isArray(userData.role) && ![MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))) {
+
+  if (Array.isArray(userData.role) && ![MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))) {
     return null;
   }
 
@@ -158,7 +169,16 @@ export default function AppointmentDialog({
         alignItems="center"
         spacing={2}
       >
-        <SearchInput />
+        <div className="d-flex align-items-center" style={{ display: 'flex', alignItems: 'center' }}>
+          <SearchInput />
+          <PatientSelect
+            sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+            value={filters?.patient}
+            onSelect={function (id: string): void {
+              const filter=id?{ patient: id }:{}
+              setFilters(filter)
+            }} />
+        </div>
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
@@ -300,6 +320,10 @@ export default function AppointmentDialog({
 
           <CompanySelect register={() => { }} value={appointMentData?.company} onChange={(value) => handleChange("company", value)} module={MODULES.APPOINTMENT} />
 
+          <DepartmentSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
+              handleChange("department", value)
+            }} module={MODULES.APPOINTMENT} />
+
           <LocalizationProvider dateAdapter={AdapterDayjs}>
 
             <DemoContainer components={["DatePicker"]}>
@@ -307,6 +331,7 @@ export default function AppointmentDialog({
                 value={appointMentData?.appointmentDate}
                 onChange={(e: any) => {
                   handleChange("appointmentDate", e)
+                  console.log(e)
                 }
                 }
                 label="Appointment Date"

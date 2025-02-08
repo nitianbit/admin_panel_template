@@ -17,4 +17,5 @@ export interface GridTableProps {
     loading:boolean;
     module:string;
     [key: string]: any; //for any extra data
+    hideAction?:boolean
   }

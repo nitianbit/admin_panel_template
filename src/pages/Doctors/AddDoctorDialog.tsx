@@ -46,8 +46,9 @@ export default function AddDoctorDialog({
     services: [],
     departments: [],
     description: "",
-    role:[MODULES.DOCTOR]
-    // specialization: ""
+    role:[MODULES.DOCTOR],
+    degree:'',
+    specialization: ""
   }
   const { onCreate, detail, onUpdate } = useDoctorStore();
   const [doctorData, setDoctorData] = React.useState<Doctor>(defaultData)
@@ -119,7 +120,7 @@ export default function AddDoctorDialog({
         open={isModalOpen}
         onClose={handleClose}
         TransitionComponent={Transition}
-        maxWidth="xs"
+        maxWidth="md"
         fullWidth
         sx={{ height: "100%" }}
       >
@@ -191,6 +192,29 @@ export default function AddDoctorDialog({
 
             <TextField
               margin="dense"
+              id="degree"
+              rows={4}
+              label="Degree"
+              // type="description"
+              fullWidth
+              variant="outlined"
+              placeholder=""
+              value={doctorData.degree}
+              onChange={(e) => handleChange("degree", e.target.value)}
+            />
+             <TextField
+              margin="dense"
+              id="specialist"
+              label="Specialization"
+              type="specialist"
+              fullWidth
+              variant="outlined"
+              placeholder="ex: Cardiologist, Dentist"
+              value={doctorData.specialization}
+              onChange={(e) => handleChange("specialization", e.target.value)}
+            />
+            <TextField
+              margin="dense"
               id="description"
               rows={4}
               label="Description"
@@ -201,18 +225,6 @@ export default function AddDoctorDialog({
               value={doctorData.description}
               onChange={(e) => handleChange("description", e.target.value)}
             />
-
-            {/* <TextField
-              margin="dense"
-              id="specialist"
-              label="Specialist"
-              type="specialist"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Cardiologist, Dentist"
-              value={doctorData.specialization}
-              onChange={(e) => handleChange("specialization", e.target.value)}
-            /> */}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>

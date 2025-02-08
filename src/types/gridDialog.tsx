@@ -24,4 +24,6 @@ export interface GridDialogProps {
   rows?: number; // Optional number of rows per page
   filters?: any; // Optional filters for the table
   title: string;
+  fullScreen?: boolean;
+  hideAction?:boolean
 }

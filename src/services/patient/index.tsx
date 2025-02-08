@@ -11,7 +11,7 @@ const store = create<PatientState>((set, get) => ({
     currentPage: 1,
     filters: {},
     isLoading: false,
-    rows: 2,
+    rows: 10,
     total:0,
 
     fetchGrid: async () => {

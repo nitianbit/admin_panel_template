@@ -3,6 +3,7 @@
  export interface Doctor {
   name: string;
   specialization?: string; // Optional field
+  degree?: string; // Optional field
   email?: string;
   phone: number;
   countryCode?: number;

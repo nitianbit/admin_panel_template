@@ -83,6 +83,7 @@ function PatientList({ }: any) {
             module: MODULES.PATIENTS,
             onDelete: (data: any) => onDelete(data._id),
             onUpdate: (data: any) => onUpdate(data),
+            rows
           }}
         />
   

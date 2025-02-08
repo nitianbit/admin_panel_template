@@ -19,6 +19,8 @@ export interface Patient {
   disabled?: boolean;
   isVerified?: boolean;
   _id?: string;
+  height?:number,
+  weight?:number
 }
 
 

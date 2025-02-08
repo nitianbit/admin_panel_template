@@ -37,7 +37,9 @@ const GridTable: React.FC<GridTableProps> = ({
   setSelectedIds,
   toggleModal,
   module,
+  rows=2,
   onUpdate = (...args: any) => { },
+  hideAction=false
 }) => {
    const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: any | null,type:string | null }>({
     visible: false,
@@ -100,7 +102,7 @@ const GridTable: React.FC<GridTableProps> = ({
                 {columns.map((col, index) => (
                   <TableCell key={index}>{col.header}</TableCell>
                 ))}
-                <TableCell
+                {!hideAction?<TableCell
                   sx={{
                     position: "sticky",
                     right: 0,
@@ -110,7 +112,7 @@ const GridTable: React.FC<GridTableProps> = ({
                   }}
                 >
                   ACTIONS
-                </TableCell>
+                </TableCell>:null}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -132,7 +134,7 @@ const GridTable: React.FC<GridTableProps> = ({
                       </TableCell>
                     ))}
                     {/* Action Column */}
-                    <TableCell
+                    {!hideAction ? <TableCell
                       sx={{
                         position: "sticky",
                         right: 0,
@@ -146,22 +148,22 @@ const GridTable: React.FC<GridTableProps> = ({
                       }} />
 
                       <DeleteIcon color="error" onClick={() => onActionClick(row)} />
-                      {isAdminOrSuperVisorOrHR(userData)&& module==MODULES.PATIENTS? (
-                        <span onClick={() => handleOpenDialog(row,"Approval")}>
-                          {row?.isVerified? <VerifiedIcon color="success"  /> : <NewReleasesIcon color="error"  />}
+                      {isAdminOrSuperVisorOrHR(userData) && module == MODULES.PATIENTS ? (
+                        <span onClick={() => handleOpenDialog(row, "Approval")}>
+                          {row?.isVerified ? <VerifiedIcon color="success" /> : <NewReleasesIcon color="error" />}
                         </span>
-                      ): null}
-                    </TableCell>
+                      ) : null}
+                    </TableCell> : null}
                   </TableRow>
                 ))}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[2]}
+          rowsPerPageOptions={[rows]}
           component="div"
           count={total}
-          rowsPerPage={2}
+          rowsPerPage={rows}
           page={currentPage - 1}
           onPageChange={onPageChange}
         />

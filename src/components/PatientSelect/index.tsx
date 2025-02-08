@@ -67,6 +67,8 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
         fetchGrid={fetchGrid}
         onDelete={onDelete}
         title="Patient"
+        fullScreen={true}
+        hideAction
       />
     </>
   );

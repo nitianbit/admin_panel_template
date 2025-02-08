@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 
 
 export interface Appointment {
@@ -7,7 +8,7 @@ export interface Appointment {
     hospital?: string;
     department?: string;
     type: string // 1: Report, 2: Prescription
-    appointmentDate: string;
+    appointmentDate: string | Dayjs;
     timeSlot: {
         start: string;
         end: string;
@@ -16,6 +17,7 @@ export interface Appointment {
     fee?: Number
     paymentStatus?: string;
     company?: string;
+    _id?:string
 }
 
 export interface AppointmentResponse {
