@@ -5,6 +5,8 @@ import DoctorDetail from "../DoctorDetail";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import { usePatientStore } from "../../services/patient";
 import PatientDetail from "../PatientDetail";
+import { PatientFilters } from "../../types/patient";
+import { useCompanyStore } from "../../services/company";
 
 interface Props {
   onSelect: (id: string) => void; // Callback when a doctor is selected
@@ -24,7 +26,9 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
     onPageChange,
     fetchGrid,
     onDelete,
+    setFilters
   } = usePatientStore();
+  const {globalCompanyId} =useCompanyStore();
 
   const handleClose = () => setVisible(false);
 
@@ -32,6 +36,15 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
     onSelect(ids.length ? ids[0] : "");
     setVisible(false);
   };
+
+  const fetch=(filters?: PatientFilters)=>{
+    if(filters && Object.keys(filters).length){
+      filters.company=globalCompanyId;
+      setFilters(filters)
+    }else{
+      setFilters({company :globalCompanyId });
+    }
+  }
 
   return (
     <>
@@ -64,11 +77,12 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
         currentPage={currentPage}
         isLoading={isLoading}
         onPageChange={onPageChange}
-        fetchGrid={fetchGrid}
+        fetchGrid={fetch}
         onDelete={onDelete}
         title="Patient"
         fullScreen={true}
         hideAction
+        showSearch
       />
     </>
   );

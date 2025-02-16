@@ -5,6 +5,9 @@ import GeneralTable from '../GridTable/index'
 import { COLUMNS } from "../../pages/PatientInfo/constants"
 import { MODULES } from "../../utils/constants"
 import { GridDialogProps } from "../../types/gridDialog"
+import SearchInput from "../SearchInput"
+import SearchIcon from '@mui/icons-material/Search';
+import { useCompanyStore } from "../../services/company"
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -22,7 +25,7 @@ const GridDialog: React.FC<GridDialogProps> = ({
     handleSave,
     data,
     totalPages,
-    rows=20,
+    rows = 20,
     total,
     currentPage,
     filters,
@@ -30,12 +33,15 @@ const GridDialog: React.FC<GridDialogProps> = ({
     onPageChange,
     fetchGrid,
     onDelete,
-    title="",
-    fullScreen=false,
-    hideAction=false
+    title = "",
+    fullScreen = false,
+    hideAction = false,
+    showSearch= false
 }) => {
 
     const [selectedPatientIds, setSelectedPatientIds] = React.useState([]);
+    const [query, setQuery] = React.useState('')
+    const { globalCompanyId } = useCompanyStore();
 
 
     useEffect(() => {
@@ -43,6 +49,25 @@ const GridDialog: React.FC<GridDialogProps> = ({
             fetchGrid()
         }
     }, [])
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value)
+    }
+
+    //currently it handles only patient make dynamic
+    const handleSearch = () => {
+        let filters: any = {};
+        if (query) {
+            filters = {
+                name: `caseIgnore[${query}]`
+            }
+        }
+
+        if (globalCompanyId) {
+            filters.company = globalCompanyId
+        }
+        fetchGrid(filters)
+    }
 
 
     return (
@@ -56,6 +81,14 @@ const GridDialog: React.FC<GridDialogProps> = ({
             fullScreen={fullScreen}
         >
             <DialogTitle>{title}</DialogTitle>
+
+            {showSearch ? <div style={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
+                <SearchInput handleChange={handleChange} />
+                <Button variant="contained" style={{ borderRadius: 100 }} onClick={handleSearch}>
+                    <SearchIcon />
+                </Button>
+            </div> : null}
+
             <GeneralTable
                 data={data}
                 columns={COLUMNS}

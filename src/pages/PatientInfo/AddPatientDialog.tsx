@@ -51,7 +51,7 @@ export default function AddPatientDialog({
         alignItems="center"
         spacing={2}
       >
-        <SearchInput handleChange={handleChange} />
+        {/* <SearchInput handleChange={handleChange} /> */}
         <Box>
           <Button
             variant="outlined"

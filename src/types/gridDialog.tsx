@@ -20,10 +20,11 @@ export interface GridDialogProps {
   spacing?: number; // Optional grid spacing
   styles?: Record<string, any>; // Optional custom styles,
   onDelete: (id: string) => void;
-  fetchGrid: () => void;
+  fetchGrid: (...args:any) => void;
   rows?: number; // Optional number of rows per page
   filters?: any; // Optional filters for the table
   title: string;
   fullScreen?: boolean;
-  hideAction?:boolean
+  hideAction?:boolean;
+  showSearch?:boolean
 }

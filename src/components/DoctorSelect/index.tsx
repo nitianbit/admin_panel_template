@@ -4,6 +4,7 @@ import { useDoctorStore } from "../../services/doctors";
 import { Box, Typography } from "@mui/material";
 import DoctorDetail from "../DoctorDetail";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import { DoctorFilters } from "../../types/doctors";
 
 interface DoctorSelectProps {
   onSelect: (id: string) => void; // Callback when a doctor is selected
@@ -23,6 +24,7 @@ export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx=
     onPageChange,
     fetchGrid,
     onDelete,
+    setFilters
   } = useDoctorStore();
 
   const handleClose = () => setVisible(false);
@@ -31,6 +33,14 @@ export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx=
     onSelect(ids.length ? ids[0] : "");
     setVisible(false);
   };
+
+    const fetch=(filters?: DoctorFilters)=>{
+      if(filters && Object.keys(filters).length){
+        setFilters(filters)
+      }else{
+        setFilters({ });
+      }
+    }
 
   return (
     <>
@@ -63,9 +73,10 @@ export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx=
         currentPage={currentPage}
         isLoading={isLoading}
         onPageChange={onPageChange}
-        fetchGrid={fetchGrid}
+        fetchGrid={fetch}
         onDelete={onDelete}
         title="Doctor"
+        showSearch
       />
     </>
   );

@@ -14,14 +14,15 @@ const store = create<PatientState>((set, get) => ({
     rows: 10,
     total:0,
 
-    fetchGrid: async () => {
+    fetchGrid: async (page?:number,filters?: PatientFilters) => {//page?:number,filters?: PatientFilters
         try {
-            const { filters, currentPage, rows, isLoading, total } = get();
+            const {  currentPage, rows, isLoading, total } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
-
-            const queryParams = new URLSearchParams(filters);
+            const newFilters={...get().filters,...(filters??{})}
+            set({ currentPage: page ?? 1,filters:newFilters});
+            const queryParams = new URLSearchParams(get().filters);
             queryParams.append('page', String(currentPage));
             queryParams.append('rows', String(rows));
             const apiUrl = `${ENDPOINTS.grid('patients')}?${queryParams.toString()}`;
