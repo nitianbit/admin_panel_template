@@ -27,7 +27,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
             // Generate previews
             const previews = files.map((file) => URL.createObjectURL(file));
-            setPreviews(previews);
+            setPreviews(prev=>[...prev,...previews]);
 
             // Pass files to parent
             onChange(files);
@@ -42,7 +42,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
             <input
                 type="file"
-                accept="image/*"
+                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 multiple={multiple}
                 onChange={handleFileChange}
                 style={{ display: "none", width: '100%' }}

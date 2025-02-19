@@ -152,8 +152,8 @@ const AddOffersDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             />
                         </Stack>
                        
-                       {data.image && typeof data.image==='string' ? <CustomImage src={data.image} style={{ width: '50%',height:200,objectFit:'contain' }}/>:
-                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} />}
+                       {data.image && typeof data.image==='string' ? <CustomImage src={data.image} style={{ width: '50%',height:200,objectFit:'contain' }}/>:null}
+                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} />
 
                     </DialogContent>
                     <DialogActions>
