@@ -123,7 +123,7 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                         />
 
                         {data.image && typeof data.image === 'string' ? <CustomImage src={data.image} style={{ width: '50%', height: 200, objectFit: 'contain' }} /> : null}
-                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} />
+                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} allow="image/*"/>
 
                     </DialogContent>
                     <DialogActions>

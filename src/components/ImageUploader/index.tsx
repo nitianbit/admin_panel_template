@@ -7,7 +7,8 @@ interface ImageUploadProps {
     height?: number;
     maxWidth?: number;
     maxHeight?: number;
-    text?:string
+    text?:string;
+    allow?:string
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -17,7 +18,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     height = 100,
     maxWidth = 300,
     maxHeight = 300,
-    text="Images"
+    text="Images",
+    allow="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 }) => {
     const [previews, setPreviews] = useState<string[]>([]);
 
@@ -42,7 +44,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
             <input
                 type="file"
-                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept={allow}
                 multiple={multiple}
                 onChange={handleFileChange}
                 style={{ display: "none", width: '100%' }}
