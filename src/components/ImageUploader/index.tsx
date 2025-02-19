@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; 
 
 interface ImageUploadProps {
     multiple?: boolean;
@@ -7,8 +8,8 @@ interface ImageUploadProps {
     height?: number;
     maxWidth?: number;
     maxHeight?: number;
-    text?:string;
-    allow?:string
+    text?: string;
+    allow?: string
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -18,8 +19,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     height = 100,
     maxWidth = 300,
     maxHeight = 300,
-    text="Images",
-    allow="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    text = "Images",
+    allow = "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 }) => {
     const [previews, setPreviews] = useState<string[]>([]);
 
@@ -29,7 +30,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
             // Generate previews
             const previews = files.map((file) => URL.createObjectURL(file));
-            setPreviews(prev=>[...prev,...previews]);
+            setPreviews(prev => [...prev, ...previews]);
 
             // Pass files to parent
             onChange(files);
@@ -70,40 +71,52 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
             {/* Preview */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {previews.map((src, index) => (
-                    <div key={index} style={{ position: "relative", display: "inline-block", }}>
-                        <img
-                            src={src}
-                            alt={`Preview ${index}`}
-                            style={{
-                                width: `${width}px`,
-                                height: `${height}px`,
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                            }}
-                        />
-                        <button
-                            onClick={() => handleRemovePreview(index)}
-                            style={{
-                                position: "absolute",
-                                top: "5px",
-                                right: "5px",
-                                background: "#ff0000",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "50%",
-                                width: "20px",
-                                height: "20px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                cursor: "pointer",
-                            }}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                ))}
+                {previews.map((src, index) => {
+                      const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(src);
+                    return (
+                        <div key={index} style={{ position: "relative", display: "inline-block", }}>
+                            {isImage ? <img
+                                src={src}
+                                alt={`Preview ${index}`}
+                                style={{
+                                    width: `${width}px`,
+                                    height: `${height}px`,
+                                    objectFit: "cover",
+                                    borderRadius: "8px",
+                                }}
+                            /> : <div
+                                key={index}
+                                style={{
+                                    width: `${width}px`,
+                                    height: `${height}px`,
+                                    objectFit: "cover",
+                                    borderRadius: "8px",
+                                }}
+                            >
+                                <PictureAsPdfIcon style={{ fontSize: 40, color: "#d32f2f" }} />
+                            </div>}
+                            <button
+                                onClick={() => handleRemovePreview(index)}
+                                style={{
+                                    position: "absolute",
+                                    top: "5px",
+                                    right: "5px",
+                                    background: "#ff0000",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "50%",
+                                    width: "20px",
+                                    height: "20px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                &times;
+                            </button>
+                        </div>)
+                })}
             </div>
         </div>
     );
