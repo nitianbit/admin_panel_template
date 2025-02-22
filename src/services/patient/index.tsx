@@ -92,6 +92,7 @@ const store = create<PatientState>((set, get) => ({
         try {
             const formData = new FormData();
             formData.append("file", data.file);
+            formData.append("company", data.company);
             const response = await doPOST(ENDPOINTS.bulkCreate('patients'), formData);
             console.log(response);
         } catch (error) {
