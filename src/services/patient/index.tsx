@@ -124,7 +124,17 @@ const store = create<PatientState>((set, get) => ({
         } catch (error) {
 
         }
-    }
+    },
+
+    resetExtraFilters: () => {
+        let newFilters={};
+        const { filters } = get();
+        if(filters.company){
+            newFilters={...newFilters,company:filters.company}
+        }
+        set({ filters: newFilters });
+        get().fetchGrid();
+    },
 }));
 
 

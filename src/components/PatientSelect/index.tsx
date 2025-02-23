@@ -26,18 +26,24 @@ export const PatientSelect: React.FC<Props> = ({ onSelect, value, sx={} }) => {
     onPageChange,
     fetchGrid,
     onDelete,
-    setFilters
+    setFilters,
+    resetExtraFilters
   } = usePatientStore();
   const {globalCompanyId} =useCompanyStore();
 
-  const handleClose = () => setVisible(false);
+  const handleClose = () => {
+    setVisible(false);
+    resetExtraFilters();
+  };
 
   const handleSave = (ids: string[]) => {
     onSelect(ids.length ? ids[0] : "");
     setVisible(false);
+    resetExtraFilters();
   };
 
   const fetch=(filters?: PatientFilters)=>{
+    // resetExtraFilters();
     if(filters && Object.keys(filters).length){
       filters.company=globalCompanyId;
       setFilters(filters)

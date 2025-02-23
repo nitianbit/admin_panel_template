@@ -44,10 +44,8 @@ const GridDialog: React.FC<GridDialogProps> = ({
     const { globalCompanyId } = useCompanyStore();
 
 
-    useEffect(() => {
-        if (data?.length == 0) {
-            fetchGrid()
-        }
+    useEffect(() => { 
+        fetchGrid()
     }, [])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
