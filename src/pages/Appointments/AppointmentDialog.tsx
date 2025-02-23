@@ -40,6 +40,10 @@ import PatientSelect from "../../components/PatientSelect";
 import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
 import moment from "moment";
 import { PatientFilters } from "../../types/patient";
+import DateTimePickerWithInterval from "../../components/DateTimePicker";
+import DatePicker2 from "react-datepicker"; 
+import "react-datepicker/dist/react-datepicker.css";
+import "./styles.css"
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -140,11 +144,11 @@ export default function AppointmentDialog({
     const data = { ...appointMentData }
 
     const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
-    const startTime = dayjs(appointMentData.timeSlot.start).format("HHmm");
-    const endTime = dayjs(appointMentData.timeSlot.end).format("HHmm");
+    // const startTime = dayjs(appointMentData.timeSlot.start).format("HHmm");
+    // const endTime = dayjs(appointMentData.timeSlot.end).format("HHmm");
     data.appointmentDate = date;
-    data.timeSlot["start"] = startTime
-    data.timeSlot["end"] = endTime;
+    // data.timeSlot["start"] = startTime
+    // data.timeSlot["end"] = endTime;
 
     if (data.patient?.length === 0) return showError("Please select a patient")
     if (!data.doctor) delete data.doctor;
@@ -337,7 +341,44 @@ export default function AppointmentDialog({
             </DemoContainer>
           </LocalizationProvider>
 
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <div className="time-container">
+            <label>Start Time</label>
+            <DatePicker2
+              selected={appointMentData?.timeSlot.start ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.start, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
+              onChange={(date) => {
+                handleChange("timeSlot.start", moment(date).format('HHmm'))
+              }}
+              showTimeSelectOnly
+              showTimeSelect
+              wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
+              dateFormat="dd-MM-yyyy HH:mm"
+              className="w-100 time-input"
+              timeFormat="HH:mm"
+              value={appointMentData?.timeSlot.start ? moment(appointMentData?.timeSlot.start, 'HHmm').format('hh:mm A') : 'Select Start Time'}
+              timeInputLabel="Start Time"
+              timeIntervals={15}
+            />
+          </div>
+          <div className="time-container">
+            <label>End Time</label>
+            <DatePicker2
+              selected={appointMentData?.timeSlot.end ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.end, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
+              onChange={(date) => { 
+                handleChange("timeSlot.end", moment(date).format('HHmm'))
+              }}
+              showTimeSelectOnly
+              showTimeSelect
+              wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
+              dateFormat="dd-MM-yyyy HH:mm"
+              className="w-100 time-input"
+              timeFormat="HH:mm"
+              value={appointMentData?.timeSlot.end ? moment(appointMentData?.timeSlot.end, 'HHmm').format('hh:mm A') : 'Select End Time'}
+              timeInputLabel="End Time"
+              timeIntervals={15}
+            />
+          </div>
+
+          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
             <TimePicker
               value={appointMentData?.timeSlot.start}
               onChange={(e: any) => {
@@ -370,7 +411,7 @@ export default function AppointmentDialog({
                 },
               }}
             />
-          </LocalizationProvider>
+          </LocalizationProvider> */}
 
 
 

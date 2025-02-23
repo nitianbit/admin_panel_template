@@ -10,6 +10,7 @@ interface DateTimePickerWithIntervalProps {
     placeholder?: string;
     onChange?: (timestamp: number) => void;
     showTimeSelect?: boolean;
+    showTimeSelectOnly?:boolean
 }
 
 const formatTimeStampToDate = (timestamp: number): Date => moment.unix(timestamp).toDate();
@@ -20,6 +21,7 @@ const DateTimePickerWithInterval: React.FC<DateTimePickerWithIntervalProps> = ({
     placeholder = "",
     onChange = () => {},
     showTimeSelect = true,
+    showTimeSelectOnly=false
 }) => {
     const [startDate, setStartDate] = useState<Date | null>(null);
 
@@ -41,6 +43,7 @@ const DateTimePickerWithInterval: React.FC<DateTimePickerWithIntervalProps> = ({
                 }
             }}
             showTimeSelect={showTimeSelect}
+            showTimeSelectOnly={showTimeSelectOnly}
             timeIntervals={15}
             placeholderText={placeholder}
             wrapperClassName={`w-100 ${className} react-datepicker-wrapper custom-date-picker-wrapper`}
