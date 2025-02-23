@@ -12,16 +12,16 @@ const store = create<PatientState>((set, get) => ({
     filters: {},
     isLoading: false,
     rows: 10,
-    total:0,
+    total: 0,
 
-    fetchGrid: async (page?:number,filters?: PatientFilters) => {//page?:number,filters?: PatientFilters
+    fetchGrid: async (page?: number, filters?: PatientFilters) => {//page?:number,filters?: PatientFilters
         try {
-            const {  currentPage, rows, isLoading, total } = get();
+            const { currentPage, rows, isLoading, total } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
-            const newFilters={...get().filters,...(filters??{})}
-            set({ currentPage: page ?? 1,filters:newFilters});
+            const newFilters = { ...get().filters, ...(filters ?? {}) }
+            set({ currentPage: page ?? 1, filters: newFilters });
             const queryParams = new URLSearchParams(get().filters);
             queryParams.append('page', String(currentPage));
             queryParams.append('rows', String(rows));
@@ -72,7 +72,7 @@ const store = create<PatientState>((set, get) => ({
         const { currentPage, filters, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page+1
+                currentPage: page + 1
             })
             fetchGrid();
         }
@@ -127,12 +127,13 @@ const store = create<PatientState>((set, get) => ({
     },
 
     resetExtraFilters: () => {
-        let newFilters={};
         const { filters } = get();
-        if(filters.company){
-            newFilters={...newFilters,company:filters.company}
+        let newFilters: PatientFilters = { }
+        if (filters.company) {
+            newFilters.company = filters.company
         }
-        set({ filters: newFilters });
+        // set({ filters: newFilters });
+        set({ currentPage: 1, filters: newFilters });
         get().fetchGrid();
     },
 }));
