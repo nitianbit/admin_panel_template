@@ -74,7 +74,7 @@ const store = create<PatientState>((set, get) => ({
             set({
                 currentPage: page + 1
             })
-            fetchGrid();
+            fetchGrid(page+1);
         }
     },
 
