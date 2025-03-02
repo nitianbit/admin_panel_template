@@ -20,6 +20,8 @@ import { dashboard_default_stats, DASHBOARD_STATS, dashboardCards } from "./cons
 import PatientsByCompany from "./PatientsByCompany";
 import PatientsByDoctor from "./PatientsByDoctor";
 import { useCompanyStore } from "../../services/company";
+import PatientsByAge from "./PatientsByAge";
+import PatientsByGender from "./PatientsByGender";
 
 const cardData = [
   {
@@ -160,6 +162,8 @@ export default function Dashboard({ companyWise = false }: { companyWise?: boole
             <AppointmentsByCompany companyWise={companyWise}/>
             <PatientsByDoctor companyWise={companyWise}/>
             <PatientsByCompany companyWise={companyWise}/>
+            <PatientsByAge companyWise={companyWise}/>
+            <PatientsByGender companyWise={companyWise}/>
           </Grid>
         </Container>
       </Box>
