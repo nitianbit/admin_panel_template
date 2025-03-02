@@ -61,7 +61,7 @@ const primarynavList = [
   },
   {
     link: "/patient-list",
-    label: "Patient List",
+    label: "Employee List",
     icon: <SickIcon />,
   },
   {

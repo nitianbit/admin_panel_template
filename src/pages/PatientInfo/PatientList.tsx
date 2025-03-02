@@ -61,7 +61,7 @@ function PatientList({ }: any) {
 
 
     return (
-      <Layout appBarTitle="Patient">
+      <Layout appBarTitle="Employee">
         <Layout.Header 
         component={AddPatientDialog}
         props={{

@@ -59,14 +59,14 @@ export default function AddPatientDialog({
             onClick={handleBulkClickOpen}
             sx={{ mr: 1 }}
           >
-            Add Bulk Patient
+            Add Bulk Employee
           </Button>
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
             onClick={handleClickOpen}
           >
-            Add Patient
+            Add Employee
           </Button>
         </Box>
 
