@@ -21,6 +21,7 @@ import { Doctor } from "../../types/doctors";
 import { MODULES } from "../../utils/constants";
 import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
 import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
+import CompanySelect from "../../components/DropDowns/CompanySelect";
 
 
 
@@ -155,9 +156,9 @@ export default function AddDoctorDialog({
 
 
 
-            {/* <CompanySelect value={doctorData.company} onChange={(value) => {
+            <CompanySelect value={doctorData.company} onChange={(value) => {
               handleChange("company", value)
-            }} module={MODULES.DOCTOR} /> */}
+            }} module={MODULES.DOCTOR} />
 
             <ServiceSelect value={doctorData.services} onChange={(value) => {
               handleChange("services", value)

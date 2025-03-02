@@ -15,10 +15,19 @@ import { useCompanyStore } from "../../services/company";
 export default function DoctorList() {
   const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDoctorStore();
   const [open, setOpen] = React.useState(false);
+  const { globalCompanyId } = useCompanyStore();
+
+  // React.useEffect(() => {
+  //     fetchGrid()
+  // }, [])
 
   React.useEffect(() => {
-    fetchGrid()
-  }, [])
+    if (globalCompanyId) {
+      setFilters({ company: globalCompanyId })
+    } else {
+      fetchGrid()
+    }
+  }, [globalCompanyId])
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -36,8 +45,8 @@ export default function DoctorList() {
       <Layout.Body
         component={GeneralTable}
         props={{
-          data,  
-          columns: COLUMNS,  
+          data,
+          columns: COLUMNS,
           currentPage,
           totalPages,
           total,

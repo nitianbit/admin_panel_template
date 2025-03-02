@@ -16,6 +16,7 @@ import { Laboratory } from "../../types/laboratory";
 import { MODULES } from "../../utils/constants";
 import ServiceSelect from "../../components/DropDowns/ServiceSelect/ServiceSelect";
 import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
+import CompanySelect from "../../components/DropDowns/CompanySelect";
 
 
 
@@ -160,9 +161,9 @@ export default function AddLaboratoryDialog({
             />
 
 
-            {/* <CompanySelect value={laboratoryData.company} onChange={(value) => {
+            <CompanySelect value={laboratoryData.company} onChange={(value) => {
               handleChange("company", value)
-            }} module={MODULES.LABORATORY} /> */}
+            }} module={MODULES.LABORATORY} />
 
             <ServiceSelect value={laboratoryData.services} onChange={(value) => {
               handleChange("services", value)
