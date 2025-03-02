@@ -6,6 +6,8 @@ import DoctorDetail from "../DoctorDetail";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import { useLaboratoryStore } from "../../services/laboratory";
 import LabDetail from "../LabDetail";
+import { useCompanyStore } from "../../services/company";
+import { LaboratoryFilters } from "../../types/laboratory";
 
 interface SelectProps {
   onSelect: (id: string) => void; // Callback when a doctor is selected
@@ -25,14 +27,34 @@ export const LabSelect: React.FC<SelectProps> = ({ onSelect, value, sx={} }) => 
     onPageChange,
     fetchGrid,
     onDelete,
+    resetExtraFilters,
+    setFilters
   } = useLaboratoryStore();
 
-  const handleClose = () => setVisible(false);
+  // const handleClose = () => setVisible(false);
 
-  const handleSave = (ids: string[]) => {
-    onSelect(ids.length ? ids[0] : "");
-    setVisible(false);
-  };
+   const {globalCompanyId} =useCompanyStore();
+  
+    const handleClose = () => {
+      setVisible(false);
+      resetExtraFilters();
+    };
+  
+    const handleSave = (ids: string[]) => {
+      onSelect(ids.length ? ids[0] : "");
+      setVisible(false);
+      resetExtraFilters();
+    };
+  
+    const fetch=(filters?: LaboratoryFilters)=>{
+      // resetExtraFilters();
+      if(filters && Object.keys(filters).length){
+        filters.company=globalCompanyId;
+        setFilters(filters)
+      }else{
+        setFilters({company :globalCompanyId });
+      }
+    }
 
   return (
     <>
@@ -65,7 +87,7 @@ export const LabSelect: React.FC<SelectProps> = ({ onSelect, value, sx={} }) => 
         currentPage={currentPage}
         isLoading={isLoading}
         onPageChange={onPageChange}
-        fetchGrid={fetchGrid}
+        fetchGrid={fetch}
         onDelete={onDelete}
         title="Laboratory"
       />

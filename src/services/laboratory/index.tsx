@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError, showSuccess } from '../toaster';
-import { Laboratory, LaboratoryFilters, LaboratoryState  } from '../../types/laboratory';
+import { Laboratory, LaboratoryFilters, LaboratoryState } from '../../types/laboratory';
 import { ENDPOINTS } from '../api/constants';
 
 
@@ -14,13 +14,13 @@ const store = create<LaboratoryState>((set, get) => ({
     filters: {},
     isLoading: false,
     rows: 20,
-    total:0,
+    total: 0,
 
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows,isLoading , total} = get();
-            if(isLoading)return;
-            
+            const { filters, currentPage, rows, isLoading, total } = get();
+            if (isLoading) return;
+
             set({ isLoading: true });
 
             const queryParams = new URLSearchParams(filters);
@@ -46,7 +46,7 @@ const store = create<LaboratoryState>((set, get) => ({
     },
 
     setFilters: (newFilters: LaboratoryFilters) => {
-        set({ filters: newFilters,currentPage:1 });
+        set({ filters: newFilters, currentPage: 1 });
         get().fetchGrid(1, newFilters);
     },
 
@@ -69,21 +69,21 @@ const store = create<LaboratoryState>((set, get) => ({
             fetchGrid();
         }
     },
-    onPageChange: ( event: React.MouseEvent<HTMLButtonElement> | null,page:number) => {
-        const { currentPage, filters, fetchGrid,totalPages } = get();
+    onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
+        const { currentPage, filters, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page+1
+                currentPage: page + 1
             })
             fetchGrid();
         }
     },
 
-    onCreate:async (data:any)=>{
+    onCreate: async (data: any) => {
         try {
-            const response=await doPOST(ENDPOINTS.create('laboratories'),data);
+            const response = await doPOST(ENDPOINTS.create('laboratories'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 showSuccess("Laboratory created successfully")
             }
@@ -91,11 +91,11 @@ const store = create<LaboratoryState>((set, get) => ({
             showError('Failed to create laboratory');
         }
     },
-    onUpdate:async (data:Laboratory)=>{
+    onUpdate: async (data: Laboratory) => {
         try {
-            const response=await doPUT(ENDPOINTS.update('laboratories'),data);
+            const response = await doPUT(ENDPOINTS.update('laboratories'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 showSuccess("Laboratory updated successfully")
             }
@@ -103,11 +103,11 @@ const store = create<LaboratoryState>((set, get) => ({
             showError('Failed to update laboratory');
         }
     },
-    onDelete:async (id:string)=>{
+    onDelete: async (id: string) => {
         try {
-            const response=await doDELETE(ENDPOINTS.delete('laboratories',id));
+            const response = await doDELETE(ENDPOINTS.delete('laboratories', id));
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 showSuccess("Laboratory deleted successfully")
             }
@@ -122,10 +122,21 @@ const store = create<LaboratoryState>((set, get) => ({
         } catch (error) {
 
         }
-    }
+    },
+
+    resetExtraFilters: () => {
+        const { filters } = get();
+        let newFilters: LaboratoryFilters = {}
+        if (filters.company) {
+            newFilters.company = filters.company
+        }
+        // set({ filters: newFilters });
+        set({ currentPage: 1, filters: newFilters });
+        get().fetchGrid();
+    },
 
 }));
 
- 
+
 
 export const useLaboratoryStore = () => store((state) => state);

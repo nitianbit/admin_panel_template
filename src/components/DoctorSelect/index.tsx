@@ -5,6 +5,7 @@ import { Box, Typography } from "@mui/material";
 import DoctorDetail from "../DoctorDetail";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import { DoctorFilters } from "../../types/doctors";
+import { useCompanyStore } from "../../services/company";
 
 interface DoctorSelectProps {
   onSelect: (id: string) => void; // Callback when a doctor is selected
@@ -12,7 +13,7 @@ interface DoctorSelectProps {
   sx?: object; // Custom styling for the root container
 }
 
-export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx={} }) => {
+export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx = {} }) => {
   const [visible, setVisible] = React.useState<boolean>(false);
 
   const {
@@ -24,23 +25,33 @@ export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx=
     onPageChange,
     fetchGrid,
     onDelete,
-    setFilters
+    setFilters,
+    resetExtraFilters
   } = useDoctorStore();
 
-  const handleClose = () => setVisible(false);
+  const { globalCompanyId } = useCompanyStore();
+
+
+  const handleClose = () => {
+    setVisible(false);
+    resetExtraFilters();
+  };
 
   const handleSave = (ids: string[]) => {
     onSelect(ids.length ? ids[0] : "");
     setVisible(false);
+    resetExtraFilters();
   };
 
-    const fetch=(filters?: DoctorFilters)=>{
-      if(filters && Object.keys(filters).length){
-        setFilters(filters)
-      }else{
-        setFilters({ });
-      }
+  const fetch = (filters?: DoctorFilters) => {
+    // resetExtraFilters();
+    if (filters && Object.keys(filters).length) {
+      filters.company = globalCompanyId;
+      setFilters(filters)
+    } else {
+      setFilters({ company: globalCompanyId });
     }
+  }
 
   return (
     <>
@@ -50,17 +61,17 @@ export const DoctorSelect: React.FC<DoctorSelectProps> = ({ onSelect, value, sx=
           my: 1,
           justifyContent: "space-between",
           alignItems: "center",
-          cursor:'pointer',
-          ...sx, 
+          cursor: 'pointer',
+          ...sx,
         }}
-        onClick={() =>  setVisible(true)}
+        onClick={() => setVisible(true)}
       >
         <Typography mr={2} color="rgba(0, 0, 0, 0.6)">
           Select Doctor -
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           {value ? <DoctorDetail _id={value} /> : "Select Doctor"}
-          <PersonSearchIcon  sx={{ cursor: "pointer", ml: 2 }}/>
+          <PersonSearchIcon sx={{ cursor: "pointer", ml: 2 }} />
         </Box>
       </Box>
       <GridDialog

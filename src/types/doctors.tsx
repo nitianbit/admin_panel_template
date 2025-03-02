@@ -54,4 +54,5 @@ export interface DoctorState {
   onUpdate: (...args:any) => Promise<void>;
   onDelete: (...args:any) => Promise<void>;
   detail: (id:string) => Promise<any>;
+  resetExtraFilters: () => void;
 }
