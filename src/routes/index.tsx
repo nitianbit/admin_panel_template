@@ -26,6 +26,7 @@ import Offers from "../pages/Offers";
 import HRList from "../pages/HR/HRList";
 import Report from "../pages/Report";
 import ServiceImages from "../pages/ServiceImages";
+import Packages from "../pages/Packages";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -225,6 +226,12 @@ export const protectedRoutes = [
     path: "/service-images",
     element: <AdminElement>
       <ServiceImages />
+    </AdminElement>,
+  },
+  {
+    path: "/packages",
+    element: <AdminElement>
+      <Packages />
     </AdminElement>,
   },
 

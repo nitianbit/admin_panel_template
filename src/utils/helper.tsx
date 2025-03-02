@@ -27,6 +27,7 @@ export const moduleRoles = {
   "/hr-list": [MODULES.ADMIN, MODULES.SUPERVISOR],
   "/report": [MODULES.ADMIN, MODULES.DOCTOR, MODULES.LABORATORY],
   "/service-images": [MODULES.ADMIN],
+  "/packages": [MODULES.ADMIN],
 }
 
 

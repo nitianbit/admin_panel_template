@@ -30,7 +30,8 @@ export const MODULES = {
     SERVICES:'services',
     HR:'hr',
     REPORT:'report',
-    SERVICE_IMAGES:'service-images'
+    SERVICE_IMAGES:'service-images',
+     PACKAGES: 'package'
 };
 
 

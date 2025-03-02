@@ -120,6 +120,11 @@ const primarynavList = [
     icon: <CircleNotificationsIcon />,
   },
   {
+    link: "/packages",
+    label: "Packages",
+    icon: <CircleNotificationsIcon />,
+  },
+  {
     link: "/push-notification",
     label: "Push Notifications",
     icon: <CircleNotificationsIcon />,
