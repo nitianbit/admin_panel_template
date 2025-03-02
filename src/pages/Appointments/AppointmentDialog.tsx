@@ -44,6 +44,7 @@ import DateTimePickerWithInterval from "../../components/DateTimePicker";
 import DatePicker2 from "react-datepicker"; 
 import "react-datepicker/dist/react-datepicker.css";
 import "./styles.css"
+import PackagetSelect from "../../components/DropDowns/PackageSelect/PackageSelect";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -319,6 +320,11 @@ export default function AppointmentDialog({
           <DepartmentSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
             handleChange("department", value)
           }} module={MODULES.APPOINTMENT} />
+
+          <PackagetSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
+            handleChange("package", value)
+          }} module={MODULES.APPOINTMENT} />
+          
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
 

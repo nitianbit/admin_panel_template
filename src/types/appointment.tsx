@@ -17,7 +17,8 @@ export interface Appointment {
     fee?: Number
     paymentStatus?: string;
     company?: string;
-    _id?:string
+    _id?: string,
+    package?: string
 }
 
 export interface AppointmentResponse {
