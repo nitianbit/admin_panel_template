@@ -72,7 +72,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             {/* Preview */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                 {previews.map((src, index) => {
-                      const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(src);
+                      const isImage =  /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(src);
                     return (
                         <div key={index} style={{ position: "relative", display: "inline-block", }}>
                             {isImage ? <img

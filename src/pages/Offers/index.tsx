@@ -5,13 +5,24 @@ import { COLUMNS } from './constants';
 import { MODULES } from '../../utils/constants';
 import { useOfferStore } from '../../services/offers';
 import AddOffersDialog from './AddOffersDialog';
+import { useCompanyStore } from '../../services/company';
 
 
 const Offers = () => {
     const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useOfferStore();
-    React.useEffect(() => {
-        fetchGrid()
-    }, [])
+      const { globalCompanyId } = useCompanyStore();
+    
+    // React.useEffect(() => {
+    //     fetchGrid()
+    // }, [])
+
+      React.useEffect(() => {
+          if (globalCompanyId) {
+            setFilters({ company: globalCompanyId })
+          } else {
+            fetchGrid()
+          }
+        }, [globalCompanyId])
 
     return (
         <Layout appBarTitle="Offers">
