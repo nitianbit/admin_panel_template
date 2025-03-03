@@ -84,6 +84,7 @@ export default function AppointmentDialog({
     lab: "",
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
     patient: "",
+    selectionType: "1",
     company: globalCompanyId ?? ""
   }
 
@@ -147,6 +148,11 @@ export default function AppointmentDialog({
     const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
     // const startTime = dayjs(appointMentData.timeSlot.start).format("HHmm");
     // const endTime = dayjs(appointMentData.timeSlot.end).format("HHmm");
+    if (data.selectionType === "1") {
+      delete data.package; // Remove package if Department is selected
+    } else if (data.selectionType === "2") {
+      delete data.department; // Remove department if Package is selected
+    }
     data.appointmentDate = date;
     // data.timeSlot["start"] = startTime
     // data.timeSlot["end"] = endTime;
@@ -316,16 +322,42 @@ export default function AppointmentDialog({
           </FormControl>
 
           <CompanySelect register={() => { }} value={appointMentData?.company} onChange={(value) => handleChange("company", value)} module={MODULES.APPOINTMENT} />
-
-          <DepartmentSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
-            handleChange("department", value)
-          }} module={MODULES.APPOINTMENT} />
-
-          <PackagetSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
-            handleChange("package", value)
-          }} module={MODULES.APPOINTMENT} />
           
+          <FormControl fullWidth margin="dense">
+  <InputLabel id="selectionType">Select Type</InputLabel>
+  <Select
+    labelId="selectionType"
+    id="selectionType"
+    label="Select Type"
+    value={appointMentData?.selectionType || ""}
+    onChange={(e) => handleChange("selectionType", e.target.value)}
+  >
+    <MenuItem value="1">Department</MenuItem>
+    <MenuItem value="2">Package</MenuItem>
+  </Select>
+</FormControl>
 
+{/* Department Selection */}
+{appointMentData?.selectionType === "1" && (
+  <DepartmentSelect
+    isMultiple={false}
+    value={appointMentData.department}
+    onChange={(value) => handleChange("department", value)}
+    module={MODULES.APPOINTMENT}
+  />
+)}
+
+{/* Package Selection */}
+{appointMentData?.selectionType === "2" && (
+  <PackagetSelect
+    isMultiple={false}
+    value={appointMentData.package}
+    onChange={(value) => handleChange("package", value)}
+    module={MODULES.APPOINTMENT}
+  />
+)}
+
+          
           <LocalizationProvider dateAdapter={AdapterDayjs}>
 
             <DemoContainer components={["DatePicker"]}>

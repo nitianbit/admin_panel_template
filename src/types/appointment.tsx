@@ -19,6 +19,7 @@ export interface Appointment {
     company?: string;
     _id?: string,
     package?: string
+    selectionType: string;
 }
 
 export interface AppointmentResponse {
