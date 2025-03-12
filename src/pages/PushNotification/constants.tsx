@@ -5,6 +5,7 @@ export const COLUMNS = [
     {
         header: "Notification Title",
         accessor: "notification.title",
+        render: (data: any) => data?.notification?.title
     },
     // {
     //     header: "Company",
