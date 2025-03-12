@@ -27,6 +27,7 @@ import HRList from "../pages/HR/HRList";
 import Report from "../pages/Report";
 import ServiceImages from "../pages/ServiceImages";
 import Packages from "../pages/Packages";
+import PushNotificationGrid from "../pages/PushNotification/list";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -124,7 +125,7 @@ export const protectedRoutes = [
       </AdminElement>
     )
   },
-   {
+  {
     path: "/hr-list",
     element: (
       <AdminElement>
@@ -189,7 +190,8 @@ export const protectedRoutes = [
   {
     path: "/push-notification",
     element: <AdminElement>
-      <PushNotification />
+      {/* <PushNotification /> */}
+      <PushNotificationGrid />
     </AdminElement>,
   },
   {
