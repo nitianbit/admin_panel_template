@@ -43,7 +43,7 @@ const AddNotificationDialog = ({ isModalOpen, toggleModal, selectedId }: any) =>
             body: ""
         },
         scheduledTime: moment().unix(),//timestamp
-        status: ""
+        status: "pending"
     });
 
     const handleChange = (key: any, value: any) => setData(prev => ({ ...prev, [key]: value }));
