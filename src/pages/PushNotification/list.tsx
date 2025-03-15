@@ -19,7 +19,7 @@ const PushNotificationGrid = () => {
 
       React.useEffect(() => {
           if (globalCompanyId) {
-            setFilters({ company: globalCompanyId })
+            setFilters({ company_id: globalCompanyId })
           } else {
             fetchGrid()
           }
