@@ -29,6 +29,7 @@ export const moduleRoles = {
   "/service-images": [MODULES.ADMIN],
   "/packages": [MODULES.ADMIN],
   "/forms": [MODULES.ADMIN],
+  "/blogs": [MODULES.ADMIN],
 }
 
 

@@ -22,6 +22,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import { hasAccess } from "../utils/helper";
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
+import BookIcon from '@mui/icons-material/Book';
 
 const primarynavList = [
   {
@@ -134,6 +135,11 @@ const primarynavList = [
     link: "/forms",
     label: "Forms",
     icon: <FormatAlignJustifyIcon />,
+  },
+  {
+    link: "/blogs",
+    label: "Blogs",
+    icon: <BookIcon />,
   },
 
 ];

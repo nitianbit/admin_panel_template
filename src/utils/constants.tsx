@@ -32,7 +32,8 @@ export const MODULES = {
     REPORT:'report',
     SERVICE_IMAGES:'service-images',
      PACKAGES: 'package',
-     FORM:'form'
+     FORM:'form',
+     BLOGS:'blogs'
 };
 
 
