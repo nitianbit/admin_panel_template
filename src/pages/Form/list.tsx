@@ -4,6 +4,7 @@ import Layout from '../../components/Layout';
 import { useFormStore } from '../../services/form';
 import { MODULES } from '../../utils/constants';
 import { COLUMNS } from './constants';
+import AddFormDialog from './AddFormDialog';
 
 const Form = () => {
     const {
@@ -30,7 +31,7 @@ const Form = () => {
 
     return (
         <Layout appBarTitle="Forms">
-            {/* <Layout.Header component={AddFormDialog} /> */}
+            <Layout.Header component={AddFormDialog} />
             <Layout.Body
                 component={GridTable}
                 props={{
