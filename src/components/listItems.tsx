@@ -21,6 +21,7 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import BusinessIcon from '@mui/icons-material/Business';
 import { hasAccess } from "../utils/helper";
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
+import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 
 const primarynavList = [
   {
@@ -124,10 +125,15 @@ const primarynavList = [
     label: "Packages",
     icon: <CircleNotificationsIcon />,
   },
+  // {
+  //   link: "/push-notification",
+  //   label: "Push Notifications",
+  //   icon: <CircleNotificationsIcon />,
+  // },
   {
-    link: "/push-notification",
-    label: "Push Notifications",
-    icon: <CircleNotificationsIcon />,
+    link: "/forms",
+    label: "Forms",
+    icon: <FormatAlignJustifyIcon />,
   },
 
 ];

@@ -28,6 +28,7 @@ import Report from "../pages/Report";
 import ServiceImages from "../pages/ServiceImages";
 import Packages from "../pages/Packages";
 import PushNotificationGrid from "../pages/PushNotification/list";
+import Form from "../pages/Form/list";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -234,6 +235,12 @@ export const protectedRoutes = [
     path: "/packages",
     element: <AdminElement>
       <Packages />
+    </AdminElement>,
+  },
+  {
+    path: "/forms",
+    element: <AdminElement>
+      <Form/>
     </AdminElement>,
   },
 

@@ -28,6 +28,7 @@ export const moduleRoles = {
   "/report": [MODULES.ADMIN, MODULES.DOCTOR, MODULES.LABORATORY],
   "/service-images": [MODULES.ADMIN],
   "/packages": [MODULES.ADMIN],
+  "/forms": [MODULES.ADMIN],
 }
 
 
