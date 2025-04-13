@@ -86,3 +86,19 @@ export const downloadFile = async (src:string) => {
 
 
 export const isAdminOrSuperVisorOrHR = (userData:any) =>  Array.isArray(userData.role) && [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))
+
+
+export const timeConverter = {
+  toHHMM: (hhmmss: string) => {
+      if (!hhmmss) return '';
+      const [hh = '00', mm = '00'] = hhmmss.split(':');
+      return `${hh}${mm}`;
+  },
+
+  toHHMMSS: (hhmm: string) => {
+      if (!hhmm || hhmm.length < 3) return '00:00:00';
+      const hh = hhmm.slice(0, 2).padStart(2, '0');
+      const mm = hhmm.slice(2).padStart(2, '0');
+      return `${hh}:${mm}:00`;
+  }
+};

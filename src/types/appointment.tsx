@@ -18,7 +18,11 @@ export interface Appointment {
     paymentStatus?: string;
     company?: string;
     _id?: string,
-    package?: string
+    package?: string,
+
+    vendor?: string, //for third party
+    stm_id?:string, //for report and third party
+    packages?: string[],
 }
 
 export interface AppointmentResponse {
@@ -51,5 +55,12 @@ export interface AppointmentState {
     onCreate: (...args: any) => Promise<void>;
     onUpdate: (...args: any) => Promise<void>;
     onDelete: (...args: any) => Promise<void>;
-    detail: (id:string) => Promise<{data:Appointment}>;
+    detail: (id: string) => Promise<{ data: Appointment }>;
+}
+
+export interface ExternalSlot {
+    slot_date: string;
+    slot_time: string;//start time
+    end_time: string;
+    stm_id: string //_id
 }

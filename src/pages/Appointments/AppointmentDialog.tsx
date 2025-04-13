@@ -41,10 +41,12 @@ import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/Depart
 import moment from "moment";
 import { PatientFilters } from "../../types/patient";
 import DateTimePickerWithInterval from "../../components/DateTimePicker";
-import DatePicker2 from "react-datepicker"; 
+import DatePicker2 from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./styles.css"
 import PackagetSelect from "../../components/DropDowns/PackageSelect/PackageSelect";
+import ExternalAppointment from "./ExternalAppointment";
+import AppointmentCommonFields from "./AppointmentCommonFields";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -117,6 +119,14 @@ export default function AppointmentDialog({
       setAppointMentData({ ...appointMentData, [key]: value });
     }
   };
+
+  const handleChangeTimeSlot = (data: Partial<Appointment>) => {
+    setAppointMentData({
+      ...appointMentData,
+      ...data
+      // timeSlot: { ...appointMentData.timeSlot, ...data }
+    });
+  }
 
 
 
@@ -214,12 +224,11 @@ export default function AppointmentDialog({
         open={isModalOpen}
         onClose={toggleModal}
         TransitionComponent={Transition}
-        maxWidth="xs"
+        fullScreen
         fullWidth
         sx={{ height: "100%" }}
       >
         <DialogTitle>Appointment Details</DialogTitle>
-
         <DialogContent dividers>
 
           <PatientSelect
@@ -244,8 +253,6 @@ export default function AppointmentDialog({
             </Select>
           </FormControl>
 
-
-
           {userData.role.includes("admin") && (
             <>
               {appointMentData?.type == "2" && (
@@ -257,168 +264,78 @@ export default function AppointmentDialog({
                   }}
                 />
               )}
-              {appointMentData?.type == "1" && (
-                <LabSelect
-                  sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
-                  value={appointMentData.lab}
-                  onSelect={(id: string): void => {
-                    console.log(id);
-                    handleChange("lab", id);
-                  }}
-                />
-              )}
+              {/* {appointMentData?.type == "1" && (
+                  <LabSelect
+                    sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                    value={appointMentData.lab}
+                    onSelect={(id: string): void => {
+                      console.log(id);
+                      handleChange("lab", id);
+                    }}
+                  />
+                )} */}
             </>
           )}
 
-          <TextField
-            margin="dense"
-            id="fee"
-            label="Fee"
-            type="fee"
-            fullWidth
-            variant="outlined"
-            value={appointMentData?.fee}
-            onChange={(e) => handleChange("fee", e.target.value)}
-
+          <AppointmentCommonFields
+            handleChange={handleChange}
+            appointMentData={appointMentData}
+            module={MODULES.APPOINTMENT}
           />
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="status">Status</InputLabel>
-            <Select
-              labelId="status"
-              id="status"
-              label="Status"
-              value={appointMentData?.status}
-              onChange={(e) => handleChange("status", e.target.value)}
-            >
-              {
-                Object.keys(APPOINTMENT_STATUS).map((key) => (
-                  <MenuItem key={key} value={APPOINTMENT_STATUS[key as keyof typeof APPOINTMENT_STATUS]}>{key}</MenuItem>
-                ))
-              }
-            </Select>
-          </FormControl>
 
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="paymentStatus">Payment Status</InputLabel>
-            <Select
-              labelId="paymentStatus"
-              id="paymentStatus"
-              label="Payment Status"
-              value={appointMentData?.paymentStatus}
-              onChange={(e) => handleChange("paymentStatus", e.target.value)}
-            >
-              {
-                Object.keys(PAYMENT_STATUS).map((key) => (
-                  <MenuItem key={key} value={PAYMENT_STATUS[key as keyof typeof PAYMENT_STATUS]}>{key}</MenuItem>
-                ))
-              }
-            </Select>
-          </FormControl>
+          {appointMentData?.type == "2" ?
+            <>
+              <PackagetSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
+                handleChange("package", value)
+              }} module={MODULES.APPOINTMENT} />
 
-          <CompanySelect register={() => { }} value={appointMentData?.company} onChange={(value) => handleChange("company", value)} module={MODULES.APPOINTMENT} />
 
-          <DepartmentSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
-            handleChange("department", value)
-          }} module={MODULES.APPOINTMENT} />
+              <div className="time-container">
+                <label>Start Time</label>
+                <DatePicker2
+                  selected={appointMentData?.timeSlot.start ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.start, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
+                  onChange={(date) => {
+                    handleChange("timeSlot.start", moment(date).format('HHmm'))
+                  }}
+                  showTimeSelectOnly
+                  showTimeSelect
+                  wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
+                  dateFormat="dd-MM-yyyy HH:mm"
+                  className="w-100 time-input"
+                  timeFormat="HH:mm"
+                  value={appointMentData?.timeSlot.start ? moment(appointMentData?.timeSlot.start, 'HHmm').format('hh:mm A') : 'Select Start Time'}
+                  timeInputLabel="Start Time"
+                  timeIntervals={15}
+                />
+              </div>
+              <div className="time-container">
+                <label>End Time</label>
+                <DatePicker2
+                  selected={appointMentData?.timeSlot.end ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.end, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
+                  onChange={(date) => {
+                    handleChange("timeSlot.end", moment(date).format('HHmm'))
+                  }}
+                  showTimeSelectOnly
+                  showTimeSelect
+                  wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
+                  dateFormat="dd-MM-yyyy HH:mm"
+                  className="w-100 time-input"
+                  timeFormat="HH:mm"
+                  value={appointMentData?.timeSlot.end ? moment(appointMentData?.timeSlot.end, 'HHmm').format('hh:mm A') : 'Select End Time'}
+                  timeInputLabel="End Time"
+                  timeIntervals={15}
+                />
+              </div>
 
-          <PackagetSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
-            handleChange("package", value)
-          }} module={MODULES.APPOINTMENT} />
-          
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-
-            <DemoContainer components={["DatePicker"]}>
-              <DatePicker
-                value={appointMentData?.appointmentDate}
-                onChange={(e: any) => {
-                  handleChange("appointmentDate", e)
-                  console.log(e)
-                }
-                }
-                label="Appointment Date"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    margin: "dense",
-                  },
-                }}
+            </>
+            : (
+              <ExternalAppointment
+                handleChange={handleChange}
+                appointMentData={appointMentData}
+                module={MODULES.APPOINTMENT}
+                handleChangeTimeSlot={handleChangeTimeSlot}
               />
-            </DemoContainer>
-          </LocalizationProvider>
-
-          <div className="time-container">
-            <label>Start Time</label>
-            <DatePicker2
-              selected={appointMentData?.timeSlot.start ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.start, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
-              onChange={(date) => {
-                handleChange("timeSlot.start", moment(date).format('HHmm'))
-              }}
-              showTimeSelectOnly
-              showTimeSelect
-              wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
-              dateFormat="dd-MM-yyyy HH:mm"
-              className="w-100 time-input"
-              timeFormat="HH:mm"
-              value={appointMentData?.timeSlot.start ? moment(appointMentData?.timeSlot.start, 'HHmm').format('hh:mm A') : 'Select Start Time'}
-              timeInputLabel="Start Time"
-              timeIntervals={15}
-            />
-          </div>
-          <div className="time-container">
-            <label>End Time</label>
-            <DatePicker2
-              selected={appointMentData?.timeSlot.end ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.end, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
-              onChange={(date) => { 
-                handleChange("timeSlot.end", moment(date).format('HHmm'))
-              }}
-              showTimeSelectOnly
-              showTimeSelect
-              wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
-              dateFormat="dd-MM-yyyy HH:mm"
-              className="w-100 time-input"
-              timeFormat="HH:mm"
-              value={appointMentData?.timeSlot.end ? moment(appointMentData?.timeSlot.end, 'HHmm').format('hh:mm A') : 'Select End Time'}
-              timeInputLabel="End Time"
-              timeIntervals={15}
-            />
-          </div>
-
-          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <TimePicker
-              value={appointMentData?.timeSlot.start}
-              onChange={(e: any) => {
-                // const startTime = dayjs(e).format("HHmm");
-                handleChange("timeSlot.start", e)
-              }
-              }
-              label="Start Time"
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  margin: "dense",
-                },
-              }}
-            />
-          </LocalizationProvider>
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <TimePicker
-              value={appointMentData?.timeSlot.end}
-              onChange={(e: any) => {   // 
-                handleChange("timeSlot.end", e)
-              }
-              }
-              label="End Time"
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  margin: "dense",
-                },
-              }}
-            />
-          </LocalizationProvider> */}
-
+            )}
 
 
         </DialogContent>
@@ -429,6 +346,6 @@ export default function AppointmentDialog({
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </div >
   );
 }

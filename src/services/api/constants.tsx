@@ -20,4 +20,6 @@ export const ENDPOINTS = {
     grid: (module:string)=>`/${module}/grid`,
     dashboardStats: '/dashboard/stats',
     stats:(module:string)=> `/dashboard/${module}`,
+    externalPackage: (vendor: string) => `/schedule/available-packages?vendor=${vendor}`,
+    externalSlots: (vendor: string, date: string | number) => `/schedule/available-slots?vendor=${vendor}&date=${date}`
 }

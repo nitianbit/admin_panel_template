@@ -44,3 +44,8 @@ export interface PackageState {
     detail: (id: string) => Promise<{ data: Package }>;
     fetchGridAll: ( filters: PackageFilters) => Promise<Package[]>;
 }
+
+
+export interface ExternalPackage extends Package {
+    deal_id:string;
+}
