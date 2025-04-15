@@ -30,6 +30,8 @@ export const moduleRoles = {
   "/packages": [MODULES.ADMIN],
   "/forms": [MODULES.ADMIN],
   "/blogs": [MODULES.ADMIN],
+  "/external-packages": [MODULES.ADMIN],
+  "/company-external-packages": [MODULES.ADMIN],
 }
 
 

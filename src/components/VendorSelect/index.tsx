@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 interface Props {
     value?: string;
-    onChange: (value: string | string[]) => void;
+    onChange: (value: string) => void;
 
 }
 

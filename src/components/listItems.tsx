@@ -141,6 +141,16 @@ const primarynavList = [
     label: "Blogs",
     icon: <BookIcon />,
   },
+  {
+    link: "/external-packages",
+    label: "External Packages",
+    icon: <BookIcon />,
+  },
+  {
+    link: "/company-external-packages",
+    label: "Company Packages",
+    icon: <BookIcon />,
+  },
 
 ];
 

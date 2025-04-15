@@ -30,6 +30,8 @@ import Packages from "../pages/Packages";
 import PushNotificationGrid from "../pages/PushNotification/list";
 import Form from "../pages/Form/list";
 import Blogs from "../pages/Blogs";
+import VendorCompanyPackageAssign from "../pages/VendorPackages/VendorCompanyPackageAssign";
+import VendorPackages from "../pages/VendorPackages";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -241,13 +243,31 @@ export const protectedRoutes = [
   {
     path: "/forms",
     element: <AdminElement>
-      <Form/>
+      <Form />
     </AdminElement>,
   },
   {
     path: "/blogs",
     element: <AdminElement>
-      <Blogs/>
+      <Blogs />
+    </AdminElement>,
+  },
+  {
+    path: "/blogs",
+    element: <AdminElement>
+      <Blogs />
+    </AdminElement>,
+  },
+  {
+    path: "/external-packages",
+    element: <AdminElement>
+      <VendorPackages />
+    </AdminElement>,
+  },
+  {
+    path: "/company-external-packages",
+    element: <AdminElement>
+      <VendorCompanyPackageAssign />
     </AdminElement>,
   },
 
