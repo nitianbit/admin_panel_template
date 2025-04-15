@@ -90,92 +90,101 @@ const VendorCompanyPackageAssign = () => {
                 }}
             >
                 <Toolbar />
-                <Container sx={{ mt: 4, mb: 4 }}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Vendor Name</TableCell>
-                                <TableCell>Company</TableCell>
-                                <TableCell>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {vendors.map((vendor, index) => (
-                                <TableRow key={vendor._id || index}>
-                                    <TableCell>
-                                        <TextField
-                                            value={vendor.name}
-                                            onChange={(e) =>
-                                                handleVendorChange(index, 'name', e.target.value)
-                                            }
-                                            fullWidth
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <CompanySelect
-                                            value={vendor.company}
-                                            onChange={(value) =>
-                                                handleVendorChange(index, 'company', value as string)
-                                            }
-                                            module={MODULES.PACKAGES}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="outlined"
-                                            color="success"
-                                            onClick={() => handleVendorSave(vendor)}
-                                        >
-                                            Save
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-
-                            {showNewVendorRow && (
+                <Container>
+                    <Box
+                        sx={{
+                            mt: 4,
+                            mb: 4,
+                            px: 3,
+                            py: 2,
+                        }}
+                    >
+                        <Table>
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell>
-                                        <TextField
-                                            value={newVendor.name}
-                                            onChange={(e) =>
-                                                handleNewVendorChange('name', e.target.value)
-                                            }
-                                            placeholder="New Vendor Name"
-                                            fullWidth
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <CompanySelect
-                                            value={newVendor.company}
-                                            onChange={(value) =>
-                                                handleNewVendorChange('company', value as string)
-                                            }
-                                            module={MODULES.PACKAGES}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={handleNewVendorSave}
-                                        >
-                                            Save
-                                        </Button>
-                                    </TableCell>
+                                    <TableCell>Vendor Name</TableCell>
+                                    <TableCell>Company</TableCell>
+                                    <TableCell>Actions</TableCell>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                            </TableHead>
+                            <TableBody>
+                                {vendors.map((vendor, index) => (
+                                    <TableRow key={vendor._id || index}>
+                                        <TableCell>
+                                            <TextField
+                                                value={vendor.name}
+                                                onChange={(e) =>
+                                                    handleVendorChange(index, 'name', e.target.value)
+                                                }
+                                                fullWidth
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <CompanySelect
+                                                value={vendor.company}
+                                                onChange={(value) =>
+                                                    handleVendorChange(index, 'company', value as string)
+                                                }
+                                                module={MODULES.PACKAGES}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="outlined"
+                                                color="success"
+                                                onClick={() => handleVendorSave(vendor)}
+                                            >
+                                                Save
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
 
-                    {!showNewVendorRow && (
-                        <Button
-                            onClick={() => setShowNewVendorRow(true)}
-                            variant="contained"
-                            sx={{ mt: 2 }}
-                        >
-                            Add New Vendor
-                        </Button>
-                    )}
+                                {showNewVendorRow && (
+                                    <TableRow>
+                                        <TableCell>
+                                            <TextField
+                                                value={newVendor.name}
+                                                onChange={(e) =>
+                                                    handleNewVendorChange('name', e.target.value)
+                                                }
+                                                placeholder="New Vendor Name"
+                                                fullWidth
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <CompanySelect
+                                                value={newVendor.company}
+                                                onChange={(value) =>
+                                                    handleNewVendorChange('company', value as string)
+                                                }
+                                                module={MODULES.PACKAGES}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleNewVendorSave}
+                                            >
+                                                Save
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+
+                        {!showNewVendorRow && (
+                            <Button
+                                onClick={() => setShowNewVendorRow(true)}
+                                variant="contained"
+                                sx={{ mt: 2 }}
+                            >
+                                Add New Vendor
+                            </Button>
+                        )}
+                    </Box>
                 </Container>
             </Box>
         </Box>

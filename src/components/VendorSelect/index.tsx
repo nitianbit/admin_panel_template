@@ -1,5 +1,10 @@
 import { FormControl, InputLabel, ListItemText, MenuItem, Select } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ApiResponse } from '../../types/general';
+import { Vendor } from '../../types/vendors';
+import { doGET } from '../../utils/HttpUtils';
+import { ENDPOINTS } from '../../services/api/constants';
+import { useCompanyStore } from '../../services/company';
 
 interface Props {
     value?: string;
@@ -12,17 +17,36 @@ const VendorSelect: React.FC<Props> = ({
     onChange
 }) => {
 
+    const { globalCompanyId } = useCompanyStore();
 
-    const [data, setData] = useState([
-        { _id: 1, name: 'Healthians', value: 'healthians' }
-    ]);
+
+    const [data, setData] = useState<Vendor[]>([]);
+
+    useEffect(() => { fetchData() }, [globalCompanyId])
+
+    const fetchData = async () => {
+        try {
+            if (!globalCompanyId) return;
+            const response: ApiResponse<{
+                rows: Vendor[]
+            }> = await doGET(`${ENDPOINTS.grid('vendors')}?rows=-1&company=${globalCompanyId}`)
+            if (response.status == 200) {
+                if (response.data?.data?.rows) {
+                    setData(response.data?.data?.rows)
+
+                }
+            }
+        } catch (error) {
+
+        }
+    }
 
 
 
 
     const renderSelectedValue = (selected: string | string[]) => {
         if (!selected) return "";
-        const item = data.find((item) => item.value === selected);
+        const item = data.find((item) => item.name === selected);
         return item ? item.name : "";
 
     };
@@ -44,7 +68,7 @@ const VendorSelect: React.FC<Props> = ({
                 renderValue={renderSelectedValue}
             >
                 {data?.map((item) => (
-                    <MenuItem key={item.value} value={item.value}>
+                    <MenuItem key={item.name} value={item.name}>
                         <ListItemText primary={item.name} />
                     </MenuItem>
                 ))}

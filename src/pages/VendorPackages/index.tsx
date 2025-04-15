@@ -41,12 +41,12 @@ const VendorPackages = () => {
         }
     }
 
-    const fetchPackages = async (vendor:string | undefined | null) => {
+    const fetchPackages = async (vendor: string | undefined | null) => {
         try {
             if (!vendor) return;
             const response: ApiResponse<ExternalPackage[]> = await doGET(ENDPOINTS.externalPackage(vendor));
             if (response.status == 200) {
-                handleChange('packages',response.data?.data);
+                handleChange('packages', response.data?.data);
             }
         } catch (error) {
 
@@ -68,31 +68,63 @@ const VendorPackages = () => {
                 }}
             >
                 <Toolbar />
-                <Container sx={{ mt: 4, mb: 4 }}>
-                    <VendorSelect
-                        value={data?.selectedVendor}
-                        onChange={(value) => {
-                            handleChange("vendor", value)
-                            fetchPackages(value);
+                <Container>
+                    <Box
+                        sx={{
+                            mt: 4,
+                            mb: 4,
+                            px: 3,
+                            py: 2,
                         }}
-                    />
+                    >
 
-                    {data?.selectedVendor ? <>
-                        {/* <ExternalPackages
-                            value={data.packages?.map((value) => value?.deal_id)}
-                            module={MODULES.PACKAGES}
+                        <VendorSelect
+                            value={data?.selectedVendor}
                             onChange={(value) => {
-                                handleChange("packages", value)
+                                handleChange("vendor", value)
+                                fetchPackages(value);
                             }}
-                            isMultiple={true}
-                        /> */}
-                        {
-                            data?.packages?.map((item: ExternalPackage, index: number) => {
-                                return <p key={index}>{item.name}</p>;
-                            })
-                        }
+                        />
 
-                    </> : null}
+                        {data?.selectedVendor ? <>
+                            <Box
+                                sx={{
+                                    mt: 1,
+                                    p: 2,
+                                    borderRadius: 2,
+                                    backgroundColor: '#fff',
+                                    boxShadow: 3,
+                                    maxHeight: 500,
+                                    overflowY: 'auto',
+                                }}
+                            >
+                                {data?.packages?.length ? (
+                                    data.packages.map((item: ExternalPackage, index: number) => (
+                                        <Box
+                                            key={index}
+                                            sx={{
+                                                mb: 1.5,
+                                                px: 2,
+                                                py: 1,
+                                                borderRadius: 1,
+                                                backgroundColor: '#f5f5f5',
+                                                fontSize: '16px',
+                                                fontWeight: 500,
+                                                color: '#333',
+                                            }}
+                                        >
+                                            {item.name}
+                                        </Box>
+                                    ))
+                                ) : (
+                                    <Box sx={{ p: 2, textAlign: 'center', color: 'gray' }}>
+                                        No packages available
+                                    </Box>
+                                )}
+                            </Box>
+
+                        </> : null}
+                    </Box>
 
                 </Container>
             </Box>
