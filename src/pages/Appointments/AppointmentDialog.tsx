@@ -47,6 +47,7 @@ import "./styles.css"
 import PackagetSelect from "../../components/DropDowns/PackageSelect/PackageSelect";
 import ExternalAppointment from "./ExternalAppointment";
 import AppointmentCommonFields from "./AppointmentCommonFields";
+import TimePickerField from "../../components/TimePickerField";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -292,49 +293,25 @@ export default function AppointmentDialog({
                 isMultiple={false}
                 value={appointMentData.department}
                 onChange={(value) => {
-                    handleChange("department", value)
+                  handleChange("department", value)
                 }}
                 module={MODULES.APPOINTMENT}
-            />
+              />
 
 
-              <div className="time-container">
-                <label>Start Time</label>
-                <DatePicker2
-                  selected={appointMentData?.timeSlot.start ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.start, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
-                  onChange={(date) => {
-                    handleChange("timeSlot.start", moment(date).format('HHmm'))
-                  }}
-                  showTimeSelectOnly
-                  showTimeSelect
-                  wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
-                  dateFormat="dd-MM-yyyy HH:mm"
-                  className="w-100 time-input"
-                  timeFormat="HH:mm"
-                  value={appointMentData?.timeSlot.start ? moment(appointMentData?.timeSlot.start, 'HHmm').format('hh:mm A') : 'Select Start Time'}
-                  timeInputLabel="Start Time"
-                  timeIntervals={15}
-                />
-              </div>
-              <div className="time-container">
-                <label>End Time</label>
-                <DatePicker2
-                  selected={appointMentData?.timeSlot.end ? moment(`${moment().format('DDMMYYYY')}${moment(appointMentData?.timeSlot.end, 'HHmm').format('HH:mm')}`, 'DDMMYYYYHHmm').toDate() : undefined}
-                  onChange={(date) => {
-                    handleChange("timeSlot.end", moment(date).format('HHmm'))
-                  }}
-                  showTimeSelectOnly
-                  showTimeSelect
-                  wrapperClassName={`w-100 react-datepicker-wrapper custom-date-picker-wrapper`}
-                  dateFormat="dd-MM-yyyy HH:mm"
-                  className="w-100 time-input"
-                  timeFormat="HH:mm"
-                  value={appointMentData?.timeSlot.end ? moment(appointMentData?.timeSlot.end, 'HHmm').format('hh:mm A') : 'Select End Time'}
-                  timeInputLabel="End Time"
-                  timeIntervals={15}
-                />
-              </div>
+              <TimePickerField
+                label="Start Time"
+                value={appointMentData?.timeSlot.start}
+                field="timeSlot.start"
+                onChange={handleChange}
+              />
 
+              <TimePickerField
+                label="End Time"
+                value={appointMentData?.timeSlot.end}
+                field="timeSlot.end"
+                onChange={handleChange}
+              />
             </>
             : (
               <ExternalAppointment
