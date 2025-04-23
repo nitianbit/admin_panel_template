@@ -23,13 +23,26 @@ const VendorSelect: React.FC<Props> = ({
     const [data, setData] = useState<Vendor[]>([]);
 
     useEffect(() => { fetchData() }, [globalCompanyId])
-
+//await doGET(`${ENDPOINTS.grid('vendors')}?rows=-1&or[company=${globalCompanyId},company=notexists[]]`)
     const fetchData = async () => {
         try {
             if (!globalCompanyId) return;
+            const query = {
+                "$or": [
+                    {
+                        "$and": [
+                            { company: { "$exists": true } },
+                            { company: { "$eq": globalCompanyId } }
+                        ]
+                    },
+                    {
+                        company: { "$exists": false }
+                    }
+                ]
+            }
             const response: ApiResponse<{
                 rows: Vendor[]
-            }> = await doGET(`${ENDPOINTS.grid('vendors')}?rows=-1&company=${globalCompanyId}`)
+            }> = await doGET(`${ENDPOINTS.grid('vendors')}?rows=-1&query=${JSON.stringify(query)}`)
             if (response.status == 200) {
                 if (response.data?.data?.rows) {
                     setData(response.data?.data?.rows)

@@ -77,14 +77,14 @@ const AppointmentCommonFields: React.FC<Props> = ({
                 module={MODULES.APPOINTMENT}
             />
 
-            <DepartmentSelect
+            {/* <DepartmentSelect
                 isMultiple={false}
                 value={appointMentData.department}
                 onChange={(value) => {
                     handleChange("department", value)
                 }}
                 module={MODULES.APPOINTMENT}
-            />
+            /> */}
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
 

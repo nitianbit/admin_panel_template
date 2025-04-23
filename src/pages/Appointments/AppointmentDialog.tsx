@@ -285,9 +285,17 @@ export default function AppointmentDialog({
 
           {appointMentData?.type == "2" ?
             <>
-              <PackagetSelect isMultiple={false} value={appointMentData.department} onChange={(value) => {
+              {/* <PackagetSelect isMultiple={false} value={appointMentData.package} onChange={(value) => {
                 handleChange("package", value)
-              }} module={MODULES.APPOINTMENT} />
+              }} module={MODULES.APPOINTMENT} /> */}
+              <DepartmentSelect
+                isMultiple={false}
+                value={appointMentData.department}
+                onChange={(value) => {
+                    handleChange("department", value)
+                }}
+                module={MODULES.APPOINTMENT}
+            />
 
 
               <div className="time-container">
