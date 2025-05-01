@@ -168,7 +168,7 @@ export default function SignInSide() {
             sm={4}
             md={7}
             sx={{
-              backgroundImage: "url(../../../doctor.jpg)",
+              backgroundImage: "url(../../../doctor.jpeg)",
               backgroundRepeat: "no-repeat",
               backgroundColor: (t) =>
                 t.palette.mode === "light"
