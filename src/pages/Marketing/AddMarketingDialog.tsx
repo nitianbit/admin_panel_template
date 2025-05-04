@@ -38,7 +38,7 @@ export default function AddMARKETINGDialog({
   const [hRData, setMARKETINGData] = React.useState<MARKETING>({
     name:"",
     email:"",
-    role:["hr"],
+    role:["marketing"],
     phone:"",
     company:"",
   })
