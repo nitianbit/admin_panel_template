@@ -64,7 +64,7 @@ export default function AddMARKETINGDialog({
       name:"",
       email:"",
       phone:"",
-      role:["hr"],
+      role:["marketing"],
       company:""
     })
   };
