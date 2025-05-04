@@ -57,6 +57,11 @@ const primarynavList = [
     icon: <PeopleIcon />,
   },
   {
+    link: "/marketing",
+    label: "Marketing",
+    icon: <PeopleIcon />,
+  },
+  {
     link: "/admin",
     label: "Admin",
     icon: <PeopleIcon />,

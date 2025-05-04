@@ -25,14 +25,16 @@ export const moduleRoles = {
   "/services": [MODULES.ADMIN],
   "/offers": [MODULES.ADMIN],
   "/hr-list": [MODULES.ADMIN, MODULES.SUPERVISOR],
-  "/report": [MODULES.ADMIN, MODULES.DOCTOR, MODULES.LABORATORY],
-  "/service-images": [MODULES.ADMIN],
-  "/packages": [MODULES.ADMIN],
-  "/forms": [MODULES.ADMIN],
-  "/blogs": [MODULES.ADMIN],
-  "/external-packages": [MODULES.ADMIN],
-  "/company-external-packages": [MODULES.ADMIN],
-  "/vendors": [MODULES.ADMIN],
+  "/report": [MODULES.ADMIN, MODULES.DOCTOR, MODULES.LABORATORY, MODULES.SUPERVISOR,],
+  "/service-images": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/forms": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/blogs": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/external-packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/company-external-packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/vendors": [MODULES.ADMIN, MODULES.SUPERVISOR,],
+  "/marketing": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
+
 }
 
 

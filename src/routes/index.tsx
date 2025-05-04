@@ -33,6 +33,7 @@ import Blogs from "../pages/Blogs";
 import VendorCompanyPackageAssign from "../pages/VendorPackages/VendorCompanyPackageAssign";
 import VendorPackages from "../pages/VendorPackages";
 import Vendors from "../pages/Vendors/Vendor";
+import MARKETINGList from "../pages/Marketing/MarketingList";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -135,6 +136,14 @@ export const protectedRoutes = [
     element: (
       <AdminElement>
         <HRList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/marketing",
+    element: (
+      <AdminElement>
+        <MARKETINGList />
       </AdminElement>
     )
   },
