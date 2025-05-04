@@ -32,6 +32,7 @@ import Form from "../pages/Form/list";
 import Blogs from "../pages/Blogs";
 import VendorCompanyPackageAssign from "../pages/VendorPackages/VendorCompanyPackageAssign";
 import VendorPackages from "../pages/VendorPackages";
+import Vendors from "../pages/Vendors/Vendor";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -268,6 +269,12 @@ export const protectedRoutes = [
     path: "/company-external-packages",
     element: <AdminElement>
       <VendorCompanyPackageAssign />
+    </AdminElement>,
+  },
+  {
+    path: "/vendors",
+    element: <AdminElement>
+      <Vendors />
     </AdminElement>,
   },
 

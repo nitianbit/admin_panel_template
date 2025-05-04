@@ -33,7 +33,8 @@ export const MODULES = {
     SERVICE_IMAGES:'service-images',
      PACKAGES: 'package',
      FORM:'form',
-     BLOGS:'blogs'
+     BLOGS:'blogs',
+     VENDORS:'vendors'
 };
 
 

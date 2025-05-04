@@ -29,7 +29,7 @@ const ExternalAppointment: React.FC<Props> = ({
 
     return (
         <>
-
+{appointMentData?.vendor}
             <VendorSelect
                 value={appointMentData?.vendor}
                 onChange={(value) => {

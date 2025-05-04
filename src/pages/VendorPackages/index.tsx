@@ -53,7 +53,7 @@ const VendorPackages = () => {
         }
     }
 
-    const handleChange = (key: string, value: string | string[] | Vendor[]) => setData(prev => ({ ...prev, [key]: value }))
+    const handleChange = (key: string, value: string | string[] | Vendor[] | ExternalPackage[]) => setData(prev => ({ ...prev, [key]: value }))
 
     return (
         <Box sx={{ display: 'flex', }}>

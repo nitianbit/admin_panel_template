@@ -32,7 +32,7 @@ const VendorSelect: React.FC<Props> = ({
                     {
                         "$and": [
                             { company: { "$exists": true } },
-                            { company: { "$eq": globalCompanyId } }
+                            { company: { "$in": [globalCompanyId] } }
                         ]
                     },
                     {

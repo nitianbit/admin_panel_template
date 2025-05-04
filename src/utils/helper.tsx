@@ -32,6 +32,7 @@ export const moduleRoles = {
   "/blogs": [MODULES.ADMIN],
   "/external-packages": [MODULES.ADMIN],
   "/company-external-packages": [MODULES.ADMIN],
+  "/vendors": [MODULES.ADMIN],
 }
 
 
