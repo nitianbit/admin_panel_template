@@ -13,9 +13,9 @@ export interface Appointment {
         start: string;
         end: string;
     };
-    status: string;
+    status: number;
     fee?: Number
-    paymentStatus?: string;
+    paymentStatus?: number;
     company?: string;
     _id?: string,
     package?: string,

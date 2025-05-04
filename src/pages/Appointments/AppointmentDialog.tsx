@@ -77,8 +77,8 @@ export default function AppointmentDialog({
   const defaultData = {
     fee: 0,
     type: "1",
-    status: "SCHD",
-    paymentStatus: "PND",
+    status: APPOINTMENT_STATUS.SCHEDULED,
+    paymentStatus: PAYMENT_STATUS.PENDING,
     appointmentDate: "",
     timeSlot: {
       start: "",
