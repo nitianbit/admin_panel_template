@@ -121,9 +121,19 @@ const AddEventDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             onChange={(e) => handleChange("description", e.target.value)}
                             multiline
                         />
+                        <TextField
+                            fullWidth
+                            margin="dense"
+                            label="Date"
+                            type="date"
+                            variant="outlined"
+                            InputLabelProps={{ shrink: true }} // Ensures label doesn’t overlap with date text
+                            value={data.date || ''}
+                            onChange={(e) => handleChange("date", e.target.value)}
+                        />
 
                         {data.image && typeof data.image === 'string' ? <CustomImage src={data.image} style={{ width: '50%', height: 200, objectFit: 'contain' }} /> : null}
-                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} allow="image/*"/>
+                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} allow="image/*" />
 
                     </DialogContent>
                     <DialogActions>

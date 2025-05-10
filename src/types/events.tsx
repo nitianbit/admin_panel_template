@@ -5,6 +5,7 @@ export interface Event {
     name: string;
     description?: string;
     hospital?: string;
+    date?: string;
     image?: string;
 
 }
