@@ -26,6 +26,7 @@ import Offers from "../pages/Offers";
 import HRList from "../pages/HR/HRList";
 import Report from "../pages/Report";
 import ServiceImages from "../pages/ServiceImages";
+import GalleryImages from "../pages/GalleryImage";
 import Packages from "../pages/Packages";
 import PushNotificationGrid from "../pages/PushNotification/list";
 import Form from "../pages/Form/list";
@@ -34,6 +35,7 @@ import VendorCompanyPackageAssign from "../pages/VendorPackages/VendorCompanyPac
 import VendorPackages from "../pages/VendorPackages";
 import Vendors from "../pages/Vendors/Vendor";
 import MARKETINGList from "../pages/Marketing/MarketingList";
+import Events from "../pages/Events";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -284,6 +286,18 @@ export const protectedRoutes = [
     path: "/vendors",
     element: <AdminElement>
       <Vendors />
+    </AdminElement>,
+  },
+  {
+    path: "/gallery-images",
+    element: <AdminElement>
+      <GalleryImages />
+    </AdminElement>,
+  },
+  {
+    path: "/event",
+    element: <AdminElement>
+      <Events />
     </AdminElement>,
   },
 

@@ -31,6 +31,8 @@ export const MODULES = {
     HR:'hr',
     REPORT:'report',
     SERVICE_IMAGES:'service-images',
+    GALLERY_IMAGES:'gallery-image',
+    EVENT:'event',
      PACKAGES: 'package',
      FORM:'form',
      BLOGS:'blogs',

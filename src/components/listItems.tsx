@@ -131,11 +131,6 @@ const primarynavList = [
     label: "Packages",
     icon: <CircleNotificationsIcon />,
   },
-  // {
-  //   link: "/push-notification",
-  //   label: "Push Notifications",
-  //   icon: <CircleNotificationsIcon />,
-  // },
   {
     link: "/forms",
     label: "Forms",
@@ -160,6 +155,16 @@ const primarynavList = [
     link: "/company-external-packages",
     label: "Vendor Company",
     icon: <BookIcon />,
+  },
+  {
+    link: "/gallery-images",
+    label: "Gallery Images",
+    icon: <CircleNotificationsIcon />,
+  },
+  {
+    link: "/event",
+    label: "Events",
+    icon: <CircleNotificationsIcon />,
   },
 
 ];
