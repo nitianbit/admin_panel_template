@@ -90,7 +90,7 @@ export default function PatientsByDoctor({ companyWise = false }: { companyWise?
         data: data,
         animationType: "scale",
         animationEasing: "elasticOut",
-        animationDelay: (idx:number) => Math.random() * 200,
+        animationDelay: (idx: number) => Math.random() * 200,
       },
     ],
     color: [

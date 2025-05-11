@@ -1,4 +1,5 @@
-import './globals.css'
+import type React from "react"
+import "./globals.css"
 
 export default function RootLayout({
   children,
@@ -11,3 +12,7 @@ export default function RootLayout({
     </html>
   )
 }
+
+export const metadata = {
+      generator: 'v0.dev'
+    };

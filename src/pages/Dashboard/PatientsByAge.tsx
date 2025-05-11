@@ -89,7 +89,7 @@ export default function PatientsByAge({ companyWise = false }: { companyWise?: b
         },
         barWidth: "50%",
         animationDuration: 1500,
-        animationDelay: (idx:number) => idx * 100,
+        animationDelay: (idx: number) => idx * 100,
       },
     ],
     tooltip: {

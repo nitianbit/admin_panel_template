@@ -63,7 +63,7 @@ export default function PieChart() {
         ],
         animationType: "scale",
         animationEasing: "elasticOut",
-        animationDelay: (idx:number) => Math.random() * 200,
+        animationDelay: (idx: number) => Math.random() * 200,
       },
     ],
   }

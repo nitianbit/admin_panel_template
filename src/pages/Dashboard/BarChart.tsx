@@ -97,7 +97,7 @@ export default function BarChart() {
           color: "#666",
         },
         animationDuration: 1500,
-        animationDelay: (idx:number) => idx * 100,
+        animationDelay: (idx: number) => idx * 100,
       },
     ],
   }
