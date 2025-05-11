@@ -52,7 +52,7 @@ export const dashboardCards = [
     color: "primary",
   },
   {
-    title: "Patients",
+    title: "Employees",
     value: "totalPatients" as keyof DASHBOARD_STATS,
     icon: <PeopleIcon />,
     color: "primary",

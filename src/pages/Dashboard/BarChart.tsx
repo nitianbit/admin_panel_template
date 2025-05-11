@@ -54,7 +54,7 @@ export default function BarChart() {
     ],
     series: [
       {
-        name: "Patients",
+        name: "Employees",
         type: "bar",
         barWidth: "60%",
         data: [10, 52, 200, 334, 390, 330, 220],

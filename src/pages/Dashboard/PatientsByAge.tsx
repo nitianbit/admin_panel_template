@@ -120,7 +120,7 @@ export default function PatientsByAge({ companyWise = false }: { companyWise?: b
       >
         <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6" fontWeight="bold" color="#333">
-            Patients By Age Group
+            Employees By Age Group
           </Typography>
         </Box>
 

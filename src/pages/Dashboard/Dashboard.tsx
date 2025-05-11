@@ -30,7 +30,7 @@ import { Typography, Divider } from "@mui/material"
 const cardData = [
   {
     icon: <PeopleIcon />,
-    title: "Patients",
+    title: "Employees",
     value: 1000,
   },
   {

@@ -56,7 +56,7 @@ export default function PatientsByDoctor({ companyWise = false }: { companyWise?
     },
     series: [
       {
-        name: "Patients",
+        name: "Employees",
         type: "pie",
         radius: ["40%", "70%"],
         avoidLabelOverlap: false,
@@ -123,7 +123,7 @@ export default function PatientsByDoctor({ companyWise = false }: { companyWise?
       >
         <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6" fontWeight="bold" color="#333">
-            Patients By Doctor
+            Employees By Doctor
           </Typography>
         </Box>
 

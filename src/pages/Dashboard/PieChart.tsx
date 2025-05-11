@@ -57,7 +57,7 @@ export default function PieChart() {
           show: false,
         },
         data: [
-          { value: 1048, name: "Patients" },
+          { value: 1048, name: "Employees" },
           { value: 735, name: "Recovered" },
           { value: 580, name: "In ICU" },
         ],
