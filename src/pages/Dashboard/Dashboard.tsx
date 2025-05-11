@@ -105,7 +105,7 @@ export default function Dashboard({ companyWise = false }: { companyWise?: boole
         {/* Dashboard Header */}
         <Box
           sx={{
-            background: "linear-gradient(90deg, #4776E6 0%, #8E54E9 100%)",
+            background: "linear-gradient(90deg, #02989D 0%, rgb(74, 220, 225) 100%)",
             color: "white",
             py: 4,
             px: 3,
@@ -114,10 +114,7 @@ export default function Dashboard({ companyWise = false }: { companyWise?: boole
         >
           <Container maxWidth="xl">
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Healthcare Dashboard
-            </Typography>
-            <Typography variant="subtitle1">
-              Welcome to your healthcare analytics center. View and analyze patient and appointment data.
+              Myewacare Dashboard
             </Typography>
           </Container>
         </Box>
