@@ -36,6 +36,7 @@ import VendorPackages from "../pages/VendorPackages";
 import Vendors from "../pages/Vendors/Vendor";
 import MARKETINGList from "../pages/Marketing/MarketingList";
 import Events from "../pages/Events";
+import SuperBlogs from "../pages/SuperBlogs";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -265,9 +266,9 @@ export const protectedRoutes = [
     </AdminElement>,
   },
   {
-    path: "/blogs",
+    path: "/superblogs",
     element: <AdminElement>
-      <Blogs />
+      <SuperBlogs />
     </AdminElement>,
   },
   {

@@ -36,6 +36,7 @@ export const MODULES = {
      PACKAGES: 'package',
      FORM:'form',
      BLOGS:'blogs',
+     SUPERBLOGS: 'superblogs',
      VENDORS:'vendors',
      MARKETING:'marketing'
 };
