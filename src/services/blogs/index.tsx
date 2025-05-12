@@ -21,7 +21,7 @@ const store = create<BlogState>((set, get) => ({
     try {
       const queryParams = new URLSearchParams(filters);
       queryParams.append("page", String(currentPage));
-      queryParams.append("limit", String(rows));
+      queryParams.append("rows", String(rows));
 
       const url = `${ENDPOINTS.grid("blogs")}?${queryParams.toString()}`;
       const response = await doGET(url);
