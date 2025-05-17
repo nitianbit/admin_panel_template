@@ -3,6 +3,7 @@ import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
 import { Patient, PatientFilters, PatientState } from '../../types/patient';
 import { ENDPOINTS } from '../api/constants';
+import { MODULES } from '../../utils/constants';
 
 
 const store = create<PatientState>((set, get) => ({
@@ -93,6 +94,7 @@ const store = create<PatientState>((set, get) => ({
             const formData = new FormData();
             formData.append("file", data.file);
             formData.append("company", data.company);
+            formData.append("module", MODULES.PATIENTS);
             const response = await doPOST(ENDPOINTS.bulkCreate('patients'), formData);
             console.log(response);
         } catch (error) {

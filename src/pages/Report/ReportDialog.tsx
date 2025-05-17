@@ -14,6 +14,7 @@ import {
     MenuItem,
     FormHelperText,
     Stack,
+    Box,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import SearchInput from "../../components/SearchInput";
@@ -33,6 +34,7 @@ import LabSelect from "../../components/LabSelect";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import "./styles.css"
 import ImageUpload from "../../components/ImageUploader";
+import AddBulkUploadReport from "./AddBulkUploadReport";
 
 const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [formData, setFormData] = useState<Report>({
@@ -44,12 +46,14 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
         date: moment().unix(),
         company: ""
     });
-
+    const [bulkOpen, setbulkOpen] = React.useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const { onUpdate, onCreate, detail,filters,setFilters } = useReportStore();
     const { globalCompanyId } = useCompanyStore();
 
     const handleChange = (key: string, value: any) => setFormData({ ...formData, [key]: value });
+
+    const handleBulkClickOpen = () =>  setbulkOpen(true);
 
     useEffect(() => {
         if (selectedId && isModalOpen) {
@@ -180,13 +184,23 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                               setFilters(filter)
                             }} />
                         </div>
-                <Button
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={handleClickOpen}
-                >
-                    Add
-                </Button>
+                        <Box>
+
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={handleBulkClickOpen}
+                    >
+                        Bulk Upload
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={handleClickOpen}
+                    >
+                        Add
+                    </Button>
+                </Box>
             </Stack>
 
             <Dialog open={isModalOpen} onClose={handleClose} maxWidth="md" fullWidth>
@@ -384,6 +398,7 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                     </Button>
                 </DialogActions>
             </Dialog>
+            <AddBulkUploadReport open={bulkOpen} setOpen={setbulkOpen}/>
 
 
         </div>

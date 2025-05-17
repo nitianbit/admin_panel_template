@@ -48,4 +48,5 @@ export interface ReportState {
     onUpdate: ( updatedReport: Partial<Report>) => Promise<ApiResponse<Report>>; // Update an existing report
     onDelete: (id: string) => Promise<void>; // Delete a report
     detail: (id: string) => Promise<{ data: Report }>; // Fetch details of a specific report
+    onBulkCreate: (...args: any) => Promise<void>;
 }

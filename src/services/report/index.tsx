@@ -3,6 +3,7 @@ import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
 import { ENDPOINTS } from '../api/constants';
 import { Report, ReportFilters, ReportState } from '../../types/report';
+import { MODULES } from '../../utils/constants';
 
 
 const store = create<ReportState>((set, get) => ({
@@ -118,7 +119,19 @@ const store = create<ReportState>((set, get) => ({
         } catch (error) {
 
         }
-    }
+    },
+    onBulkCreate: async (data: any) => {
+        try {
+            const formData = new FormData();
+            formData.append("file", data.file);
+            // formData.append("company", data.company);
+            formData.append("module", MODULES.REPORT);
+            const response = await doPOST(ENDPOINTS.bulkCreate(MODULES.REPORT), formData);
+            console.log(response);
+        } catch (error) {
+
+        }
+    },
 }));
 
 
