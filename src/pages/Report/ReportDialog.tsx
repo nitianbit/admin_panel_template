@@ -44,7 +44,8 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
         type: 1,
         attachments: [],
         date: moment().unix(),
-        company: ""
+        company: "",
+        link:""
     });
     const [bulkOpen, setbulkOpen] = React.useState(false);
     const [files, setFiles] = useState<File[]>([]);
@@ -271,6 +272,19 @@ const PrescriptionReportDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 value={formData.notes}
                                 rows={4}
                                 onChange={(e) => handleChange("notes", e.target.value)}
+                                multiline
+                                InputLabelProps={{
+                                    shrink: true, // Ensure the label shrinks when there's content
+                                  }}
+                            />
+                            <TextField
+                                fullWidth
+                                margin="dense"
+                                label="Link"
+                                variant="outlined"
+                                value={formData.link}
+                                rows={1}
+                                onChange={(e) => handleChange("link", e.target.value)}
                                 multiline
                                 InputLabelProps={{
                                     shrink: true, // Ensure the label shrinks when there's content

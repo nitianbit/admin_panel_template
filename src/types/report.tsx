@@ -9,7 +9,8 @@ export interface Report {
     date: number; // Timestamp for the report or prescription date
     patient: string; // Reference to Patient ID
     attachments:string[],
-    company:string
+    company:string,
+    link?:string
 }
 
 export interface ReportResponse {
