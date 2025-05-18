@@ -6,13 +6,16 @@ import { doGET } from "../../utils/HttpUtils"
 import { ENDPOINTS } from "../../services/api/constants"
 import { Grid, Paper, Box, Typography, CircularProgress } from "@mui/material"
 import { useCompanyStore } from "../../services/company"
+import useDebounce from "../../hooks/useDebounce"
 
 export default function PatientsByGender({ companyWise = false }: { companyWise?: boolean }) {
   const [data, setData] = React.useState([])
   const [loading, setLoading] = React.useState(true)
-  const { globalCompanyId } = useCompanyStore()
+  const { globalCompanyId } = useCompanyStore();
 
-  const fetchData = async () => {
+  const labels =["Male", "Female"];
+
+  const fetchData = useDebounce(async () => {
     setLoading(true)
     try {
       let url = ENDPOINTS.stats("patients-gender-stats")
@@ -29,7 +32,7 @@ export default function PatientsByGender({ companyWise = false }: { companyWise?
     } finally {
       setLoading(false)
     }
-  }
+  }, 1000)
 
   React.useEffect(() => {
     fetchData()
@@ -39,7 +42,7 @@ export default function PatientsByGender({ companyWise = false }: { companyWise?
     grid: { top: 30, right: 30, bottom: 40, left: 50 },
     xAxis: {
       type: "category",
-      data: ["Male", "Female"],
+      data: labels,
       axisLabel: {
         fontSize: 12,
         color: "#666",
@@ -54,7 +57,11 @@ export default function PatientsByGender({ companyWise = false }: { companyWise?
     },
     series: [
       {
-        data: data.map((item: any) => item.value),
+        // data: data.map((item: any) => item.value),
+        data:labels.map(label => {
+          const record: any = data.find((item: any) => item.name === label);
+          return record?.value ?? 0
+        }),
         type: "bar",
         smooth: true,
         itemStyle: {

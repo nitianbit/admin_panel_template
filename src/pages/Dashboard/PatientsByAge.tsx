@@ -6,13 +6,16 @@ import { doGET } from "../../utils/HttpUtils"
 import { ENDPOINTS } from "../../services/api/constants"
 import { Grid, Paper, Box, Typography, CircularProgress } from "@mui/material"
 import { useCompanyStore } from "../../services/company"
+import useDebounce from "../../hooks/useDebounce"
 
 export default function PatientsByAge({ companyWise = false }: { companyWise?: boolean }) {
   const [data, setData] = React.useState([])
   const [loading, setLoading] = React.useState(true)
-  const { globalCompanyId } = useCompanyStore()
+  const { globalCompanyId } = useCompanyStore();
+  const labels=["< 20", "21-30", "31-40", "41-50", "50 >"]
 
-  const fetchData = async () => {
+
+  const fetchData = useDebounce(async () => {
     setLoading(true)
     try {
       let url = ENDPOINTS.stats("patients-age-group-stats")
@@ -29,7 +32,8 @@ export default function PatientsByAge({ companyWise = false }: { companyWise?: b
     } finally {
       setLoading(false)
     }
-  }
+  },1000)
+ 
 
   React.useEffect(() => {
     fetchData()
@@ -39,7 +43,7 @@ export default function PatientsByAge({ companyWise = false }: { companyWise?: b
     grid: { top: 30, right: 30, bottom: 40, left: 50 },
     xAxis: {
       type: "category",
-      data: ["< 20", "21-30", "31-40", "41-50", "50 >"],
+      data: labels,
       axisLabel: {
         fontSize: 12,
         color: "#666",
@@ -61,7 +65,11 @@ export default function PatientsByAge({ companyWise = false }: { companyWise?: b
     },
     series: [
       {
-        data: data.map((item: any) => item.value),
+        // data: data.map((item: any) => item.value),
+        data: labels.map(label => { //sorting data according to the labels 
+          const record: any = data.find((item: any) => item.name === label);
+          return record?.value ?? 0
+        }),
         type: "bar",
         smooth: true,
         itemStyle: {
