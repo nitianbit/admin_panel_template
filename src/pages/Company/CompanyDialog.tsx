@@ -11,10 +11,8 @@ import { Stack, Switch } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchInput from "../../components/SearchInput";
 import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
 import { Company } from "../../types/company";
 import { useCompanyStore } from "../../services/company";
-import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 const Transition = React.forwardRef(function Transition(
@@ -31,8 +29,7 @@ export default function CompanyDialog({
   toggleModal,
   selectedId
 }: any) {
-
-  const { onCreate,detail,onUpdate } = useCompanyStore();
+  const { onCreate, detail, onUpdate } = useCompanyStore();
 
   const [comapnyData, setCompanyData] = React.useState<Company>({
     name: "",
@@ -42,43 +39,45 @@ export default function CompanyDialog({
     noOfEmployees: 0,
     website: "",
     isActive: true,
-    contactperson: "",
-    noOfUser: 0
-  })
-   const handleChange = (key: any, value: any) =>  setCompanyData({ ...comapnyData, [key]: value });
+    noOfUser: 0,
+    codename: ""
+  });
+
+  const handleChange = (key: keyof Company, value: any) =>
+    setCompanyData({ ...comapnyData, [key]: value });
+
   const handleClickOpen = () => toggleModal(true);
   const handleClose = () => toggleModal(false);
 
   const handleSave = async (event: React.FormEvent) => {
-    event.preventDefault(); 
-    const {name,contactperson,email,phone,website}=comapnyData;
-    if(!name || !contactperson || !email || !phone || !website){
-      toast.error("All fields are required")
-      return
+    event.preventDefault();
+    const { name, contactPerson, email, phone, website, codename } = comapnyData;
+    if (!name || !contactPerson || !email || !phone || !website || !codename) {
+      toast.error("All fields are required");
+      return;
     }
-    if(comapnyData?._id){
+    if (comapnyData?._id) {
       onUpdate(comapnyData);
-     }else{
-       onCreate(comapnyData);
-     }
-    handleClose()
-  }
-  
-    const fetchDetail=async(selectedId:string)=>{
-      try {
-        const data=await detail(selectedId);
-        setCompanyData(data?.data)
-      } catch (error) {
-        
-      }
+    } else {
+      onCreate(comapnyData);
     }
-  
-    React.useEffect(() => {
-      if (selectedId) {
-       fetchDetail(selectedId)
-      }
-    }, [selectedId]);
+    handleClose();
+  };
 
+  const fetchDetail = async (selectedId: string) => {
+    try {
+      const data = await detail(selectedId);
+      setCompanyData(data?.data);
+    } catch (error) {
+      console.error("Failed to fetch company details", error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (selectedId) {
+      fetchDetail(selectedId);
+    }
+  }, [selectedId]);
 
   return (
     <div>
@@ -106,7 +105,6 @@ export default function CompanyDialog({
         fullWidth
         sx={{ height: "100%" }}
       >
-
         <form onSubmit={handleSave}>
           <DialogTitle>Company Details</DialogTitle>
 
@@ -115,33 +113,45 @@ export default function CompanyDialog({
               margin="dense"
               id="name"
               label="Company Name"
-              type="name"
+              type="text"
               required
               fullWidth
               variant="outlined"
-              value={comapnyData?.name}
+              value={comapnyData.name}
               onChange={(e) => handleChange("name", e.target.value)}
+            />
 
+            <TextField
+              margin="dense"
+              id="codename"
+              label="Codename"
+              type="text"
+              fullWidth
+              required
+              variant="outlined"
+              value={comapnyData.codename}
+              onChange={(e) => handleChange("codename", e.target.value)}
             />
 
             <TextField
               margin="dense"
               id="phone"
-              label="Phone no"
-              type="phone"
+              label="Phone Number"
+              type="text"
               fullWidth
+              required
               variant="outlined"
-              placeholder="0 123456789"
               value={comapnyData.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
             />
+
             <TextField
               margin="dense"
               label="Company Email"
               type="email"
               fullWidth
+              required
               variant="outlined"
-              placeholder="Enter Company Email"
               value={comapnyData.email}
               onChange={(e) => handleChange("email", e.target.value)}
             />
@@ -149,42 +159,44 @@ export default function CompanyDialog({
             <TextField
               id="website"
               margin="dense"
-              type="website"
+              label="Company Website"
+              type="text"
               fullWidth
               required
-              label="Company Website"
               variant="outlined"
-              value={comapnyData?.website}
+              value={comapnyData.website}
               onChange={(e) => handleChange("website", e.target.value)}
             />
+
             <TextField
               margin="dense"
               fullWidth
               required
               label="Contact Person Name"
               variant="outlined"
-              value={comapnyData?.contactperson}
-              onChange={(e) => handleChange("contactperson", e.target.value)}
+              value={comapnyData.contactPerson}
+              onChange={(e) => handleChange("contactPerson", e.target.value)}
             />
+
             <TextField
               margin="dense"
               label="Number Of Users"
               fullWidth
+              type="number"
+              required
               variant="outlined"
-              placeholder="Enter Number Of Users"
               value={comapnyData.noOfUser}
               onChange={(e) => handleChange("noOfUser", e.target.value)}
             />
 
-            {/* <FormControl fullWidth margin="dense"> */}
-            <InputLabel id="paymentStatus">Is Active</InputLabel>
+            <InputLabel sx={{ mt: 2 }}>Is Active</InputLabel>
             <Switch
               checked={comapnyData.isActive}
               onChange={(e) => handleChange("isActive", e.target.checked)}
-              inputProps={{ 'aria-label': 'controlled' }}
+              inputProps={{ "aria-label": "controlled" }}
             />
-            {/* </FormControl> */}
           </DialogContent>
+
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
             <Button type="submit" variant="contained">
@@ -196,3 +208,4 @@ export default function CompanyDialog({
     </div>
   );
 }
+
