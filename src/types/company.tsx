@@ -12,7 +12,6 @@ export interface Company {
     email:string,
     phone: number | null;
     countryCode?: number;
-    contactperson: string;
     noOfUser: number;
 }
 
