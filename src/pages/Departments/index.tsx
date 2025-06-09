@@ -6,12 +6,19 @@ import { useDepartmentStore } from '../../services/departments';
 import AddDepartmentDialog from './AddDepartmentDialog';
 import { COLUMNS } from './constants';
 import { MODULES } from '../../utils/constants';
+import { useCompanyStore } from '../../services/company';
 
 const Departments = () => {
-    const { data, totalPages, currentPage, total,rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDepartmentStore();
+    const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useDepartmentStore();
+    const { globalCompanyId } = useCompanyStore();
+
     React.useEffect(() => {
-        fetchGrid()
-    }, [])
+        if (globalCompanyId) {
+            setFilters({ company: globalCompanyId })
+        } else {
+            fetchGrid()
+        }
+    }, [globalCompanyId])
 
     return (
         <Layout appBarTitle="Departments">
@@ -31,8 +38,6 @@ const Departments = () => {
                     rows
                 }}
             />
-
-
         </Layout>
     )
 }

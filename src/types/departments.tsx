@@ -6,7 +6,7 @@ export interface Department {
     description?: string;
     hospital?: string;
     image?: string;
-
+    company:string;
 }
 
 export interface DepartmentResponse {

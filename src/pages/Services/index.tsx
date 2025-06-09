@@ -1,17 +1,38 @@
 import React from 'react'
 import Layout from '../../components/Layout'
 import GridTable from '../../components/GridTable'
-import { use } from 'echarts';
 import AddServiceDialog from './AddServiceDialog';
 import { COLUMNS } from './constants';
 import { MODULES } from '../../utils/constants';
 import { useServicestore } from '../../services/services';
+import { useCompanyStore } from '../../services/company';
 
-const Departments = () => {
-    const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useServicestore();
+const Services = () => {
+    const {
+        data,
+        totalPages,
+        currentPage,
+        total,
+        filters,
+        isLoading,
+        detail,
+        fetchGrid,
+        setFilters,
+        nextPage,
+        prevPage,
+        onPageChange,
+        onDelete
+    } = useServicestore();
+
+    const { globalCompanyId } = useCompanyStore();
+
     React.useEffect(() => {
-        fetchGrid()
-    }, [])
+        if (globalCompanyId) {
+            setFilters({ company: globalCompanyId });
+        } else {
+            fetchGrid();
+        }
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Services">
@@ -26,14 +47,12 @@ const Departments = () => {
                     total,
                     loading: isLoading,
                     onPageChange,
-                    module: MODULES.DEPARTMENT,
+                    module: MODULES.SERVICES,
                     onDelete: (data: any) => onDelete(data._id)
                 }}
             />
-
-
         </Layout>
     )
 }
 
-export default Departments
+export default Services;

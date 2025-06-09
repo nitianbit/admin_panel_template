@@ -12,6 +12,8 @@ import ImageUpload from "../../components/ImageUploader";
 import { uploadFile } from "../../utils/helper";
 import { MODULES } from "../../utils/constants";
 import _ from 'lodash';
+import CompanySelect from "../../components/DropDowns/CompanySelect";
+import { showError } from "../../services/toaster";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -27,7 +29,8 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [data, setData] = React.useState<Department>({
         name: "",
         description: "",
-        image: ""
+        image: "",
+        company: ""
     })
     const { register, handleSubmit, formState: { errors }, reset } = useForm<Department>();
 
@@ -37,6 +40,10 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
     const onSubmit = async () => {
         try {
+            if (!data.company) {
+                return showError("Please select a company");
+            }
+
             let response: Department | null = null;
             const payload: any = _.cloneDeep(data)
             if (typeof data.image !== 'string') {
@@ -71,7 +78,7 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     }
 
     React.useEffect(() => {
-        setData({ name: "", description: "", image: "" })
+        setData({ name: "", description: "", image: "", company: "" })
         if (selectedId) {
             fetchDetail(selectedId)
         }
@@ -122,8 +129,12 @@ const AddDepartmentDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             multiline
                         />
 
+                        <CompanySelect value={data.company} onChange={(value) => {
+                            handleChange("company", value)
+                        }} module={MODULES.DEPARTMENT} />
+
                         {data.image && typeof data.image === 'string' ? <CustomImage src={data.image} style={{ width: '50%', height: 200, objectFit: 'contain' }} /> : null}
-                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} allow="image/*"/>
+                        <ImageUpload onChange={(files: any) => handleChange("image", files?.length ? files[0] : null)} allow="image/*" />
 
                     </DialogContent>
                     <DialogActions>

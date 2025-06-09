@@ -5,7 +5,7 @@ export interface Service {
     name: string;
     type: string;
     department: string;
-
+    company:string;
 }
 
 export interface ServiceResponse {
