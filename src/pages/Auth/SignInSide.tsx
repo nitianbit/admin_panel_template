@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-//import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -186,14 +185,22 @@ export default function SignInSide() {
             component={Paper}
             elevation={6}
             square
+            sx={{
+              overflow: 'auto',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
           >
             <Box
               sx={{
-                my: 8,
-                mx: 4,
+                my: { xs: 4, sm: 6, md: 8 },
+                mx: { xs: 2, sm: 3, md: 4 },
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center"
+                alignItems: "center",
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box'
               }}
             >
               <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
@@ -203,64 +210,124 @@ export default function SignInSide() {
                 Sign In
               </Typography>
 
-              <Box sx={{ mt: 1 }}>
-                {!isOTPSend && <ToggleButton
-                  options={options}
-                  onSelect={handleRoleSelect}
-                  style={{
-                    marginTop: 4
-                  }}
-                />}
-                {isOTPSend ?
-
-                  <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={4} />
-                  : <TextField
+              <Box sx={{ 
+                mt: 1, 
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box'
+              }}>
+                {!isOTPSend && (
+                  <Box sx={{ 
+                    mt: 2, 
+                    mb: 2,
+                    width: '100%',
+                    overflow: 'hidden'
+                  }}>
+                    <ToggleButton
+                      options={options}
+                      onSelect={handleRoleSelect}
+                      style={{
+                        marginTop: 4,
+                        width: '100%',
+                        maxWidth: '100%'
+                      }}
+                    />
+                  </Box>
+                )}
+                
+                {isOTPSend ? (
+                  <Box sx={{ 
+                    mt: 2, 
+                    mb: 2,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%'
+                  }}>
+                    <OTP 
+                      separator={<span>-</span>} 
+                      value={otp} 
+                      onChange={setOTP} 
+                      length={4} 
+                    />
+                  </Box>
+                ) : (
+                  <TextField
                     margin="normal"
-                    //required
                     fullWidth
                     id="email"
                     label="Email Address"
                     onChange={(e: any) => {
                       handleChange("email", e?.target?.value)
                     }}
-                    // name="email"
-                    //autoComplete="email"
-                    //autoFocus
                     value={data?.email}
                     error={!!errors.email}
                     helperText={errors.email?.message}
-                  />}
+                    sx={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      '& .MuiInputBase-root': {
+                        maxWidth: '100%'
+                      }
+                    }}
+                  />
+                )}
+                
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
                   onClick={handleSendButton}
-                  sx={{ mt: 3, mb: 2 }}
+                  sx={{ 
+                    mt: 3, 
+                    mb: 2,
+                    maxWidth: '100%',
+                    wordBreak: 'keep-all',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
                 >
-                  {isOTPSend ? "Verify Otp" : "Send OTP"}
+                  {isOTPSend ? "Verify OTP" : "Send OTP"}
                 </Button>
-                <Grid container>
-                  <Grid item xs>
-                  </Grid>
-                  <Grid item>
-                    <Link
-                      to={"/signup"}
-                      style={{
-                        textDecoration: "none",
-                        color: "inherit"
-                      }}
-                    >
-                      {"Don't have an account? Sign Up"}
-                    </Link>
+                
+                <Grid container spacing={1}>
+                  <Grid item xs={12}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'flex-end',
+                      width: '100%'
+                    }}>
+                      <Link
+                        to={"/signup"}
+                        style={{
+                          textDecoration: "none",
+                          color: "inherit",
+                          fontSize: '0.875rem',
+                          textAlign: 'right'
+                        }}
+                      >
+                        {"Don't have an account? Sign Up"}
+                      </Link>
+                    </Box>
                   </Grid>
                 </Grid>
-                <Divider sx={{ mt: 2 }} light variant="middle">
-                  {/* OR */}
-                </Divider>
-                <Typography align="center" variant="subtitle2" sx={{ mt: 2 }}>
+                
+                <Divider sx={{ mt: 2 }} light variant="middle" />
+                
+                <Typography 
+                  align="center" 
+                  variant="subtitle2" 
+                  sx={{ 
+                    mt: 2,
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    lineHeight: 1.4,
+                    wordBreak: 'break-word',
+                    hyphens: 'auto'
+                  }}
+                >
                   By continuing, you agree to{" "}
-                  <span style={{ color: "green" }}>Terms of Service</span> and
-                  <span style={{ color: "green" }}> Privacy Policy</span>.
+                  <span style={{ color: "green" }}>Terms of Service</span> and{" "}
+                  <span style={{ color: "green" }}>Privacy Policy</span>.
                 </Typography>
               </Box>
             </Box>
