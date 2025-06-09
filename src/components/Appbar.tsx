@@ -21,6 +21,7 @@ import { useAppContext } from "../services/context/AppContext";
 import logo from '../../src/assets/images/EWA_logo.webp'
 import CompanyDropDown from "./DropDowns/Company/CompanyDropdown";
 
+
 export default function Appbar(props: { appBarTitle: string }) {
   const { userData } = useAppContext();
   const [open, setOpen] = React.useState(true);
@@ -91,7 +92,9 @@ export default function Appbar(props: { appBarTitle: string }) {
                 color="inherit"
                 onClick={handleOpenUserMenu}
               >
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt={userData?.name}>
+  {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+</Avatar>
               </IconButton>
             </Tooltip>
             <Menu

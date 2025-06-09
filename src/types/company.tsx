@@ -3,6 +3,7 @@
 export interface Company {
     _id?: string;
     name: string;
+    codename: string;
     contactPerson: string;
     noOfEmployees: number;
     website: string,
@@ -11,7 +12,6 @@ export interface Company {
     email:string,
     phone: number | null;
     countryCode?: number;
-    contactperson: string;
     noOfUser: number;
 }
 
