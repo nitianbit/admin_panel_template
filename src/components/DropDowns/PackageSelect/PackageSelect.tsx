@@ -84,11 +84,11 @@ const PackagetSelect: React.FC<Props> = ({
 }) => {
     const { data, fetchGrid, setFilters } = usePackageStore();
 
-    // useEffect(() => {
-    //     if (data.length === 0) {
-    //         fetchGrid();
-    //     }
-    // }, []);
+    useEffect(() => {
+        if (data.length === 0) {
+            fetchGrid();
+        }
+    }, []);
     const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {

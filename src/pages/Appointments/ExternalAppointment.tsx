@@ -38,7 +38,7 @@ const ExternalAppointment: React.FC<Props> = ({
             />
 
             {appointMentData?.vendor ? (
-                !['EWA','Myewacare'].includes(appointMentData?.vendor)
+                ['EWA','Myewacare'].includes(appointMentData?.vendor)
                     ? <PackagetSelect isMultiple={false} value={appointMentData.package} onChange={(value) => {
                         handleChange("package", value)
                     }} module={MODULES.APPOINTMENT} />
