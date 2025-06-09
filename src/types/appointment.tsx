@@ -23,6 +23,13 @@ export interface Appointment {
     vendor?: string, //for third party
     stm_id?:string, //for report and third party
     packages?: string[],
+    location: {
+            latitude?: Number ,
+            longitude?: Number,
+        },
+    address?:string,
+    city?:string,
+    zipcode?:string,
 }
 
 export interface AppointmentResponse {

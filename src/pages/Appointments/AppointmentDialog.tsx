@@ -70,7 +70,6 @@ export default function AppointmentDialog({
   const { data: doctorData, totalPages: doctorTotalPages, total: doctorTotal, currentPage: doctorCurrentPage, isLoading: doctorIsLoading, onPageChange: doctorOnPageChange, fetchGrid: doctorFetchtGrid, onDelete: doctorOnDelete } = useDoctorStore();
   const { userData } = useAppContext();
 
-
   const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
   const [doctorDialogOpen, setDoctorDialogOpen] = React.useState(false);
 
@@ -87,7 +86,14 @@ export default function AppointmentDialog({
     lab: "",
     doctor: userData?.role?.includes("doctors") ? userData?._id : "",
     patient: "",
-    company: globalCompanyId ?? ""
+    company: globalCompanyId ?? "",
+    location: {
+      latitude: undefined,
+      longitude: undefined
+    },
+    address: "",
+    city: "",
+    zipcode: ""
   }
 
   const [appointMentData, setAppointMentData] = React.useState<Appointment>(defaultData)
@@ -108,13 +114,18 @@ export default function AppointmentDialog({
     }
   }, [selectedId])
 
-
   const handleChange = (key: any, value: any) => {
     if (key.startsWith("timeSlot.")) {
-      const field = key.split(".")[1]; // Extract 'start' or 'end'
+      const field = key.split(".")[1];
       setAppointMentData({
         ...appointMentData,
         timeSlot: { ...appointMentData.timeSlot, [field]: value }
+      });
+    } else if (key.startsWith("location.")) {
+      const field = key.split(".")[1];
+      setAppointMentData({
+        ...appointMentData,
+        location: { ...appointMentData.location, [field]: value }
       });
     } else {
       setAppointMentData({ ...appointMentData, [key]: value });
@@ -125,17 +136,13 @@ export default function AppointmentDialog({
     setAppointMentData({
       ...appointMentData,
       ...data
-      // timeSlot: { ...appointMentData.timeSlot, ...data }
     });
   }
-
-
 
   const handlePatientDialogSave = (ids: string[]) => {
     setPatientDialogOpen(false)
     appointMentData.patient = ids?.length ? ids[0] : ""
   }
-
 
   const handleDoctorDialogSave = (ids: string[]) => {
     setDoctorDialogOpen(false)
@@ -146,26 +153,20 @@ export default function AppointmentDialog({
     setPatientDialogOpen(false)
   }
 
-
   const handleDoctorDialogClose = () => {
     setDoctorDialogOpen(false)
   }
 
   const handleSave = async () => {
-
     const data = { ...appointMentData }
 
     const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
-    // const startTime = dayjs(appointMentData.timeSlot.start).format("HHmm");
-    // const endTime = dayjs(appointMentData.timeSlot.end).format("HHmm");
     data.appointmentDate = date;
-    // data.timeSlot["start"] = startTime
-    // data.timeSlot["end"] = endTime;
 
     if (data.patient?.length === 0) return showError("Please select a patient")
     if (!data.doctor) delete data.doctor;
     if (!data.lab) delete data.lab;
-    // \    if(!data.lab)delete data.lab;
+
     if (data?._id) {
       onUpdate(data)
     } else {
@@ -220,7 +221,6 @@ export default function AppointmentDialog({
         title="Patient"
       />
 
-
       <Dialog
         open={isModalOpen}
         onClose={toggleModal}
@@ -265,16 +265,6 @@ export default function AppointmentDialog({
                   }}
                 />
               )}
-              {/* {appointMentData?.type == "1" && (
-                  <LabSelect
-                    sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
-                    value={appointMentData.lab}
-                    onSelect={(id: string): void => {
-                      console.log(id);
-                      handleChange("lab", id);
-                    }}
-                  />
-                )} */}
             </>
           )}
 
@@ -284,11 +274,62 @@ export default function AppointmentDialog({
             module={MODULES.APPOINTMENT}
           />
 
-          {appointMentData?.type == "2" ?
+          {/* New Fields Start */}
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Address"
+            value={appointMentData.address || ""}
+            onChange={(e) => handleChange("address", e.target.value)}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="City"
+            value={appointMentData.city || ""}
+            onChange={(e) => handleChange("city", e.target.value)}
+          />
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Zip Code"
+            value={appointMentData.zipcode || ""}
+            onChange={(e) => handleChange("zipcode", e.target.value)}
+          />
+
+          <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+            <Box flex={1}>
+              <TextField
+                label="Latitude"
+                type="number"
+                fullWidth
+                size="small"
+                value={appointMentData.location?.latitude || ""}
+                onChange={(e) =>
+                  handleChange("location.latitude", parseFloat(e.target.value))
+                }
+              />
+            </Box>
+            <Box flex={1}>
+              <TextField
+                label="Longitude"
+                type="number"
+                fullWidth
+                size="small"
+                value={appointMentData.location?.longitude || ""}
+                onChange={(e) =>
+                  handleChange("location.longitude", parseFloat(e.target.value))
+                }
+              />
+            </Box>
+          </Stack>
+
+          {/* New Fields End */}
+
+          {appointMentData?.type == "2" ? (
             <>
-              {/* <PackagetSelect isMultiple={false} value={appointMentData.package} onChange={(value) => {
-                handleChange("package", value)
-              }} module={MODULES.APPOINTMENT} /> */}
               <DepartmentSelect
                 isMultiple={false}
                 value={appointMentData.department}
@@ -297,7 +338,6 @@ export default function AppointmentDialog({
                 }}
                 module={MODULES.APPOINTMENT}
               />
-
 
               <TimePickerField
                 label="Start Time"
@@ -313,15 +353,14 @@ export default function AppointmentDialog({
                 onChange={handleChange}
               />
             </>
-            : (
-              <ExternalAppointment
-                handleChange={handleChange}
-                appointMentData={appointMentData}
-                module={MODULES.APPOINTMENT}
-                handleChangeTimeSlot={handleChangeTimeSlot}
-              />
-            )}
-
+          ) : (
+            <ExternalAppointment
+              handleChange={handleChange}
+              appointMentData={appointMentData}
+              module={MODULES.APPOINTMENT}
+              handleChangeTimeSlot={handleChangeTimeSlot}
+            />
+          )}
 
         </DialogContent>
         <DialogActions>
@@ -331,6 +370,6 @@ export default function AppointmentDialog({
           </Button>
         </DialogActions>
       </Dialog>
-    </div >
+    </div>
   );
 }
