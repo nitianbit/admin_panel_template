@@ -22,7 +22,7 @@ export const COLUMNS = [
   {
     header: "Contact Number",
     accessor: "patient_number",
-    render: (data: any) => data?.patient_number || "-",
+    render: (data: any) => data?.patient_phone || "-",
   },
   {
   header: "Appointment Date",
