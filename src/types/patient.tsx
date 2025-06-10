@@ -20,7 +20,10 @@ export interface Patient {
   isVerified?: boolean;
   _id?: string;
   height?:number,
-  weight?:number
+  weight?:number,
+  employId?:string,
+    dob?:string,
+    surname?:string,
 }
 
 
