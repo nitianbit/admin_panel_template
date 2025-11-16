@@ -38,7 +38,11 @@ export const MODULES = {
      BLOGS:'blogs',
      SUPERBLOGS: 'superblogs',
      VENDORS:'vendors',
-     MARKETING:'marketing'
+     MARKETING:'marketing',
+     SURGERY:'surgery',
+     SECOND_OPINION:'second-opinion',
+     EWA_PACKAGE:'ewa-package',
+     CORPORATE_PLAN:'corporate-plan',
 };
 
 

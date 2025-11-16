@@ -171,6 +171,26 @@ const primarynavList = [
     label: "Events",
     icon: <CircleNotificationsIcon />,
   },
+  {
+    link: "/second-opinion",
+    label: "Second Opinion",
+    icon: <BookIcon />,
+  },
+  {
+    link: "/corporate-plan",
+    label: "Corporate Plan",
+    icon: <BookIcon />,
+  },
+  {
+    link: "/surgery",
+    label: "Surgery",
+    icon: <BookIcon />,
+  },
+  {
+    link: "/ewa-package",
+    label: "Ewa Package",
+    icon: <BookIcon />,
+  },
 
 ];
 

@@ -37,6 +37,10 @@ import Vendors from "../pages/Vendors/Vendor";
 import MARKETINGList from "../pages/Marketing/MarketingList";
 import Events from "../pages/Events";
 import SuperBlogs from "../pages/SuperBlogs";
+import Surgery from "../pages/Surgery";
+import CorporatePlan from "../pages/CorporatePlan/list";
+import SecondOpinion from "../pages/SecondOpinion";
+import EwaPackage from "../pages/EwaPackage/list";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -301,5 +305,31 @@ export const protectedRoutes = [
       <Events />
     </AdminElement>,
   },
+  {
+    path: "/surgery",
+    element: <AdminElement>
+      <Surgery />
+    </AdminElement>,
+  },
+  {
+    path: "/corporate-plan",
+    element: <AdminElement>
+      <CorporatePlan />
+    </AdminElement>,
+  },
+  {
+    path: "/second-opinion",
+    element: <AdminElement>
+      <SecondOpinion />
+    </AdminElement>,
+  },
+  {
+    path:"/ewa-package",
+    element:<AdminElement>
+      <EwaPackage/>
+    </AdminElement>,
+  }
+
+
 
 ]
