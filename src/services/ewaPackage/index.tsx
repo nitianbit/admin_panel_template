@@ -81,7 +81,7 @@ const store = create<EwaPackageState>((set, get) => ({
 
   onCreate: async (data: Partial<EwaPackageData>) => {
     try {
-      const response = await doPOST(ENDPOINTS.create('EwaPackage'), data);
+      const response = await doPOST(ENDPOINTS.create('ewa-package'), data);
       if (response.status >= 200 && response.status < 400) {
         get().fetchGrid();
       }
@@ -93,7 +93,7 @@ const store = create<EwaPackageState>((set, get) => ({
 
   onUpdate: async (data: EwaPackageData) => {
     try {
-      const response = await doPUT(ENDPOINTS.update('EwaPackage'), data);
+      const response = await doPUT(ENDPOINTS.update('ewa-package'), data);
       if (response.status >= 200 && response.status < 400) {
         get().fetchGrid();
       }
@@ -105,7 +105,7 @@ const store = create<EwaPackageState>((set, get) => ({
 
   onDelete: async (id: string) => {
     try {
-      const response = await doDELETE(ENDPOINTS.delete('EwaPackage', id));
+      const response = await doDELETE(ENDPOINTS.delete('ewa-package', id));
       if (response.status >= 200 && response.status < 400) {
         get().fetchGrid();
       }
@@ -114,7 +114,7 @@ const store = create<EwaPackageState>((set, get) => ({
 
   detail: async (id: string) => {
     try {
-      const response = await doGET(ENDPOINTS.detail('EwaPackage', id));
+      const response = await doGET(ENDPOINTS.detail('ewa-package', id));
       return response.data;
     } catch {
       return { data: {} as EwaPackageData };

@@ -76,7 +76,7 @@ const store = create<CorporatePlanState>((set, get) => ({
 
   onCreate: async (data: Partial<CorporatePlanData>) => {
     try {
-      const response = await doPOST(ENDPOINTS.create('CorporatePlan'), data);
+      const response = await doPOST(ENDPOINTS.create('corporate-plan'), data);
       if (response.status >= 200 && response.status < 400) {
         get().fetchGrid();
       }
@@ -88,7 +88,7 @@ const store = create<CorporatePlanState>((set, get) => ({
 
   onUpdate: async (data: CorporatePlanData) => {
     try {
-      const response = await doPUT(ENDPOINTS.update('CorporatePlan'), data);
+      const response = await doPUT(ENDPOINTS.update('corporate-plan'), data);
       if (response.status >= 200 && response.status < 400) {
         get().fetchGrid();
       }
@@ -100,7 +100,7 @@ const store = create<CorporatePlanState>((set, get) => ({
 
   onDelete: async (id: string) => {
     try {
-      const response = await doDELETE(ENDPOINTS.delete('CorporatePlan', id));
+      const response = await doDELETE(ENDPOINTS.delete('corporate-plan', id));
       if (response.status >= 200 && response.status < 400) {
         get().fetchGrid();
       }
@@ -111,7 +111,7 @@ const store = create<CorporatePlanState>((set, get) => ({
 
   detail: async (id: string) => {
     try {
-      const response = await doGET(ENDPOINTS.detail('CorporatePlan', id));
+      const response = await doGET(ENDPOINTS.detail('corporate-plan', id));
       return response.data;
     } catch {
       return { data: {} as CorporatePlanData };
