@@ -50,6 +50,7 @@ export default function PatientsByCompany({ companyWise = false }: { companyWise
     legend: {
       top: "5%",
       left: "center",
+      type: "scroll",
       textStyle: {
         color: "#666",
         fontSize: 12,
@@ -60,6 +61,7 @@ export default function PatientsByCompany({ companyWise = false }: { companyWise
         name: "Employees",
         type: "pie",
         radius: ["40%", "70%"],
+        center: ["50%", "60%"],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 10,

@@ -10,11 +10,11 @@ export function isError(e: unknown): e is Error {
 
 export const moduleRoles = {
   "/dashboard": [MODULES.ADMIN, MODULES.SUPERVISOR],
-  "/stats": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.HR,MODULES.MARKETING],
-  "/patient-list": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR,MODULES.LABORATORY],
+  "/stats": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR, MODULES.MARKETING],
+  "/patient-list": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR, MODULES.LABORATORY],
   "/patient-info/1": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
-  "/profile": [MODULES.DOCTOR],
-  "/appointments": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR,MODULES.LABORATORY],
+  "/profile": [MODULES.DOCTOR, MODULES.ADMIN],
+  "/appointments": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR, MODULES.LABORATORY],
   "/doctor-list": [MODULES.ADMIN, MODULES.HR],
   "/laboratory-list": [MODULES.ADMIN, MODULES.HR],
   "/admin": [MODULES.SUPERVISOR],
@@ -23,21 +23,21 @@ export const moduleRoles = {
   "/wellness-events": [MODULES.ADMIN],
   "/departments": [MODULES.ADMIN],
   "/services": [MODULES.ADMIN],
-  "/offers": [MODULES.ADMIN,MODULES.MARKETING],
+  "/offers": [MODULES.ADMIN, MODULES.MARKETING],
   "/hr-list": [MODULES.ADMIN, MODULES.SUPERVISOR],
   "/report": [MODULES.ADMIN, MODULES.DOCTOR, MODULES.LABORATORY, MODULES.SUPERVISOR,],
-  "/service-images": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/gallery-images": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/event":[MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
+  "/service-images": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/gallery-images": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/event": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
   // "/event": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
   "/packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
   "/forms": [MODULES.ADMIN, MODULES.SUPERVISOR,],
-  "/blogs": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/second-opinion": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/ewa-package": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/corporate-plan": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/surgery": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
-  "/superblogs": [MODULES.ADMIN, MODULES.SUPERVISOR,MODULES.MARKETING],
+  "/blogs": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/second-opinion": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/ewa-package": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/corporate-plan": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/surgery": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
+  "/superblogs": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING],
   "/external-packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
   "/company-external-packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
   "/vendors": [MODULES.ADMIN, MODULES.SUPERVISOR,],
@@ -74,44 +74,44 @@ export const uploadFile = async (data: any, files: any) => {
   return response;
 }
 
-export const downloadFile = async (src:string) => {
+export const downloadFile = async (src: string) => {
   try {
-      const response = await api({
-          url: src,
-          headers: {
-              Authorization: localStorage.getItem("BearerToken") || '',
-          },
-          withCredentials: false,
-          responseType: "blob",
-      });
+    const response = await api({
+      url: src,
+      headers: {
+        Authorization: localStorage.getItem("BearerToken") || '',
+      },
+      withCredentials: false,
+      responseType: "blob",
+    });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", src.split("/").pop() || "file");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", src.split("/").pop() || "file");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   } catch (error) {
-      console.error("Error downloading file:", error);
+    console.error("Error downloading file:", error);
   }
 };
 
 
-export const isAdminOrSuperVisorOrHR = (userData:any) =>  Array.isArray(userData.role) && [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))
+export const isAdminOrSuperVisorOrHR = (userData: any) => Array.isArray(userData.role) && [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))
 
 
 export const timeConverter = {
   toHHMM: (hhmmss: string) => {
-      if (!hhmmss) return '';
-      const [hh = '00', mm = '00'] = hhmmss.split(':');
-      return `${hh}${mm}`;
+    if (!hhmmss) return '';
+    const [hh = '00', mm = '00'] = hhmmss.split(':');
+    return `${hh}${mm}`;
   },
 
   toHHMMSS: (hhmm: string) => {
-      if (!hhmm || hhmm.length < 3) return '00:00:00';
-      const hh = hhmm.slice(0, 2).padStart(2, '0');
-      const mm = hhmm.slice(2).padStart(2, '0');
-      return `${hh}:${mm}:00`;
+    if (!hhmm || hhmm.length < 3) return '00:00:00';
+    const hh = hhmm.slice(0, 2).padStart(2, '0');
+    const mm = hhmm.slice(2).padStart(2, '0');
+    return `${hh}:${mm}:00`;
   }
 };
