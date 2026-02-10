@@ -1,24 +1,21 @@
-
-
 import {
-    Button, Card, CardContent, Dialog, DialogActions, DialogContent,
-    DialogTitle, Grid, TextField
+    Button,
+    Card,
+    CardContent,
+    Drawer,
+    Grid,
+    TextField,
+    Box,
+    Typography,
+    IconButton,
+    Stack
 } from "@mui/material";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
+import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
 import { useForm as useReactHookForm } from "react-hook-form";
 import { useCompanyStore } from "../../services/company";
 import { useFormStore } from "../../services/form";
 import { FormData } from "../../types/form";
-
-// Slide Transition
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & { children: React.ReactElement<any, any> },
-    ref: React.Ref<unknown>
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 const AddFormDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { detail } = useFormStore();
@@ -56,99 +53,107 @@ const AddFormDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     }, [selectedId]);
 
     return (
-        <Dialog
+        <Drawer
+            anchor="right"
             open={isModalOpen}
             onClose={handleClose}
-            TransitionComponent={Transition}
-            maxWidth="md"
-            fullWidth
         >
-            <form>
-                <DialogTitle>View Form</DialogTitle>
-                <DialogContent dividers>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <Card>
-                                <CardContent>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Full Name"
-                                                value={data.full_name}
-                                                disabled
-                                                variant="outlined"
-                                            />
+            <Box sx={{ width: { xs: '100%', sm: 600 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                {/* Header */}
+                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+                    <Typography variant="h6">View Form</Typography>
+                    <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+
+                <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+                    <form>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <Card>
+                                    <CardContent>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Full Name"
+                                                    value={data.full_name}
+                                                    disabled
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Age"
+                                                    value={data.age}
+                                                    disabled
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Gender"
+                                                    value={data.gender}
+                                                    disabled
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Email"
+                                                    value={data.email}
+                                                    disabled
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Mobile"
+                                                    value={data.mobile}
+                                                    disabled
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Address"
+                                                    value={data.address}
+                                                    disabled
+                                                    multiline
+                                                    rows={2}
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Enquire About"
+                                                    value={data.enquire_about}
+                                                    disabled
+                                                    multiline
+                                                    rows={3}
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Age"
-                                                value={data.age}
-                                                disabled
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Gender"
-                                                value={data.gender}
-                                                disabled
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Email"
-                                                value={data.email}
-                                                disabled
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Mobile"
-                                                value={data.mobile}
-                                                disabled
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Address"
-                                                value={data.address}
-                                                disabled
-                                                multiline
-                                                rows={2}
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Enquire About"
-                                                value={data.enquire_about}
-                                                disabled
-                                                multiline
-                                                rows={3}
-                                                variant="outlined"
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Close</Button>
-                </DialogActions>
-            </form>
-        </Dialog>
+                    </form>
+                </Box>
+
+                <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                    <Button onClick={handleClose} variant="contained">Close</Button>
+                </Box>
+            </Box>
+        </Drawer>
     );
 };
 

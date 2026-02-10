@@ -1,14 +1,10 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-import { Stack } from "@mui/material";
+import Drawer from "@mui/material/Drawer";
+import { Stack, Box, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
 import { HR } from "../../types/hr";
@@ -17,30 +13,19 @@ import { MODULES } from "../../utils/constants";
 import { useHRStore } from "../../services/hr";
 import { showError } from "../../services/toaster";
 
-
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
 export default function AddHRDialog({
   isModalOpen,
   toggleModal,
   selectedId
 }: any) {
 
-  const { onCreate,detail,onUpdate } = useHRStore();
+  const { onCreate, detail, onUpdate } = useHRStore();
   const [hRData, setHRData] = React.useState<HR>({
-    name:"",
-    email:"",
-    role:["hr"],
-    phone:"",
-    company:"",
+    name: "",
+    email: "",
+    role: ["hr"],
+    phone: "",
+    company: "",
   })
 
   const handleChange = (key: any, value: any) => {
@@ -48,9 +33,7 @@ export default function AddHRDialog({
   }
 
   const {
-    register,
     handleSubmit,
-    formState: { errors },
     reset
   } = useForm<HR>();
 
@@ -61,39 +44,39 @@ export default function AddHRDialog({
   const handleClose = () => {
     toggleModal(false);
     setHRData({
-      name:"",
-      email:"",
-      phone:"",
-      role:["hr"],
-      company:""
+      name: "",
+      email: "",
+      phone: "",
+      role: ["hr"],
+      company: ""
     })
   };
 
   const onSubmit = () => {
-    if(!hRData.company || !hRData.email || !hRData.name || !hRData.phone){
+    if (!hRData.company || !hRData.email || !hRData.name || !hRData.phone) {
       return showError("All fields are required")
     }
-    if(hRData?._id){
-     onUpdate(hRData);
-    }else{
+    if (hRData?._id) {
+      onUpdate(hRData);
+    } else {
       onCreate(hRData);
     }
     handleClose();
   };
 
-  const fetchDetail=async(selectedId:string)=>{
+  const fetchDetail = async (selectedId: string) => {
     try {
-      const data=await detail(selectedId);
+      const data = await detail(selectedId);
       reset(data?.data)
       setHRData(data?.data)
     } catch (error) {
-      
+
     }
   }
 
   React.useEffect(() => {
     if (selectedId) {
-     fetchDetail(selectedId)
+      fetchDetail(selectedId)
     }
   }, [selectedId]);
 
@@ -115,67 +98,78 @@ export default function AddHRDialog({
         </Button>
       </Stack>
 
-      <Dialog
+      <Drawer
+        anchor="right"
         open={isModalOpen}
         onClose={handleClose}
-        TransitionComponent={Transition}
-        maxWidth="xs"
-        fullWidth
-        sx={{ height: "100%" }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Add HR</DialogTitle>
+        <Box sx={{ width: { xs: '100%', sm: 400 }, p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+            <Typography variant="h6">Add HR</Typography>
+            <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-          <DialogContent dividers>
-            <TextField
-              margin="dense"
-              id="name"
-              label="Full Name"
-              type="name"
-              fullWidth
-              required
-              variant="outlined"
-              value={hRData.name} 
-              onChange={(e) => handleChange("name", e.target.value)}
-               />
+          <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack spacing={2}>
+                <TextField
+                  margin="dense"
+                  id="name"
+                  label="Full Name"
+                  type="name"
+                  fullWidth
+                  required
+                  size="small"
+                  variant="outlined"
+                  value={hRData.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                />
 
-            <CompanySelect  value={hRData.company} onChange={(value)=>{
-              handleChange("company", value)
-            }} module={MODULES.HR} />
+                <CompanySelect value={hRData.company} onChange={(value) => {
+                  handleChange("company", value)
+                }} module={MODULES.HR} />
 
-            <TextField
-              margin="dense"
-              id="phone"
-              required
-              label="Phone no"
-              type="phone"
-              fullWidth
-              variant="outlined"
-              placeholder="0 123456789"
-              value={hRData.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
-            />
-            <TextField
-              margin="dense"
-              id="email"
-              required
-              label="Email Address"
-              type="email"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: test@test.com"
-              value={hRData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
+                <TextField
+                  margin="dense"
+                  id="phone"
+                  required
+                  label="Phone no"
+                  type="phone"
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  placeholder="0 123456789"
+                  value={hRData.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                />
+                <TextField
+                  margin="dense"
+                  id="email"
+                  required
+                  label="Email Address"
+                  type="email"
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  placeholder="ex: test@test.com"
+                  value={hRData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
+              </Stack>
+            </form>
+          </Box>
+
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={handleClose} variant="outlined" color="error">Cancel</Button>
+            <Button onClick={handleSubmit(onSubmit)} variant="contained" color="primary">
               Submit
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </Box>
+        </Box>
+      </Drawer>
     </div>
   );
 }

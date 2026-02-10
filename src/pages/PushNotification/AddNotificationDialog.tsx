@@ -1,7 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Grid, InputLabel, Stack, TextField, Typography } from "@mui/material";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, Button, Card, CardContent, Drawer, Grid, IconButton, InputLabel, Stack, TextField, Typography } from "@mui/material";
 import _ from 'lodash';
 import moment from "moment";
 import React from 'react';
@@ -12,15 +11,6 @@ import { useCompanyStore } from "../../services/company";
 import { useNotificationStore } from "../../services/notifications";
 import { showError } from "../../services/toaster";
 import { Notification } from "../../types/notifications";
-
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 const AddNotificationDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate } = useNotificationStore();
@@ -97,112 +87,112 @@ const AddNotificationDialog = ({ isModalOpen, toggleModal, selectedId }: any) =>
                 </Button>
             </Stack>
 
-            <Dialog
+            <Drawer
+                anchor="right"
                 open={isModalOpen}
                 onClose={handleClose}
-                TransitionComponent={Transition}
-                maxWidth="lg"
-                fullWidth
-                sx={{ height: "100%" }}
             >
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogTitle>Add Notification</DialogTitle>
-                    <DialogContent dividers>
+                <Box sx={{ width: { xs: '100%', sm: 800 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    {/* Header */}
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+                        <Typography variant="h6">Add Notification</Typography>
+                        <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
 
-                        <Grid container spacing={3}>
-                            {/* Notification Form */}
-                            <Grid item xs={12} md={8}>
-                                <Card>
-                                    <CardContent>
+                    <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+                        <form id="notification-form" onSubmit={handleSubmit(onSubmit)}>
+                            <Grid container spacing={3}>
+                                {/* Notification Form */}
+                                <Grid item xs={12} md={8}>
+                                    <Card>
+                                        <CardContent>
 
-                                        <TextField
-                                            fullWidth
-                                            label="Notification Title"
-                                            value={data.notification.title}
-                                            onChange={(e) => setData(prev => ({ ...prev, notification: { ...prev.notification, title: e.target.value } }))}
-                                            margin="dense"
-                                            variant="outlined"
-                                        />
-
-                                        {/* Message */}
-                                        <TextField
-                                            fullWidth
-                                            label="Notification Message"
-                                            value={data.notification.body}
-                                            onChange={(e) => setData(prev => ({ ...prev, notification: { ...prev.notification, body: e.target.value } }))}
-                                            margin="dense"
-                                            variant="outlined"
-                                            multiline
-                                            rows={4}
-                                        />
-
-                                        <Stack
-                                            direction="row"
-                                            justifyContent="flex-start"
-                                            alignItems="center"
-                                            spacing={2}
-                                            margin="10px"
-                                        >
-                                            <InputLabel >Schedule Time </InputLabel>
-                                            <DateTimePickerWithInterval
-                                                value={data.scheduledTime}
-                                                onChange={(newTimestamp: number) => console.log('expireAt', newTimestamp)}
-                                                placeholder="Select Expiry Time"
+                                            <TextField
+                                                fullWidth
+                                                label="Notification Title"
+                                                value={data.notification.title}
+                                                onChange={(e) => setData(prev => ({ ...prev, notification: { ...prev.notification, title: e.target.value } }))}
+                                                margin="dense"
+                                                variant="outlined"
                                             />
-                                        </Stack>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
 
-                            {/* Preview */}
-                            <Grid item xs={12} md={4}>
-                                <Card>
-                                    <CardContent>
-                                        <Typography variant="h6" gutterBottom>
-                                            Preview
-                                        </Typography>
-                                        <Box
-                                            sx={{
-                                                border: "1px solid #ccc",
-                                                borderRadius: 2,
-                                                p: 2,
-                                                bgcolor: "#f9f9f9",
-                                            }}
-                                        >
-                                            <Typography variant="subtitle1" gutterBottom>
-                                                {data.notification.title || "Notification Title"}
+                                            {/* Message */}
+                                            <TextField
+                                                fullWidth
+                                                label="Notification Message"
+                                                value={data.notification.body}
+                                                onChange={(e) => setData(prev => ({ ...prev, notification: { ...prev.notification, body: e.target.value } }))}
+                                                margin="dense"
+                                                variant="outlined"
+                                                multiline
+                                                rows={4}
+                                            />
+
+                                            <Stack
+                                                direction="row"
+                                                justifyContent="flex-start"
+                                                alignItems="center"
+                                                spacing={2}
+                                                margin="10px"
+                                            >
+                                                <InputLabel >Schedule Time </InputLabel>
+                                                <DateTimePickerWithInterval
+                                                    value={data.scheduledTime}
+                                                    onChange={(newTimestamp: number) => console.log('expireAt', newTimestamp)}
+                                                    placeholder="Select Expiry Time"
+                                                />
+                                            </Stack>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+
+                                {/* Preview */}
+                                <Grid item xs={12} md={4}>
+                                    <Card>
+                                        <CardContent>
+                                            <Typography variant="h6" gutterBottom>
+                                                Preview
                                             </Typography>
-                                            <Typography variant="body1"
+                                            <Box
                                                 sx={{
-                                                    display: "-webkit-box",
-                                                    WebkitLineClamp: 3,
-                                                    WebkitBoxOrient: "vertical",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
+                                                    border: "1px solid #ccc",
+                                                    borderRadius: 2,
+                                                    p: 2,
+                                                    bgcolor: "#f9f9f9",
                                                 }}
                                             >
-                                                {data.notification.body || "This is the notification message."}
-                                            </Typography>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
+                                                <Typography variant="subtitle1" gutterBottom>
+                                                    {data.notification.title || "Notification Title"}
+                                                </Typography>
+                                                <Typography variant="body1"
+                                                    sx={{
+                                                        display: "-webkit-box",
+                                                        WebkitLineClamp: 3,
+                                                        WebkitBoxOrient: "vertical",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                    }}
+                                                >
+                                                    {data.notification.body || "This is the notification message."}
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                             </Grid>
+                        </form>
+                    </Box>
 
-
-                        </Grid>
-
-
-
-
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit" variant="contained">
+                    <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                        <Button onClick={handleClose} variant="outlined" color="error">Cancel</Button>
+                        <Button type="submit" form="notification-form" variant="contained" color="primary">
                             Submit
                         </Button>
-                    </DialogActions>
-                </form>
-            </Dialog>
+                    </Box>
+                </Box>
+            </Drawer>
 
         </>
     )

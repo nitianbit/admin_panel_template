@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError, showSuccess } from '../toaster';
 import { ENDPOINTS } from '../api/constants';
-import { ServiceState ,Service,ServiceFilters} from '../../types/services';
+import { ServiceState, Service, ServiceFilters } from '../../types/services';
 
 
 
@@ -14,14 +14,14 @@ const store = create<ServiceState>((set, get) => ({
     filters: {},
     isLoading: false,
     rows: 20,
-    total:0,
-    allData:[],
+    total: 0,
+    allData: [],
 
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows,isLoading , total} = get();
-            if(isLoading)return;
-            
+            const { filters, currentPage, rows, isLoading, total } = get();
+            if (isLoading) return;
+
             set({ isLoading: true });
 
             const queryParams = new URLSearchParams(filters);
@@ -46,28 +46,28 @@ const store = create<ServiceState>((set, get) => ({
         }
     },
 
-     fetchGridAll: async (filters: ServiceFilters) => {
-            try {
-                const { allData } = get();
-                if (allData.length > 0) return allData;
-                const queryParams = new URLSearchParams(filters);
-                queryParams.append('rows', String(-1));
-                const apiUrl = `${ENDPOINTS.grid('services')}?${queryParams.toString()}`;
-    
-                const response = await doGET(apiUrl);
-    
-                if (response.status >= 200 && response.status < 400) {
-                    set({ allData: response.data.data.rows, });
-                }
-                return get().allData;
-            } catch (err) {
-                showError('Failed to fetch services');
-                return get().allData
+    fetchGridAll: async (filters: ServiceFilters) => {
+        try {
+            const { allData } = get();
+            if (allData.length > 0) return allData;
+            const queryParams = new URLSearchParams(filters);
+            queryParams.append('rows', String(-1));
+            const apiUrl = `${ENDPOINTS.grid('services')}?${queryParams.toString()}`;
+
+            const response = await doGET(apiUrl);
+
+            if (response.status >= 200 && response.status < 400) {
+                set({ allData: response.data.data.rows, });
             }
-        },
+            return get().allData;
+        } catch (err) {
+            showError('Failed to fetch services');
+            return get().allData
+        }
+    },
 
     setFilters: (newFilters: ServiceFilters) => {
-        set({ filters: newFilters,currentPage:1 });
+        set({ filters: newFilters, currentPage: 1 });
         get().fetchGrid(1, newFilters);
     },
 
@@ -90,35 +90,35 @@ const store = create<ServiceState>((set, get) => ({
             fetchGrid();
         }
     },
-    onPageChange: ( event: React.MouseEvent<HTMLButtonElement> | null,page:number) => {
-        const { currentPage, filters, fetchGrid,totalPages } = get();
+    onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
+        const { currentPage, filters, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
-                currentPage: page+1
+                currentPage: page + 1
             })
             fetchGrid();
         }
     },
 
-    onCreate:async (data:any)=>{
+    onCreate: async (data: any) => {
         try {
-            const response=await doPOST(ENDPOINTS.create('services'),data);
+            const response = await doPOST(ENDPOINTS.create('services'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 showSuccess("Service create successfully")
-            }else{
+            } else {
                 showError(response.message);
             }
         } catch (error) {
             showError('Failed to create service');
         }
     },
-    onUpdate:async (data:Service)=>{
+    onUpdate: async (data: Service) => {
         try {
-            const response=await doPUT(ENDPOINTS.update('services'),data);
+            const response = await doPUT(ENDPOINTS.update('services'), data);
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 showSuccess("Service updated successfully")
             }
@@ -126,11 +126,11 @@ const store = create<ServiceState>((set, get) => ({
             showError('Failed to update service');
         }
     },
-    onDelete:async (id:string)=>{
+    onDelete: async (id: string) => {
         try {
-            const response=await doDELETE(ENDPOINTS.delete('services',id));
+            const response = await doDELETE(ENDPOINTS.delete('services', id));
             console.log(response);
-            if(response.status>=200 && response.status<400){
+            if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 showSuccess("Service deleted successfully")
             }
@@ -149,6 +149,6 @@ const store = create<ServiceState>((set, get) => ({
 
 }));
 
- 
+
 
 export const useServicestore = () => store((state) => state);

@@ -1,28 +1,15 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-import { Stack, Switch } from "@mui/material";
+import Drawer from "@mui/material/Drawer";
+import { Stack, Switch, Box, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
 import InputLabel from "@mui/material/InputLabel";
 import { Company } from "../../types/company";
 import { useCompanyStore } from "../../services/company";
 import { toast } from "react-toastify";
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 export default function CompanyDialog({
   isModalOpen,
@@ -97,114 +84,123 @@ export default function CompanyDialog({
         </Button>
       </Stack>
 
-      <Dialog
+      <Drawer
+        anchor="right"
         open={isModalOpen}
         onClose={handleClose}
-        TransitionComponent={Transition}
-        maxWidth="md"
-        fullWidth
-        sx={{ height: "100%" }}
       >
-        <form onSubmit={handleSave}>
-          <DialogTitle>Company Details</DialogTitle>
+        <Box sx={{ width: { xs: '100%', sm: 500 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+            <Typography variant="h6">Company Details</Typography>
+            <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-          <DialogContent dividers>
-            <TextField
-              margin="dense"
-              id="name"
-              label="Company Name"
-              type="text"
-              required
-              fullWidth
-              variant="outlined"
-              value={comapnyData.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
+          <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+            <form onSubmit={handleSave} id="company-form">
+              <Stack spacing={2}>
+                <TextField
+                  margin="dense"
+                  id="name"
+                  label="Company Name"
+                  type="text"
+                  required
+                  fullWidth
+                  variant="outlined"
+                  value={comapnyData.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                />
 
-            <TextField
-              margin="dense"
-              id="codename"
-              label="Codename"
-              type="text"
-              fullWidth
-              required
-              variant="outlined"
-              value={comapnyData.codename}
-              onChange={(e) => handleChange("codename", e.target.value)}
-            />
+                <TextField
+                  margin="dense"
+                  id="codename"
+                  label="Codename"
+                  type="text"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  value={comapnyData.codename}
+                  onChange={(e) => handleChange("codename", e.target.value)}
+                />
 
-            <TextField
-              margin="dense"
-              id="phone"
-              label="Phone Number"
-              type="text"
-              fullWidth
-              required
-              variant="outlined"
-              value={comapnyData.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
-            />
+                <TextField
+                  margin="dense"
+                  id="phone"
+                  label="Phone Number"
+                  type="text"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  value={comapnyData.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                />
 
-            <TextField
-              margin="dense"
-              label="Company Email"
-              type="email"
-              fullWidth
-              required
-              variant="outlined"
-              value={comapnyData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-            />
+                <TextField
+                  margin="dense"
+                  label="Company Email"
+                  type="email"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  value={comapnyData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
 
-            <TextField
-              id="website"
-              margin="dense"
-              label="Company Website"
-              type="text"
-              fullWidth
-              required
-              variant="outlined"
-              value={comapnyData.website}
-              onChange={(e) => handleChange("website", e.target.value)}
-            />
+                <TextField
+                  id="website"
+                  margin="dense"
+                  label="Company Website"
+                  type="text"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  value={comapnyData.website}
+                  onChange={(e) => handleChange("website", e.target.value)}
+                />
 
-            <TextField
-              margin="dense"
-              fullWidth
-              required
-              label="Contact Person Name"
-              variant="outlined"
-              value={comapnyData.contactPerson}
-              onChange={(e) => handleChange("contactPerson", e.target.value)}
-            />
+                <TextField
+                  margin="dense"
+                  fullWidth
+                  required
+                  label="Contact Person Name"
+                  variant="outlined"
+                  value={comapnyData.contactPerson}
+                  onChange={(e) => handleChange("contactPerson", e.target.value)}
+                />
 
-            <TextField
-              margin="dense"
-              label="Number Of Users"
-              fullWidth
-              type="number"
-              required
-              variant="outlined"
-              value={comapnyData.noOfUser}
-              onChange={(e) => handleChange("noOfUser", e.target.value)}
-            />
+                <TextField
+                  margin="dense"
+                  label="Number Of Users"
+                  fullWidth
+                  type="number"
+                  required
+                  variant="outlined"
+                  value={comapnyData.noOfUser}
+                  onChange={(e) => handleChange("noOfUser", e.target.value)}
+                />
 
-            <InputLabel sx={{ mt: 2 }}>Is Active</InputLabel>
-            <Switch
-              checked={comapnyData.isActive}
-              onChange={(e) => handleChange("isActive", e.target.checked)}
-              inputProps={{ "aria-label": "controlled" }}
-            />
-          </DialogContent>
+                <Box>
+                  <InputLabel sx={{ mb: 1 }}>Is Active</InputLabel>
+                  <Switch
+                    checked={comapnyData.isActive}
+                    onChange={(e) => handleChange("isActive", e.target.checked)}
+                    inputProps={{ "aria-label": "controlled" }}
+                  />
+                </Box>
+              </Stack>
+            </form>
+          </Box>
 
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={handleClose} variant="outlined" color="error">Cancel</Button>
+            <Button type="submit" form="company-form" variant="contained" color="primary">
               Submit
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </Box>
+        </Box>
+      </Drawer>
     </div>
   );
 }

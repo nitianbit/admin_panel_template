@@ -1,14 +1,10 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-import { Box, Stack, Typography } from "@mui/material";
+import Drawer from "@mui/material/Drawer";
+import { Box, Stack, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -49,14 +45,7 @@ import ExternalAppointment from "./ExternalAppointment";
 import AppointmentCommonFields from "./AppointmentCommonFields";
 import TimePickerField from "../../components/TimePickerField";
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+
 
 export default function AppointmentDialog({
   isModalOpen,
@@ -221,155 +210,159 @@ export default function AppointmentDialog({
         title="Patient"
       />
 
-      <Dialog
+      <Drawer
+        anchor="right"
         open={isModalOpen}
         onClose={toggleModal}
-        TransitionComponent={Transition}
-        fullScreen
-        fullWidth
-        sx={{ height: "100%" }}
       >
-        <DialogTitle>Appointment Details</DialogTitle>
-        <DialogContent dividers>
+        <Box sx={{ width: { xs: '100%', sm: 600 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+            <Typography variant="h6">Appointment Details</Typography>
+            <IconButton onClick={toggleModal} sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-          <PatientSelect
-            onSelect={function (id: string): void {
-              setPatientDialogOpen(false)
-              handleChange("patient", id);
-            }}
-            value={appointMentData?.patient}
-          />
+          <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+            <PatientSelect
+              onSelect={function (id: string): void {
+                setPatientDialogOpen(false)
+                handleChange("patient", id);
+              }}
+              value={appointMentData?.patient}
+            />
 
-          <FormControl fullWidth margin="dense">
-            <InputLabel id="type">Select Type</InputLabel>
-            <Select
-              labelId="type"
-              id="type"
-              label="Select Type"
-              value={appointMentData?.type}
-              onChange={(e) => handleChange("type", e.target.value)}
-            >
-              <MenuItem value={"1"}>Report</MenuItem>
-              <MenuItem value={"2"}>Prescription</MenuItem>
-            </Select>
-          </FormControl>
+            <FormControl fullWidth margin="dense">
+              <InputLabel id="type">Select Type</InputLabel>
+              <Select
+                labelId="type"
+                id="type"
+                label="Select Type"
+                value={appointMentData?.type}
+                onChange={(e) => handleChange("type", e.target.value)}
+              >
+                <MenuItem value={"1"}>Report</MenuItem>
+                <MenuItem value={"2"}>Prescription</MenuItem>
+              </Select>
+            </FormControl>
 
-          {userData.role.includes("admin") && (
-            <>
-              {appointMentData?.type == "2" && (
-                <DoctorSelect
-                  sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
-                  value={appointMentData.doctor}
-                  onSelect={(id: string): void => {
-                    handleChange("doctor", id);
-                  }}
-                />
-              )}
-            </>
-          )}
+            {userData.role.includes("admin") && (
+              <>
+                {appointMentData?.type == "2" && (
+                  <DoctorSelect
+                    sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                    value={appointMentData.doctor}
+                    onSelect={(id: string): void => {
+                      handleChange("doctor", id);
+                    }}
+                  />
+                )}
+              </>
+            )}
 
-          <AppointmentCommonFields
-            handleChange={handleChange}
-            appointMentData={appointMentData}
-            module={MODULES.APPOINTMENT}
-          />
-
-          {/* New Fields Start */}
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Address"
-            value={appointMentData.address || ""}
-            onChange={(e) => handleChange("address", e.target.value)}
-          />
-
-          <TextField
-            fullWidth
-            margin="dense"
-            label="City"
-            value={appointMentData.city || ""}
-            onChange={(e) => handleChange("city", e.target.value)}
-          />
-
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Zip Code"
-            value={appointMentData.zipcode || ""}
-            onChange={(e) => handleChange("zipcode", e.target.value)}
-          />
-
-          <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-            <Box flex={1}>
-              <TextField
-                label="Latitude"
-                type="number"
-                fullWidth
-                size="small"
-                value={appointMentData.location?.latitude || ""}
-                onChange={(e) =>
-                  handleChange("location.latitude", parseFloat(e.target.value))
-                }
-              />
-            </Box>
-            <Box flex={1}>
-              <TextField
-                label="Longitude"
-                type="number"
-                fullWidth
-                size="small"
-                value={appointMentData.location?.longitude || ""}
-                onChange={(e) =>
-                  handleChange("location.longitude", parseFloat(e.target.value))
-                }
-              />
-            </Box>
-          </Stack>
-
-          {/* New Fields End */}
-
-          {appointMentData?.type == "2" ? (
-            <>
-              <DepartmentSelect
-                isMultiple={false}
-                value={appointMentData.department}
-                onChange={(value) => {
-                  handleChange("department", value)
-                }}
-                module={MODULES.APPOINTMENT}
-              />
-
-              <TimePickerField
-                label="Start Time"
-                value={appointMentData?.timeSlot.start}
-                field="timeSlot.start"
-                onChange={handleChange}
-              />
-
-              <TimePickerField
-                label="End Time"
-                value={appointMentData?.timeSlot.end}
-                field="timeSlot.end"
-                onChange={handleChange}
-              />
-            </>
-          ) : (
-            <ExternalAppointment
+            <AppointmentCommonFields
               handleChange={handleChange}
               appointMentData={appointMentData}
               module={MODULES.APPOINTMENT}
-              handleChangeTimeSlot={handleChangeTimeSlot}
             />
-          )}
 
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={toggleModal}>Cancel</Button>
-          <Button onClick={handleSave} type="submit" variant="contained">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+            {/* New Fields Start */}
+            <TextField
+              fullWidth
+              margin="dense"
+              label="Address"
+              value={appointMentData.address || ""}
+              onChange={(e) => handleChange("address", e.target.value)}
+            />
+
+            <TextField
+              fullWidth
+              margin="dense"
+              label="City"
+              value={appointMentData.city || ""}
+              onChange={(e) => handleChange("city", e.target.value)}
+            />
+
+            <TextField
+              fullWidth
+              margin="dense"
+              label="Zip Code"
+              value={appointMentData.zipcode || ""}
+              onChange={(e) => handleChange("zipcode", e.target.value)}
+            />
+
+            <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+              <Box flex={1}>
+                <TextField
+                  label="Latitude"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={appointMentData.location?.latitude || ""}
+                  onChange={(e) =>
+                    handleChange("location.latitude", parseFloat(e.target.value))
+                  }
+                />
+              </Box>
+              <Box flex={1}>
+                <TextField
+                  label="Longitude"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={appointMentData.location?.longitude || ""}
+                  onChange={(e) =>
+                    handleChange("location.longitude", parseFloat(e.target.value))
+                  }
+                />
+              </Box>
+            </Stack>
+
+            {/* New Fields End */}
+
+            {appointMentData?.type == "2" ? (
+              <>
+                <DepartmentSelect
+                  isMultiple={false}
+                  value={appointMentData.department}
+                  onChange={(value) => {
+                    handleChange("department", value)
+                  }}
+                  module={MODULES.APPOINTMENT}
+                />
+
+                <TimePickerField
+                  label="Start Time"
+                  value={appointMentData?.timeSlot.start}
+                  field="timeSlot.start"
+                  onChange={handleChange}
+                />
+
+                <TimePickerField
+                  label="End Time"
+                  value={appointMentData?.timeSlot.end}
+                  field="timeSlot.end"
+                  onChange={handleChange}
+                />
+              </>
+            ) : (
+              <ExternalAppointment
+                handleChange={handleChange}
+                appointMentData={appointMentData}
+                module={MODULES.APPOINTMENT}
+                handleChangeTimeSlot={handleChangeTimeSlot}
+              />
+            )}
+          </Box>
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={toggleModal}>Cancel</Button>
+            <Button onClick={handleSave} type="submit" variant="contained">
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </div>
   );
 }

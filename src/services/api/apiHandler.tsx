@@ -4,9 +4,9 @@ import { API_METHODS } from "./constants";
 
 export const api = axios.create({
     //  baseURL: 'http://139.59.87.79:4030/api',
-       baseURL: 'https://myewacare.com/api'
+    baseURL: 'https://myewacare.com/api'
     //   baseURL: 'http://localhost:4030/api'
-    
+
 });
 
 const isFormData = (value: unknown): value is FormData => value instanceof FormData;
@@ -70,7 +70,7 @@ const apiHandler = async (endPoint: any, method: string, data = null) => {
         }
 
         // Return the error message to the caller
-        return { error: true, message: errorMessage, status: statusCode, data:{} };
+        return { error: true, message: errorMessage, status: statusCode, data: {} };
     }
 };
 

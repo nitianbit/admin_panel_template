@@ -45,7 +45,7 @@ export default function SignInSide() {
     formState: { errors }
   } = useForm<FormValues>();
 
-  const options = ['doctors', 'laboratories', "admin", 'supervisor', "hr","marketing"];
+  const options = ['doctors', 'laboratories', "admin", 'supervisor', "hr", "marketing"];
 
   const handleRoleSelect = (role: any) => {
     setData((prev) => {
@@ -79,8 +79,8 @@ export default function SignInSide() {
         setIsLoggedIn(true)
         setValue(STORAGE_KEYS.TOKEN, response.data?.data)
         if (data.role == 'admin' || data.role == 'supervisor') {
-           navigate(`/dashboard`)
-        }else{
+          navigate(`/dashboard`)
+        } else {
           navigate(`/stats`)
         }
         verifyToken(response.data?.data);
@@ -148,10 +148,10 @@ export default function SignInSide() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      if (data.role == 'admin' || data.role == 'supervisor') {
-        return navigate(`/dashboard`)
-      }
-      navigate(`/stats`)
+      // if (data.role == 'admin' || data.role == 'supervisor') {
+      return navigate(`/dashboard`)
+      // }
+      // navigate(`/stats`)
     }
   }, [isLoggedIn])
 
@@ -210,15 +210,15 @@ export default function SignInSide() {
                 Sign In
               </Typography>
 
-              <Box sx={{ 
-                mt: 1, 
+              <Box sx={{
+                mt: 1,
                 width: '100%',
                 maxWidth: '100%',
                 boxSizing: 'border-box'
               }}>
                 {!isOTPSend && (
-                  <Box sx={{ 
-                    mt: 2, 
+                  <Box sx={{
+                    mt: 2,
                     mb: 2,
                     width: '100%',
                     overflow: 'hidden'
@@ -234,20 +234,20 @@ export default function SignInSide() {
                     />
                   </Box>
                 )}
-                
+
                 {isOTPSend ? (
-                  <Box sx={{ 
-                    mt: 2, 
+                  <Box sx={{
+                    mt: 2,
                     mb: 2,
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%'
                   }}>
-                    <OTP 
-                      separator={<span>-</span>} 
-                      value={otp} 
-                      onChange={setOTP} 
-                      length={4} 
+                    <OTP
+                      separator={<span>-</span>}
+                      value={otp}
+                      onChange={setOTP}
+                      length={4}
                     />
                   </Box>
                 ) : (
@@ -271,14 +271,14 @@ export default function SignInSide() {
                     }}
                   />
                 )}
-                
+
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
                   onClick={handleSendButton}
-                  sx={{ 
-                    mt: 3, 
+                  sx={{
+                    mt: 3,
                     mb: 2,
                     maxWidth: '100%',
                     wordBreak: 'keep-all',
@@ -289,11 +289,11 @@ export default function SignInSide() {
                 >
                   {isOTPSend ? "Verify OTP" : "Send OTP"}
                 </Button>
-                
+
                 <Grid container spacing={1}>
                   <Grid item xs={12}>
-                    <Box sx={{ 
-                      display: 'flex', 
+                    <Box sx={{
+                      display: 'flex',
                       justifyContent: 'flex-end',
                       width: '100%'
                     }}>
@@ -311,13 +311,13 @@ export default function SignInSide() {
                     </Box>
                   </Grid>
                 </Grid>
-                
+
                 <Divider sx={{ mt: 2 }} light variant="middle" />
-                
-                <Typography 
-                  align="center" 
-                  variant="subtitle2" 
-                  sx={{ 
+
+                <Typography
+                  align="center"
+                  variant="subtitle2"
+                  sx={{
                     mt: 2,
                     fontSize: { xs: '0.75rem', sm: '0.875rem' },
                     lineHeight: 1.4,

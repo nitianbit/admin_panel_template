@@ -4,236 +4,262 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
+
+// Professional Colorful Icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import PeopleIcon from "@mui/icons-material/People";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import DescriptionIcon from "@mui/icons-material/Description";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import HelpIcon from "@mui/icons-material/Help";
-import SettingsIcon from "@mui/icons-material/Settings";
-import BookOnlineIcon from "@mui/icons-material/BookOnline";
-import SickIcon from "@mui/icons-material/Sick";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import BadgeIcon from "@mui/icons-material/Badge";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import BiotechIcon from "@mui/icons-material/Biotech";
+import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
+import CampaignIcon from "@mui/icons-material/Campaign";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import GroupsIcon from "@mui/icons-material/Groups";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import SummarizeIcon from "@mui/icons-material/Summarize";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import SpaIcon from "@mui/icons-material/Spa";
+import DomainIcon from "@mui/icons-material/Domain";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import BusinessIcon from '@mui/icons-material/Business';
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import SnippetFolderIcon from "@mui/icons-material/SnippetFolder";
+import RssFeedIcon from "@mui/icons-material/RssFeed";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import CollectionsIcon from "@mui/icons-material/Collections";
+import EventIcon from "@mui/icons-material/Event";
+import HealingIcon from "@mui/icons-material/Healing";
+import WorkIcon from "@mui/icons-material/Work";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import LocalMallIcon from "@mui/icons-material/LocalMall";
+
+// Secondary List Icons
+import ScienceIcon from "@mui/icons-material/Science";
+import FolderSharedIcon from "@mui/icons-material/FolderShared";
+import MedicationIcon from "@mui/icons-material/Medication";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
+import DynamicFormIcon from "@mui/icons-material/DynamicForm";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import { hasAccess } from "../utils/helper";
-import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
-import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
-import BookIcon from '@mui/icons-material/Book';
 
 const primarynavList = [
   {
     link: "/dashboard",
     label: "Dashboard",
-    icon: <DashboardIcon />,
+    icon: <DashboardIcon sx={{ color: "#4caf50" }} />, // Green
   },
   {
     link: "/stats",
     label: "Stats",
-    icon: <DashboardIcon />,
+    icon: <BarChartIcon sx={{ color: "#2196f3" }} />, // Blue
   },
   {
     link: "/profile",
     label: "Doctor Profile",
-    icon: <AccountCircleIcon />,
+    icon: <BadgeIcon sx={{ color: "#9c27b0" }} />, // Purple
   },
   {
     link: "/doctor-list",
     label: "Doctor List",
-    icon: <PeopleIcon />,
+    icon: <MedicalServicesIcon sx={{ color: "#009688" }} />, // Teal
   },
   {
     link: "/laboratory-list",
-    label: "Laboratory  List",
-    icon: <PeopleIcon />,
+    label: "Laboratory List",
+    icon: <BiotechIcon sx={{ color: "#ff9800" }} />, // Orange
   },
-
   {
     link: "/hr-list",
     label: "HR",
-    icon: <PeopleIcon />,
+    icon: <SupervisedUserCircleIcon sx={{ color: "#795548" }} />, // Brown
   },
   {
     link: "/marketing",
     label: "Marketing",
-    icon: <PeopleIcon />,
+    icon: <CampaignIcon sx={{ color: "#e91e63" }} />, // Pink
   },
   {
     link: "/admin",
     label: "Admin",
-    icon: <PeopleIcon />,
+    icon: <AdminPanelSettingsIcon sx={{ color: "#f44336" }} />, // Red
   },
   {
     link: "/patient-list",
     label: "Employee List",
-    icon: <SickIcon />,
+    icon: <GroupsIcon sx={{ color: "#3f51b5" }} />, // Indigo
   },
   {
     link: "/appointments",
     label: "Appointments",
-    icon: <BookOnlineIcon />,
+    icon: <EventAvailableIcon sx={{ color: "#8bc34a" }} />, // Light Green
   },
   {
     link: "/report",
     label: "Report/Prescription",
-    icon: <BookOnlineIcon />,
+    icon: <SummarizeIcon sx={{ color: "#00bcd4" }} />, // Cyan
   },
   {
     link: "/push-notification",
     label: "Push Notifications",
-    icon: <CircleNotificationsIcon />,
+    icon: <NotificationsActiveIcon sx={{ color: "#ffc107" }} />, // Amber
   },
   {
     link: "/kanban",
     label: "Kanban",
-    icon: <ViewKanbanIcon />,
+    icon: <ViewKanbanIcon sx={{ color: "#673ab7" }} />, // Deep Purple
   },
   {
     link: "/account",
     label: "Account",
-    icon: <ManageAccountsIcon />,
+    icon: <ManageAccountsIcon sx={{ color: "#607d8b" }} />, // Blue Grey
   },
   {
     link: "/wellness-events",
-    label: "Wellness ",
-    icon: <CircleNotificationsIcon />,
+    label: "Wellness",
+    icon: <SpaIcon sx={{ color: "#4caf50" }} />, // Green
   },
   {
     link: "/departments",
     label: "Departments",
-    icon: <CircleNotificationsIcon />,
+    icon: <DomainIcon sx={{ color: "#ff5722" }} />, // Deep Orange
   },
   {
     link: "/services",
     label: "Services",
-    icon: <CircleNotificationsIcon />,
+    icon: <MonitorHeartIcon sx={{ color: "#2196f3" }} />, // Blue
   },
   {
     link: "/company",
     label: "Company",
-    icon: <BusinessIcon />,
+    icon: <BusinessIcon sx={{ color: "#3f51b5" }} />, // Indigo
   },
   {
     link: "/offers",
     label: "Offers",
-    icon: <CircleNotificationsIcon />,
+    icon: <LocalOfferIcon sx={{ color: "#e91e63" }} />, // Pink
   },
   {
     link: "/service-images",
     label: "Service Images",
-    icon: <CircleNotificationsIcon />,
+    icon: <PhotoLibraryIcon sx={{ color: "#9c27b0" }} />, // Purple
   },
   {
     link: "/packages",
     label: "Packages",
-    icon: <CircleNotificationsIcon />,
+    icon: <Inventory2Icon sx={{ color: "#ff9800" }} />, // Orange
   },
   {
     link: "/forms",
     label: "Forms",
-    icon: <FormatAlignJustifyIcon />,
+    icon: <SnippetFolderIcon sx={{ color: "#009688" }} />, // Teal
   },
   {
     link: "/blogs",
     label: "Blogs",
-    icon: <BookIcon />,
+    icon: <RssFeedIcon sx={{ color: "#ff5722" }} />, // Deep Orange
   },
   {
     link: "/superblogs",
     label: "SuperBlogs",
-    icon: <BookIcon />,
+    icon: <AutoStoriesIcon sx={{ color: "#673ab7" }} />, // Deep Purple
   },
   {
     link: "/external-packages",
     label: "External Packages",
-    icon: <BookIcon />,
+    icon: <CardGiftcardIcon sx={{ color: "#e91e63" }} />, // Pink
   },
   {
     link: "/vendors",
     label: "Vendors",
-    icon: <BookIcon />,
+    icon: <StorefrontIcon sx={{ color: "#795548" }} />, // Brown
   },
   {
     link: "/company-external-packages",
     label: "Vendor Company",
-    icon: <BookIcon />,
+    icon: <ApartmentIcon sx={{ color: "#607d8b" }} />, // Blue Grey
   },
   {
     link: "/gallery-images",
     label: "Gallery Images",
-    icon: <CircleNotificationsIcon />,
+    icon: <CollectionsIcon sx={{ color: "#f44336" }} />, // Red
   },
   {
     link: "/event",
     label: "Events",
-    icon: <CircleNotificationsIcon />,
+    icon: <EventIcon sx={{ color: "#8bc34a" }} />, // Light Green
   },
   {
     link: "/second-opinion",
     label: "Second Opinion",
-    icon: <BookIcon />,
+    icon: <HealingIcon sx={{ color: "#00bcd4" }} />, // Cyan
   },
   {
     link: "/corporate-plan",
     label: "Corporate Plan",
-    icon: <BookIcon />,
+    icon: <WorkIcon sx={{ color: "#3f51b5" }} />, // Indigo
   },
   {
     link: "/surgery",
     label: "Surgery",
-    icon: <BookIcon />,
+    icon: <LocalHospitalIcon sx={{ color: "#f44336" }} />, // Red
   },
   {
     link: "/ewa-package",
     label: "Ewa Package",
-    icon: <BookIcon />,
+    icon: <LocalMallIcon sx={{ color: "#ffc107" }} />, // Amber
   },
-
 ];
 
 const secondaryNavList = [
   {
     link: "/lab-results",
     label: "Lab Results",
-    icon: <ReceiptLongIcon />,
+    icon: <ScienceIcon sx={{ color: "#00bcd4" }} />, // Cyan
   },
   {
     link: "/medical-records",
     label: "Medical Records",
-    icon: <DescriptionIcon />,
+    icon: <FolderSharedIcon sx={{ color: "#ff9800" }} />, // Orange
   },
   {
     link: "/prescriptions",
     label: "Prescriptions",
-    icon: <AssignmentTurnedInIcon />,
+    icon: <MedicationIcon sx={{ color: "#e91e63" }} />, // Pink
   },
   {
     link: "/plans",
     label: "Care Plans",
-    icon: <AssignmentIcon />,
+    icon: <FactCheckIcon sx={{ color: "#4caf50" }} />, // Green
   },
   {
     link: "/forms",
     label: "Forms",
-    icon: <DescriptionIcon />,
+    icon: <DynamicFormIcon sx={{ color: "#673ab7" }} />, // Deep Purple
   },
   {
     link: "/help",
     label: "Get Help",
-    icon: <HelpIcon />,
+    icon: <SupportAgentIcon sx={{ color: "#2196f3" }} />, // Blue
   },
   {
     link: "/settings",
     label: "Settings",
-    icon: <SettingsIcon />,
+    icon: <SettingsSuggestIcon sx={{ color: "#607d8b" }} />, // Blue Grey
   },
   {
     link: "/login",
     label: "Logout",
-    icon: <LogoutIcon />,
+    icon: <LogoutIcon sx={{ color: "#f44336" }} />, // Red
   },
 ];
 

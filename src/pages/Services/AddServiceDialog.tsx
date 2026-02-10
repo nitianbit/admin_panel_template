@@ -1,13 +1,9 @@
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-import React from 'react'
-import { useForm } from "react-hook-form";
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Drawer,
+  Box,
+  Typography,
+  IconButton,
   FormControl,
   InputLabel,
   MenuItem,
@@ -15,8 +11,11 @@ import {
   Stack,
   TextField
 } from "@mui/material";
+import React from 'react';
+import { useForm } from "react-hook-form";
 import SearchInput from "../../components/SearchInput";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import { Service } from "../../types/services";
 import { useServicestore } from "../../services/services";
 import { Department } from "../../types/departments";
@@ -27,14 +26,7 @@ import { showError } from "../../services/toaster";
 import { doGET } from "../../utils/HttpUtils";
 import { ENDPOINTS } from "../../services/api/constants";
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+
 
 const AddServiceDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
   const { onCreate, detail, onUpdate } = useServicestore();
@@ -145,73 +137,80 @@ const AddServiceDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         </Button>
       </Stack>
 
-      <Dialog
+      <Drawer
+        anchor="right"
         open={isModalOpen}
         onClose={handleClose}
-        TransitionComponent={Transition}
-        maxWidth="sm"
-        fullWidth
-        sx={{ height: "100%" }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Add Service</DialogTitle>
-          <DialogContent dividers>
+        <Box sx={{ width: { xs: '100%', sm: 400 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+            <Typography variant="h6">Add Service</Typography>
+            <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-            <TextField
-              margin="dense"
-              id="name"
-              label="Service Name"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={data.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
+          <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack spacing={2}>
+                <TextField
+                  margin="dense"
+                  id="name"
+                  label="Service Name"
+                  type="text"
+                  fullWidth
+                  variant="outlined"
+                  value={data.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                />
 
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="service-label">Service Type</InputLabel>
-              <Select
-                labelId="service-label"
-                value={data.type}
-                label="Service Type"
-                onChange={(e) => handleChange("type", e.target.value)}
-              >
-                {Object.values(SERVICE_TYPE)?.map((item: string) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                <FormControl fullWidth margin="dense">
+                  <InputLabel id="service-label">Service Type</InputLabel>
+                  <Select
+                    labelId="service-label"
+                    value={data.type}
+                    label="Service Type"
+                    onChange={(e) => handleChange("type", e.target.value)}
+                  >
+                    {Object.values(SERVICE_TYPE)?.map((item: string) => (
+                      <MenuItem key={item} value={item}>{item}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-            <CompanySelect
-              value={data.company}
-              onChange={(value) => handleChange("company", value)}
-              module={MODULES.SERVICES}
-            />
+                <CompanySelect
+                  value={data.company}
+                  onChange={(value) => handleChange("company", value)}
+                  module={MODULES.SERVICES}
+                />
 
-            <FormControl fullWidth margin="dense" disabled={!data.company}>
-              <InputLabel id="department-label">Department</InputLabel>
-              <Select
-                labelId="department-label"
-                id="department-select"
-                value={data.department}
-                label="Department"
-                onChange={(e) => handleChange("department", e.target.value)}
-              >
-                {departments.map((item: Department) => (
-                  <MenuItem key={item._id} value={item._id}>{item.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                <FormControl fullWidth margin="dense" disabled={!data.company}>
+                  <InputLabel id="department-label">Department</InputLabel>
+                  <Select
+                    labelId="department-label"
+                    id="department-select"
+                    value={data.department}
+                    label="Department"
+                    onChange={(e) => handleChange("department", e.target.value)}
+                  >
+                    {departments.map((item: Department) => (
+                      <MenuItem key={item._id} value={item._id}>{item.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Stack>
+            </form>
+          </Box>
 
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={handleClose} variant="outlined" color="error">Cancel</Button>
+            <Button onClick={handleSubmit(onSubmit)} variant="contained" color="primary">
               Submit
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </Box>
+        </Box>
+      </Drawer>
     </>
   )
 }
