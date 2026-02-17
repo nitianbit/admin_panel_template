@@ -41,6 +41,10 @@ import Surgery from "../pages/Surgery";
 import CorporatePlan from "../pages/CorporatePlan/list";
 import SecondOpinion from "../pages/SecondOpinion";
 import EwaPackage from "../pages/EwaPackage/list";
+import Banners from "../pages/Banners";
+import Specialists from "../pages/Specialist";
+import WellnessPackages from "../pages/WellnessPackages";
+import HeartRateLoader from "../components/HeartRateLoader";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -48,13 +52,27 @@ const USER_TYPES = {
 };
 
 const AdminElement = ({ children }: any) => {
-  const { userData } = useAppContext()
+  const { userData, isLoggedIn } = useAppContext()
 
+  if (isLoggedIn && !userData) {
+    return <HeartRateLoader message="Checking permissions..." />;
+  }
 
-  if (hasAccess(userData?.role ?? [])) {
+  // Normalize roles to an array if it's a string
+  const userRoles = Array.isArray(userData?.role)
+    ? userData.role
+    : (userData?.role ? [userData.role] : []);
+
+  if (hasAccess(userRoles)) {
     return <>{children}</>;
   } else {
-    return <div>You are not authorized to access this routes</div>;
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h3>Access Denied</h3>
+        <p>You are not authorized to access this route.</p>
+        <button onClick={() => window.location.href = '/'}>Go back to Login</button>
+      </div>
+    );
   }
 };
 
@@ -324,12 +342,27 @@ export const protectedRoutes = [
     </AdminElement>,
   },
   {
-    path:"/ewa-package",
-    element:<AdminElement>
-      <EwaPackage/>
+    path: "/ewa-package",
+    element: <AdminElement>
+      <EwaPackage />
+    </AdminElement>,
+  },
+  {
+    path: "/banners",
+    element: <AdminElement>
+      <Banners />
+    </AdminElement>,
+  },
+  {
+    path: "/specialist",
+    element: <AdminElement>
+      <Specialists />
+    </AdminElement>,
+  },
+  {
+    path: "/wellness-package",
+    element: <AdminElement>
+      <WellnessPackages />
     </AdminElement>,
   }
-
-
-
 ]

@@ -19,7 +19,7 @@ import { OTP } from "../../components/OTP/OTP";
 
 type FormValues = {
   name: string;
-  email: string;
+  phone: string;
   role: string
 };
 
@@ -38,12 +38,12 @@ export default function SignUp() {
   const [data, setData] = useState({
     name: "",
     role: "doctors",
-    email: ""
+    phone: ""
   });
 
   const [otp, setOTP] = useState("")
   const [isOTPSend, setIsOTPSend] = useState(false);
-  const [otpData, setOtpData] = useState({ otp: ''.padEnd(4, ' ') });
+  const [otpData, setOtpData] = useState({ otp: ''.padEnd(6, ' ') });
 
   const handleChange = (key: any, value: any) => {
     setData((prev) => {
@@ -54,23 +54,23 @@ export default function SignUp() {
 
   const VerifyOTP = async () => {
     try {
-      if (otp.length != 4) {
-        error("Please enter 4 digit OTP")
+      if (otp.length != 6) {
+        error("Please enter 6 digit OTP")
         return;
       }
 
       const updatedOTpData = {
         ...otpData,
         otp: otp,
-        role:data.role,
-        isTokenRequired:false,
+        role: data.role,
+        isTokenRequired: false,
       };
       setOtpData(updatedOTpData)
       const response = await doPOST(AUTHENDPOINTS.verifyotp, updatedOTpData);
       if (response.status >= 200 && response.status < 300) {
         success("Register Successfully")
         navigate(`/login`)
-      }else if (response.status >= 400 && response.status <= 500) {
+      } else if (response.status >= 400 && response.status <= 500) {
         error(response.message)
       }
     } catch (e) {
@@ -93,7 +93,7 @@ export default function SignUp() {
           userId: response.data.data.userId
         }))
         success("OTP Send Successfully")
-      }else if (response.status >= 400 && response.status <= 500) {
+      } else if (response.status >= 400 && response.status <= 500) {
         error(response.message)
       }
     } catch (e) {
@@ -106,13 +106,28 @@ export default function SignUp() {
 
   const signUp = async () => {
     try {
-      if (!data.email || !data.name || !data.role) {
+      if (!data.phone || !data.name || !data.role) {
         error("Please enter required fields")
         return;
       }
-      const response = await doPOST(AUTHENDPOINTS.signup, data);
+      const payload = {
+        ...data,
+        mobile: data.phone
+      };
+      const response = await doPOST(AUTHENDPOINTS.signup, payload);
       if (response.status >= 200 && response.status < 300) {
-        await sendOTP(response.data.data);
+        const responseData = response.data?.data || response.data;
+        if (responseData?.otpId) {
+          setIsOTPSend(true);
+          setOtpData((prev: any) => ({
+            ...prev,
+            otpId: responseData.otpId,
+            userId: responseData.userId || responseData._id
+          }));
+          success("OTP Sent Successfully");
+        } else {
+          await sendOTP(responseData);
+        }
       } else if (response.status >= 400 && response.status <= 500) {
         error(response.message)
       }
@@ -150,58 +165,55 @@ export default function SignUp() {
         </Typography>
         <Box sx={{ mt: 3 }}>
 
-          {isOTPSend ?   <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={4} /> :
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                //autoComplete="given-name"
-                //name="firstName"
-                //required
-                fullWidth
-                id="name"
-                label="Name"
-                //autoFocus
-                onChange={(e: any) => {
-                  handleChange("name", e?.target?.value)
-                }}
-                error={!!errors.name}
-                helperText={errors.name?.message}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                //required
-                fullWidth
-                id="email"
-                label="Email Address"
-                //name="email"
-                //autoComplete="email"
-                onChange={(e: any) => {
-                  handleChange("email", e?.target?.value)
-                }}
-                error={!!errors.email}
-                helperText={errors.email?.message}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Select
-                fullWidth
-                labelId="role"
-                id="role"
-                label="Roles"
-                onChange={(e: any) => {
-                  handleChange("role", e?.target?.value)
-                }}
-                defaultValue={"doctors"}
-                error={!!errors.role}
-              >
-                <MenuItem value={"doctors"}>Doctor</MenuItem>
-                <MenuItem value={"laboratories"}>Laboratory</MenuItem>
-                <MenuItem value={"admin"}>Admin</MenuItem>
-                {/* <MenuItem value={"supervisor"}>Super Visor</MenuItem> */}
-              </Select>
-            </Grid>
-          </Grid>}
+          {isOTPSend ? <OTP separator={<span>-</span>} value={otp} onChange={setOTP} length={6} /> :
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  //autoComplete="given-name"
+                  //name="firstName"
+                  //required
+                  fullWidth
+                  id="name"
+                  label="Name"
+                  //autoFocus
+                  onChange={(e: any) => {
+                    handleChange("name", e?.target?.value)
+                  }}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="phone"
+                  label="Phone Number"
+                  onChange={(e: any) => {
+                    handleChange("phone", e?.target?.value)
+                  }}
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Select
+                  fullWidth
+                  labelId="role"
+                  id="role"
+                  label="Roles"
+                  onChange={(e: any) => {
+                    handleChange("role", e?.target?.value)
+                  }}
+                  defaultValue={"doctors"}
+                  error={!!errors.role}
+                >
+                  <MenuItem value={"doctors"}>Doctor</MenuItem>
+                  <MenuItem value={"laboratories"}>Laboratory</MenuItem>
+                  <MenuItem value={"admin"}>Admin</MenuItem>
+                  {/* <MenuItem value={"supervisor"}>Super Visor</MenuItem> */}
+                </Select>
+              </Grid>
+            </Grid>}
           <Button
             type="submit"
             fullWidth
@@ -209,7 +221,7 @@ export default function SignUp() {
             sx={{ mt: 3, mb: 2 }}
             onClick={handleSendButton}
           >
-           {isOTPSend ? "Verify Otp" : "Send OTP"}
+            {isOTPSend ? "Verify Otp" : "Send OTP"}
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>

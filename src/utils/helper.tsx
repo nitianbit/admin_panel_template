@@ -9,7 +9,7 @@ export function isError(e: unknown): e is Error {
 
 
 export const moduleRoles = {
-  "/dashboard": [MODULES.ADMIN, MODULES.SUPERVISOR],
+  "/dashboard": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.USER],
   "/stats": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR, MODULES.MARKETING],
   "/patient-list": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR, MODULES.LABORATORY],
   "/patient-info/1": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.DOCTOR],
@@ -42,20 +42,27 @@ export const moduleRoles = {
   "/company-external-packages": [MODULES.ADMIN, MODULES.SUPERVISOR,],
   "/vendors": [MODULES.ADMIN, MODULES.SUPERVISOR,],
   "/marketing": [MODULES.ADMIN, MODULES.SUPERVISOR],
+  "/banners": [MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.MARKETING, MODULES.USER],
 
 }
 
 
-export const hasAccess = (roles: string[], module: string | null = null) => {
+export const hasAccess = (roles: string[] | string | null | undefined, module: string | null = null) => {
   const pathname = module ?? window.location.pathname;
+
+  // Normalize roles to an array
+  const normalizedRoles = Array.isArray(roles)
+    ? roles
+    : (roles ? [roles] : []);
+
   if (pathname in moduleRoles) {
-    const role = moduleRoles[pathname as keyof typeof moduleRoles];
-    if (role) {
-      return role.some((r: any) => roles.includes(r));
+    const allowedRoles = moduleRoles[pathname as keyof typeof moduleRoles];
+    if (allowedRoles) {
+      return allowedRoles.some((r: any) => normalizedRoles.includes(r));
     }
     return false;
   }
-  return false;
+  return true; // If path not in moduleRoles, allow access by default or define your policy
 }
 
 

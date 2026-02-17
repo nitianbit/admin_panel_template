@@ -31,7 +31,7 @@ export const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [userData, setUserData] = useState<any>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean|any>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | any>(null);
   const [token, setToken] = useState<string>("");
 
   const [isTokenVerified, setIsTokenVerified] = useState(false); // State flag for token verification
@@ -41,23 +41,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const verifyToken = async (token: string | null) => {
     try {
-      const response = await doPOST(AUTHENDPOINTS.verifyToken, { token: token });
-      if (response.status==200) {
+      if (token) {
         setIsLoggedIn(true);
-        setUserData(response.data.data);
         return true;
       } else {
         setIsLoggedIn(false);
-        setIsTokenVerified(true)
         localStorage.clear();
-        success('Session Expired');
       }
     } catch (err) {
       error('Failed to verify token');
-    }finally{
+    } finally {
       setIsTokenVerified(true)
     }
-    return  false
+    return false
   };
 
   const logout = () => {
@@ -67,15 +63,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    // Only check token if it has not been verified yet
+    // Check if token exists in localStorage on app load
     const token = getValue(STORAGE_KEYS.TOKEN);
-    if (token ) {
-      verifyToken(token);
-    }else{
+    if (token) {
+      setIsLoggedIn(true);
+      setIsTokenVerified(true);
+
+      // Restore userData from localStorage so route guards have role info
+      const storedUserData = getValue(STORAGE_KEYS.USER_DATA);
+      if (storedUserData) {
+        try {
+          setUserData(JSON.parse(storedUserData));
+        } catch (e) {
+          console.error('Failed to parse stored user data:', e);
+        }
+      }
+    } else {
       setIsTokenVerified(true);
       setIsLoggedIn(false)
     }
-  }, []); // Add dependency on isTokenVerified to control the execution
+  }, []);
 
   return (
     <AppContext.Provider

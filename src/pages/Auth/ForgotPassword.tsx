@@ -11,7 +11,7 @@ import Container from "@mui/material/Container";
 import { useForm } from "react-hook-form";
 
 type FormValues = {
-  email: string;
+  phone: string;
 };
 
 export default function ForgotPassword() {
@@ -40,24 +40,20 @@ export default function ForgotPassword() {
           Forgot Password
         </Typography>
         <Typography variant="body2" align="center">
-          Enter your email and we will send you a link to reset your password.
+          Enter your phone number and we will send you a link to reset your password.
         </Typography>
         <Box sx={{ mt: 3, width: "100%" }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Grid item>
               <TextField
-                //autoComplete="email"
-                //name="email"
-                //required
                 fullWidth
-                id="email"
-                label="Email Address"
-                //autoFocus
-                {...register("email", {
-                  required: "Email is required"
+                id="phone"
+                label="Phone Number"
+                {...register("phone", {
+                  required: "Phone number is required"
                 })}
-                error={!!errors.email}
-                helperText={errors.email?.message}
+                error={!!errors.phone}
+                helperText={errors.phone?.message}
               />
             </Grid>
 

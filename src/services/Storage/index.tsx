@@ -3,4 +3,5 @@ export const setValue = (key: string, value: string): void => localStorage.setIt
 export const removeValue = (key: string): void => localStorage.removeItem(key);
 export const STORAGE_KEYS = {
   TOKEN: 'EWA_TOKEN',
+  USER_DATA: 'EWA_USER_DATA',
 };

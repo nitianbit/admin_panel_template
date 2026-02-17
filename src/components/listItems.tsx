@@ -49,6 +49,9 @@ import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
 import LogoutIcon from "@mui/icons-material/Logout";
+import ViewCarouselIcon from "@mui/icons-material/ViewCarousel";
+import PersonIcon from "@mui/icons-material/Person";
+import InventoryIcon from "@mui/icons-material/Inventory";
 
 import { hasAccess } from "../utils/helper";
 
@@ -221,6 +224,21 @@ const primarynavList = [
 ];
 
 const secondaryNavList = [
+  {
+    link: "/banners",
+    label: "Banners",
+    icon: <ViewCarouselIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/specialist",
+    label: "Specialist",
+    icon: <PersonIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/wellness-package",
+    label: "Wellness Packages",
+    icon: <InventoryIcon sx={{ color: "#009688" }} />, // Teal
+  },
   {
     link: "/lab-results",
     label: "Lab Results",

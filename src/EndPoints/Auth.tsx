@@ -1,7 +1,7 @@
 export const AUTHENDPOINTS = {
-    login:"/auth/login",
-    signup:"/auth/signup",
-    sentotp:"/auth/send-otp",
-    verifyotp:"/auth/verify-otp",
-    verifyToken:"/auth/verify-token",
+    login: "/auth/user/send",
+    signup: "/auth/user/signup",
+    sentotp: "/auth/user/send",
+    verifyotp: "/auth/user/verify",
+    // verifyToken: "/auth/user/verify-token",
 }

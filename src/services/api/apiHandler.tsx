@@ -4,8 +4,8 @@ import { API_METHODS } from "./constants";
 
 export const api = axios.create({
     //  baseURL: 'http://139.59.87.79:4030/api',
-    baseURL: 'https://myewacare.com/api'
-    //   baseURL: 'http://localhost:4030/api'
+    // baseURL: 'https://myewacare.com/api'
+    baseURL: 'http://93.127.199.40:4031/api/v1/'
 
 });
 
@@ -15,13 +15,19 @@ const isFormData = (value: unknown): value is FormData => value instanceof FormD
 const apiHandler = async (endPoint: any, method: string, data = null) => {
     try {
         const contentType: string = isFormData(data) ? "multipart/form-data" : "application/json";
+
+        const cleanEndPoint = endPoint.startsWith('/') ? endPoint.substring(1) : endPoint;
+        const finalUrl = `${api.defaults.baseURL}${cleanEndPoint}`;
+        console.log(`[API Call] ${method} ${finalUrl}`);
+
         const response = await api({
             method: method,
-            url: endPoint,
+            url: cleanEndPoint,
             ...(![API_METHODS.GET].includes(method) && { data: data }),
             headers: {
                 Authorization: getValue(STORAGE_KEYS.TOKEN),
                 "x-api-key": "web",
+                "Content-Type": contentType
             },
         });
 
@@ -37,24 +43,25 @@ const apiHandler = async (endPoint: any, method: string, data = null) => {
             statusCode = status;
 
             // Handle different HTTP status codes
+            const message = data?.message || data?.error || data?.err;
             switch (status) {
                 case 400:
-                    errorMessage = data.message || 'Bad Request: The server could not understand the request.';
+                    errorMessage = message || 'Bad Request: The server could not understand the request.';
                     break;
                 case 401:
-                    errorMessage = data.message || 'Unauthorized: Authentication is required.';
+                    errorMessage = message || 'Unauthorized: Authentication is required.';
                     break;
                 case 403:
-                    errorMessage = data.message || 'Forbidden: You do not have permission to access this resource.';
+                    errorMessage = message || 'Forbidden: You do not have permission to access this resource.';
                     break;
                 case 404:
-                    errorMessage = data.message || 'Not Found: The requested resource could not be found.';
+                    errorMessage = message || 'Not Found: The requested resource could not be found.';
                     break;
                 case 500:
-                    errorMessage = data.message || 'Internal Server Error: There is an issue with the server.';
+                    errorMessage = message || 'Internal Server Error: There is an issue with the server.';
                     break;
                 default:
-                    errorMessage = data.message || `Unexpected Error: ${status}`;
+                    errorMessage = message || `Unexpected Error: ${status}`;
                     break;
             }
         }

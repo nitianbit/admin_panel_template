@@ -35,7 +35,9 @@ interface FileItem {
     file: File;
 }
 
-const FILE_BASE_URL = "https://myewacare.com/api/"; // base URL for files
+// const FILE_BASE_URL = "https://myewacare.com/api/"; // base URL for files
+const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // base URL for files
+// 
 
 const EditSecondOpinionDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [data, setData] = useState<any>({
@@ -63,7 +65,7 @@ const EditSecondOpinionDialog = ({ isModalOpen, toggleModal, selectedId }: any) 
                 };
                 setData(transformedData);
             }
-        } catch (error) {}
+        } catch (error) { }
     };
 
     useEffect(() => {
@@ -112,7 +114,7 @@ const EditSecondOpinionDialog = ({ isModalOpen, toggleModal, selectedId }: any) 
                     email,
                     concern
                 });
-            } 
+            }
             // CREATE
             else {
                 response = await doPOST(ENDPOINTS.create("second-opinion"), {
@@ -146,7 +148,7 @@ const EditSecondOpinionDialog = ({ isModalOpen, toggleModal, selectedId }: any) 
             }
 
             handleClose();
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const handleChange = (key: string, value: any) => {

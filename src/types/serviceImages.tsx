@@ -1,5 +1,3 @@
-
-
 export interface ServiceImage {
     _id?: string;
     image: string | null;
