@@ -47,6 +47,12 @@ export const MODULES = {
     BANNER: 'banners',
     SPECIALIST: 'specialist',
     WELLNESS_PACKAGE: 'wellness-package',
+    HEALTH_TIP: 'health-tips',
+    PARTNER: 'partners',
+    SLOTS: 'slots',
+    COUPON: 'coupon',
+    BOOKING: 'bookings',
+    CORPORATE: 'corporates',
 };
 
 

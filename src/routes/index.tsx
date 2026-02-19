@@ -45,6 +45,13 @@ import Banners from "../pages/Banners";
 import Specialists from "../pages/Specialist";
 import WellnessPackages from "../pages/WellnessPackages";
 import HeartRateLoader from "../components/HeartRateLoader";
+import HealthTips from "../pages/HealthTips";
+import Users from "../pages/User";
+import Partners from "../pages/Partners";
+import Slots from "../pages/Slots";
+import Coupons from "../pages/Coupons";
+import Bookings from "../pages/Bookings";
+import Corporates from "../pages/Corporates";
 
 const USER_TYPES = {
   NORMAL_USER: "Normal User",
@@ -363,6 +370,48 @@ export const protectedRoutes = [
     path: "/wellness-package",
     element: <AdminElement>
       <WellnessPackages />
+    </AdminElement>,
+  },
+  {
+    path: "/health-tips",
+    element: <AdminElement>
+      <HealthTips />
+    </AdminElement>,
+  },
+  {
+    path: "/users",
+    element: <AdminElement>
+      <Users />
+    </AdminElement>,
+  },
+  {
+    path: "/partners",
+    element: <AdminElement>
+      <Partners />
+    </AdminElement>,
+  },
+  {
+    path: "/slots",
+    element: <AdminElement>
+      <Slots />
+    </AdminElement>,
+  },
+  {
+    path: "/coupons",
+    element: <AdminElement>
+      <Coupons />
+    </AdminElement>,
+  },
+  {
+    path: "/bookings",
+    element: <AdminElement>
+      <Bookings />
+    </AdminElement>,
+  },
+  {
+    path: "/corporates",
+    element: <AdminElement>
+      <Corporates />
     </AdminElement>,
   }
 ]

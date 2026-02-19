@@ -52,6 +52,9 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import ViewCarouselIcon from "@mui/icons-material/ViewCarousel";
 import PersonIcon from "@mui/icons-material/Person";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import HandshakeIcon from '@mui/icons-material/Handshake';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 import { hasAccess } from "../utils/helper";
 
@@ -238,6 +241,41 @@ const secondaryNavList = [
     link: "/wellness-package",
     label: "Wellness Packages",
     icon: <InventoryIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/users",
+    label: "User Accounts",
+    icon: <ManageAccountsIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/partners",
+    label: "Partners",
+    icon: <HandshakeIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/health-tips",
+    label: "Health Tips",
+    icon: <TipsAndUpdatesIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/slots",
+    label: "Slots",
+    icon: <AccessTimeIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/coupons",
+    label: "Coupons",
+    icon: <LocalOfferIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/bookings",
+    label: "Bookings",
+    icon: <EventAvailableIcon sx={{ color: "#009688" }} />, // Teal
+  },
+  {
+    link: "/corporates",
+    label: "Corporates",
+    icon: <BusinessIcon sx={{ color: "#009688" }} />, // Teal
   },
   {
     link: "/lab-results",
