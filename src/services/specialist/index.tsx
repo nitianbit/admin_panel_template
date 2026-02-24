@@ -81,7 +81,7 @@ const store = create<SpecialistState>((set, get) => ({
 
     onCreate: async (data: any) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.SPECIALIST), data);
+            const response = await doPOST(MODULES.SPECIALIST, data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();

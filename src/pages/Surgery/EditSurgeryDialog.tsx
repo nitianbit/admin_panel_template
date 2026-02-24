@@ -36,8 +36,8 @@ interface FileItem {
     file: File;
 }
 
-// const FILE_BASE_URL = "https://myewacare.com/api/"; // <--- base URL for files
-const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // <--- base URL for files
+const FILE_BASE_URL = "https://myewacare.com/api/v1"; // <--- base URL for files
+// const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // <--- base URL for files
 
 const EditSurgeryDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [data, setData] = useState<any>({

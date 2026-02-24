@@ -6,8 +6,8 @@ import { COLUMNS } from "./constants";
 import EditSecondOpinionDialog from "./EditSecondOpinionDialog";
 import { useSecondOpinionStore } from "../../services/secondOpinion";
 
-// const FILE_BASE_URL = "https://myewacare.com/api/"; // base URL for files
-const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // base URL for files
+const FILE_BASE_URL = "https://myewacare.com/api/v1"; // base URL for files
+// const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // base URL for files
 
 export default function SecondOpinion() {
   const {

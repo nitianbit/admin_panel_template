@@ -3,10 +3,9 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl,
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import React from 'react';
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import SearchInput from "../../components/SearchInput";
 
-import _ from 'lodash';
 import CustomImage from "../../components/CustomImage";
 import ImageUpload from "../../components/ImageUploader";
 import { useBannerStore } from "../../services/banners";
@@ -50,45 +49,76 @@ const initialData: Banner = {
 
 const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate } = useBannerStore();
-    const [data, setData] = React.useState<Banner>({ ...initialData });
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<Banner>();
-    const resetData = () => setData({ ...initialData });
+    const { register, handleSubmit, reset, watch, setValue, control } = useForm<Banner>({
+        defaultValues: { ...initialData },
+    });
 
-    const handleChange = (key: any, value: any) => setData(prev => ({ ...prev, [key]: value }));
+    const imageFileRef = React.useRef<File | null>(null);
+    const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
+
     const handleClickOpen = () => toggleModal(true);
     const handleClose = () => toggleModal(false);
 
-    const onSubmit = async () => {
-
-        if (!data?.title) {
+    const onSubmit = async (formValues: Banner) => {
+        if (!formValues?.title) {
             showError('Please enter a title');
             return;
         }
 
-        if (!data?.imageUrl) {
+        if (!imageFileRef.current && !existingImageUrl) {
             showError('Please select an image');
             return;
         }
 
-        let response = null;
-        const payload: any = _.cloneDeep(data);
-        if (typeof data.imageUrl !== 'string') {
-            delete payload.imageUrl;
-        }
-        if (data?._id) {
-            response = await onUpdate({ ...payload });
-        } else {
-            response = await onCreate({ ...payload });
-        }
+        const formatDate = (date: string) => date ? date.split('-').join('') : '';
 
-        if (response?._id && data?.imageUrl && typeof data.imageUrl === 'object') {
-            const res = await uploadFile({ module: MODULES.BANNER, record_id: response?._id }, [data?.imageUrl]);
-            if (res.status >= 200 && res.status < 400) {
-                const imagePaths = res.data?.data?.length ? res.data?.data[0] : '';
-                await onUpdate({ imageUrl: imagePaths, _id: response?._id });
+        let imageUrl = existingImageUrl || "";
+        if (imageFileRef.current instanceof File) {
+            const uploadRes = await uploadFile({ module: MODULES.BANNER }, [imageFileRef.current]);
+            console.log('Upload response:', JSON.stringify(uploadRes, null, 2));
+
+            if (uploadRes.error) {
+                showError(uploadRes.message || 'Failed to upload image');
+                return;
+            }
+
+            const uploadedFiles = uploadRes.data?.data?.files;
+            if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                imageUrl = uploadedFiles[0].url;
             }
         }
-        resetData();
+
+        if (!imageUrl) {
+            showError('Image upload failed. Please try again.');
+            return;
+        }
+
+        const payload: any = {
+            title: formValues.title,
+            description: formValues.description || "",
+            linkUrl: formValues.linkUrl || "",
+            bannerType: formValues.bannerType || "home",
+            startDate: formatDate(formValues.startDate || ""),
+            endDate: formatDate(formValues.endDate || ""),
+            target: formValues.target || "",
+            targetId: formValues.targetId || "",
+            isActive: formValues.isActive ?? true,
+            order: formValues.order ?? 0,
+            imageUrl: imageUrl,
+        };
+
+        let response = null;
+
+        if (formValues?._id) {
+            payload._id = formValues._id;
+            response = await onUpdate(payload);
+        } else {
+            response = await onCreate(payload);
+        }
+
+        reset({ ...initialData });
+        imageFileRef.current = null;
+        setExistingImageUrl("");
         handleClose();
     };
 
@@ -96,18 +126,25 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         try {
             const data = await detail(selectedId);
             reset(data?.data);
-            setData(data?.data);
+            if (data?.data?.imageUrl && typeof data.data.imageUrl === 'string') {
+                setExistingImageUrl(data.data.imageUrl);
+            }
         } catch (error) {
 
         }
     }
 
     React.useEffect(() => {
-        setData({ ...initialData });
+        reset({ ...initialData });
+        imageFileRef.current = null;
+        setExistingImageUrl("");
         if (selectedId) {
             fetchDetail(selectedId);
         }
     }, [selectedId]);
+
+    const watchedId = watch("_id");
+    const watchedIsActive = watch("isActive");
 
     return (
         <>
@@ -131,7 +168,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 sx={{ height: "100%" }}
             >
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogTitle>{data?._id ? 'Edit Banner' : 'Add Banner'}</DialogTitle>
+                    <DialogTitle>{watchedId ? 'Edit Banner' : 'Add Banner'}</DialogTitle>
                     <DialogContent dividers>
 
                         <TextField
@@ -141,8 +178,8 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             type="text"
                             fullWidth
                             variant="outlined"
-                            value={data.title}
-                            onChange={(e) => handleChange("title", e.target.value)}
+                            {...register("title")}
+                            InputLabelProps={{ shrink: true }}
                         />
 
                         <TextField
@@ -154,8 +191,8 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             multiline
                             rows={3}
                             variant="outlined"
-                            value={data.description}
-                            onChange={(e) => handleChange("description", e.target.value)}
+                            {...register("description")}
+                            InputLabelProps={{ shrink: true }}
                         />
 
                         <TextField
@@ -165,26 +202,33 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             type="text"
                             fullWidth
                             variant="outlined"
-                            value={data.linkUrl}
-                            onChange={(e) => handleChange("linkUrl", e.target.value)}
+                            {...register("linkUrl")}
+                            InputLabelProps={{ shrink: true }}
                         />
 
-                        <FormControl fullWidth margin="dense">
-                            <InputLabel id="bannerType-label">Banner Type</InputLabel>
-                            <Select
-                                labelId="bannerType-label"
-                                id="bannerType"
-                                value={data.bannerType || 'home'}
-                                label="Banner Type"
-                                onChange={(e) => handleChange("bannerType", e.target.value)}
-                            >
-                                {BANNER_TYPES.map((type) => (
-                                    <MenuItem key={type.value} value={type.value}>
-                                        {type.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <Controller
+                            name="bannerType"
+                            control={control}
+                            defaultValue="home"
+                            render={({ field }) => (
+                                <FormControl fullWidth margin="dense">
+                                    <InputLabel id="bannerType-label">Banner Type</InputLabel>
+                                    <Select
+                                        labelId="bannerType-label"
+                                        id="bannerType"
+                                        label="Banner Type"
+                                        {...field}
+                                        value={field.value || 'home'}
+                                    >
+                                        {BANNER_TYPES.map((type) => (
+                                            <MenuItem key={type.value} value={type.value}>
+                                                {type.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            )}
+                        />
 
                         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
                             <TextField
@@ -195,8 +239,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 fullWidth
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
-                                value={data.startDate}
-                                onChange={(e) => handleChange("startDate", e.target.value)}
+                                {...register("startDate")}
                             />
 
                             <TextField
@@ -207,8 +250,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 fullWidth
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
-                                value={data.endDate}
-                                onChange={(e) => handleChange("endDate", e.target.value)}
+                                {...register("endDate")}
                             />
                         </Stack>
 
@@ -220,8 +262,8 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.target}
-                                onChange={(e) => handleChange("target", e.target.value)}
+                                {...register("target")}
+                                InputLabelProps={{ shrink: true }}
                             />
 
                             <TextField
@@ -231,8 +273,8 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.targetId}
-                                onChange={(e) => handleChange("targetId", e.target.value)}
+                                {...register("targetId")}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
 
@@ -243,24 +285,34 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 label="Display Order"
                                 type="number"
                                 variant="outlined"
-                                value={data.order}
-                                onChange={(e) => handleChange("order", Number(e.target.value))}
+                                {...register("order", { valueAsNumber: true })}
                                 sx={{ width: 200 }}
+                                InputLabelProps={{ shrink: true }}
                             />
 
                             <FormControlLabel
                                 control={
                                     <Switch
-                                        checked={data.isActive ?? true}
-                                        onChange={(e) => handleChange("isActive", e.target.checked)}
+                                        checked={watchedIsActive ?? true}
+                                        onChange={(e) => setValue("isActive", e.target.checked)}
                                     />
                                 }
                                 label="Active"
                             />
                         </Stack>
 
-                        {data.imageUrl && typeof data.imageUrl === 'string' ? <CustomImage src={data.imageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
-                        <ImageUpload onChange={(files: any) => handleChange("imageUrl", files?.length ? files[0] : null)} allow="image/*" />
+                        {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
+                        <ImageUpload
+                            onChange={(files: any) => {
+                                imageFileRef.current = files?.length ? files[0] : null;
+                                if (files?.length) {
+                                    setExistingImageUrl("");
+
+                                }
+                                console.log(imageFileRef.current);
+                            }}
+                            allow="image/*"
+                        />
 
                     </DialogContent>
                     <DialogActions>

@@ -75,12 +75,13 @@ export const uploadFile = async (data: any, files: any) => {
   const formData = new FormData();
 
   Array.from(files).forEach((file: any) => {
-    formData.append('pic', file);
+    formData.append('files', file);
   });
 
   Object.keys(data).forEach((key) => {
     formData.append(key, data[key]);
   });
+
   const response = await doPOST('/file/upload', formData);
 
   return response;

@@ -8,8 +8,8 @@ import { COLUMNS } from "./constants";
 import EditSurgeryDialog from "./EditSurgeryDialog";
 import { useSurgeryStore } from "../../services/surgery/index";
 
-// const FILE_BASE_URL = "https://myewacare.com/api/"; // <--- base URL for files
-const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // <--- base URL for files
+const FILE_BASE_URL = "https://myewacare.com/api/v1"; // <--- base URL for files
+// const FILE_BASE_URL = "http://93.127.199.40:4031/api/"; // <--- base URL for files
 
 export default function Surgery() {
   const {

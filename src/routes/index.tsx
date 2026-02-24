@@ -361,7 +361,7 @@ export const protectedRoutes = [
     </AdminElement>,
   },
   {
-    path: "/specialist",
+    path: "/specialists",
     element: <AdminElement>
       <Specialists />
     </AdminElement>,

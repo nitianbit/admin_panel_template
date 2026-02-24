@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; 
+import React, { useId, useState } from "react";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 interface ImageUploadProps {
     multiple?: boolean;
@@ -22,15 +22,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     text = "Images",
     allow = "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 }) => {
-    const [previews, setPreviews] = useState<string[]>([]);
+    const uniqueId = useId();
+    const inputId = `image-upload-input-${uniqueId}`;
+    const [previews, setPreviews] = useState<{ url: string; type: string }[]>([]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const files = Array.from(event.target.files);
 
-            // Generate previews
-            const previews = files.map((file) => URL.createObjectURL(file));
-            setPreviews(prev => [...prev, ...previews]);
+            // Generate previews with type info
+            const newPreviews = files.map((file) => ({
+                url: URL.createObjectURL(file),
+                type: file.type,
+            }));
+            setPreviews(prev => [...prev, ...newPreviews]);
 
             // Pass files to parent
             onChange(files);
@@ -49,9 +54,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 multiple={multiple}
                 onChange={handleFileChange}
                 style={{ display: "none", width: '100%' }}
-                id="image-upload-input"
+                id={inputId}
             />
-            <label htmlFor="image-upload-input" style={{ width: '100%' }}>
+            <label htmlFor={inputId} style={{ width: '100%' }}>
                 <div
                     style={{
                         width: `100%`,
@@ -71,12 +76,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
             {/* Preview */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {previews.map((src, index) => {
-                      const isImage =  /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(src);
+                {previews.map((preview, index) => {
+                    const isImage = preview.type?.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(preview.url);
                     return (
                         <div key={index} style={{ position: "relative", display: "inline-block", }}>
                             {isImage ? <img
-                                src={src}
+                                src={preview.url}
                                 alt={`Preview ${index}`}
                                 style={{
                                     width: `${width}px`,
@@ -85,7 +90,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                                     borderRadius: "8px",
                                 }}
                             /> : <div
-                                key={index}
                                 style={{
                                     width: `${width}px`,
                                     height: `${height}px`,
@@ -96,6 +100,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                                 <PictureAsPdfIcon style={{ fontSize: 40, color: "#d32f2f" }} />
                             </div>}
                             <button
+                                type="button"
                                 onClick={() => handleRemovePreview(index)}
                                 style={{
                                     position: "absolute",

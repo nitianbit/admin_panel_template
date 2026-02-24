@@ -88,7 +88,7 @@ export default function SignInSide() {
 
         const userWithRole = {
           ...user,
-          role: user?.role || data.role
+          role: user?.role || user?.userType || data.role
         };
 
         setValue(STORAGE_KEYS.USER_DATA, JSON.stringify(userWithRole));

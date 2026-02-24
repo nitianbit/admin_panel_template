@@ -3,9 +3,9 @@ import { STORAGE_KEYS, getValue } from '../Storage/index';
 import { API_METHODS } from "./constants";
 
 export const api = axios.create({
-    //  baseURL: 'http://139.59.87.79:4030/api',
-    // baseURL: 'https://myewacare.com/api'
-    baseURL: 'http://93.127.199.40:4031/api/v1/'
+    // baseURL: 'http://139.59.87.79:4030/api',
+    baseURL: 'https://myewacare.com/api/v1'
+    // baseURL: 'http://93.127.199.40:4031/api/v1/'
 
 });
 
@@ -14,21 +14,25 @@ const isFormData = (value: unknown): value is FormData => value instanceof FormD
 
 const apiHandler = async (endPoint: any, method: string, data = null) => {
     try {
-        const contentType: string = isFormData(data) ? "multipart/form-data" : "application/json";
 
         const cleanEndPoint = endPoint.startsWith('/') ? endPoint.substring(1) : endPoint;
         const finalUrl = `${api.defaults.baseURL}${cleanEndPoint}`;
         console.log(`[API Call] ${method} ${finalUrl}`);
 
+        const headers: any = {
+            Authorization: `Bearer ${getValue(STORAGE_KEYS.TOKEN)}`,
+            "x-api-key": "web",
+        };
+
+        if (!isFormData(data)) {
+            headers["Content-Type"] = "application/json";
+        }
+
         const response = await api({
             method: method,
             url: cleanEndPoint,
             ...(![API_METHODS.GET].includes(method) && { data: data }),
-            headers: {
-                Authorization: getValue(STORAGE_KEYS.TOKEN),
-                "x-api-key": "web",
-                "Content-Type": contentType
-            },
+            headers,
         });
 
         return { error: false, message: "", status: response.status, data: response.data };

@@ -9,7 +9,7 @@ export const API_METHODS = {
 
 
 export const ENDPOINTS = {
-    login: '/auth/user/send',
+    login: '/auth/admin/send',
     register: '/register',
     profile: '/profile',
     create: (module: string) => `/${module}/create`,
