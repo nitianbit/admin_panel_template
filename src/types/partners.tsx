@@ -51,6 +51,8 @@ export interface PartnerState {
     allData: PartnerData[];
 
     fetchGrid: (page?: number, filters?: PartnerFilters) => Promise<void>;
+    fetchVerified: () => Promise<PartnerData[]>;
+    fetchByType: (partnerType: string) => Promise<PartnerData[]>;
     setFilters: (newFilters: PartnerFilters) => void;
     nextPage: () => void;
     prevPage: () => void;

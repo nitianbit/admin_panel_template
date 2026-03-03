@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Modal, ModalBody } from 'reactstrap';
 import { api } from '../../services/api/apiHandler';
+import { getValue, STORAGE_KEYS } from '../../services/Storage';
 import { Dialog } from '@mui/material';
 
 interface CustomImageProps {
@@ -25,10 +26,17 @@ const CustomImage: React.FC<CustomImageProps> = ({
         setLoading(true);
         if (src) {
             try {
-                const response = await api({
-                    url: src,
+                // Build full absolute URL using the origin from the api baseURL
+                // api.defaults.baseURL = 'https://myewacare.com/api/v1'
+                // Image paths are like '/api/static/general/...' which is NOT under /api/v1/
+                // So we extract just the origin and append the src path directly
+                const baseURL = api.defaults.baseURL || '';
+                const origin = new URL(baseURL).origin; // e.g. 'https://myewacare.com'
+                const fullUrl = src.startsWith('http') ? src : `${origin}${src}`;
+
+                const response = await axios.get(fullUrl, {
                     headers: {
-                        Authorization: localStorage.getItem("BearerToken") || '',
+                        Authorization: `Bearer ${getValue(STORAGE_KEYS.TOKEN)}`,
                     },
                     withCredentials: false,
                     responseType: "blob",

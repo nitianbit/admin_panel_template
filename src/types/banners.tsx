@@ -13,6 +13,7 @@ export interface Banner {
     targetId?: string;
     isActive?: boolean;
     order?: number;
+    corporateId?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

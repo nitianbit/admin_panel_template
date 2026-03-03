@@ -6,7 +6,6 @@ import React from 'react';
 import { useForm } from "react-hook-form";
 import SearchInput from "../../components/SearchInput";
 
-import _ from 'lodash';
 import CustomImage from "../../components/CustomImage";
 import ImageUpload from "../../components/ImageUploader";
 import { showError } from "../../services/toaster";
@@ -46,70 +45,143 @@ const initialData: Specialist = {
 };
 
 const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
-    const { onCreate, detail, onUpdate } = useSpecialistStore();
-    const [data, setData] = React.useState<Specialist>({ ...initialData });
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<Specialist>();
-    const resetData = () => setData({ ...initialData });
+    const { onCreate, detail, onUpdate, filters, setFilters } = useSpecialistStore();
+    const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<Specialist>({
+        defaultValues: { ...initialData },
+    });
 
-    const handleChange = (key: any, value: any) => setData(prev => ({ ...prev, [key]: value }));
+    const imageFileRef = React.useRef<File | null>(null);
+    const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
+
     const handleClickOpen = () => toggleModal(true);
     const handleClose = () => toggleModal(false);
 
-    const onSubmit = async () => {
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-        if (!data?.name) {
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Common specializations to check against
+            const SPECIALIZATIONS = [
+                'Cardiologist', 'Dermatologist', 'Endocrinologist', 'Gastroenterologist',
+                'Neurologist', 'Oncologist', 'Orthopedic', 'Pediatrician', 'Psychiatrist',
+                'Radiologist', 'Urologist', 'Gynecologist', 'Surgeon', 'Dentist', 'Physician',
+                'Ophthalmologist', 'ENT', 'Pulmonologist', 'Rheumatologist', 'Nephrologist',
+                'General Physician', 'Orthopaedics', 'Obstetrics', 'Pathologist'
+            ];
+
+            const matchedSpec = SPECIALIZATIONS.find(
+                s => s.toLowerCase().includes(searchTerm) || searchTerm.includes(s.toLowerCase())
+            );
+
+            if (matchedSpec) {
+                // If search term matches a specialization, filter by specialization
+                newFilters.specialization = matchedSpec;
+                delete newFilters.name;
+            } else {
+                // Otherwise, perform a regular name search
+                newFilters.name = query.trim();
+                delete newFilters.specialization;
+            }
+        } else {
+            delete newFilters.name;
+            delete newFilters.specialization;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
+    };
+
+    const onSubmit = async (formValues: Specialist) => {
+        if (!formValues?.name) {
             showError('Please enter a name');
             return;
         }
 
-        if (!data?.specialization) {
+        if (!formValues?.specialization) {
             showError('Please enter a specialization');
             return;
         }
 
-        let response = null;
-        const payload: any = _.cloneDeep(data);
-        if (typeof data.profilePictureUrl !== 'string') {
-            delete payload.profilePictureUrl;
-        }
-        if (data?._id) {
-            response = await onUpdate({ ...payload });
-        } else {
-            response = await onCreate({ ...payload });
-        }
+        let profilePictureUrl = existingImageUrl || "";
+        if (imageFileRef.current instanceof File) {
+            const uploadRes = await uploadFile({ module: MODULES.SPECIALIST }, [imageFileRef.current]);
 
-        if (response?._id && data?.profilePictureUrl && typeof data.profilePictureUrl === 'object') {
-            const res = await uploadFile({ module: MODULES.SPECIALIST, record_id: response?._id }, [data?.profilePictureUrl]);
-            if (res.status >= 200 && res.status < 400) {
-                const imagePaths = res.data?.data?.length ? res.data?.data[0] : '';
-                await onUpdate({ profilePictureUrl: imagePaths, _id: response?._id });
+            if (uploadRes.error) {
+                showError(uploadRes.message || 'Failed to upload image');
+                return;
+            }
+
+            const uploadedFiles = uploadRes.data?.data?.files;
+            if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                profilePictureUrl = uploadedFiles[0].url;
             }
         }
-        resetData();
-        handleClose();
+
+        const payload: any = {
+            ...formValues,
+            profilePictureUrl: profilePictureUrl,
+        };
+
+        let response = null;
+        if (formValues?._id) {
+            response = await onUpdate(payload);
+        } else {
+            response = await onCreate(payload);
+        }
+
+        if (response) {
+            reset({ ...initialData });
+            imageFileRef.current = null;
+            setExistingImageUrl("");
+            handleClose();
+        }
     };
 
     const fetchDetail = async (selectedId: string) => {
         try {
             const data = await detail(selectedId);
             reset(data?.data);
-            setData(data?.data);
+            if (data?.data?.profilePictureUrl && typeof data.data.profilePictureUrl === 'string') {
+                setExistingImageUrl(data.data.profilePictureUrl);
+            }
         } catch (error) {
 
         }
     }
 
     React.useEffect(() => {
-        setData({ ...initialData });
+        reset({ ...initialData });
+        imageFileRef.current = null;
+        setExistingImageUrl("");
         if (selectedId) {
             fetchDetail(selectedId);
         }
     }, [selectedId]);
 
+    const watchedId = watch("_id");
+    const watchedIsConsultationFree = watch("isConsultationFree");
+    const watchedIsActive = watch("isActive");
+    const watchedIsVerified = watch("isVerified");
+
     return (
         <>
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                <SearchInput />
+                <SearchInput handleChange={handleSearchChange} />
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}
@@ -128,7 +200,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 sx={{ height: "100%" }}
             >
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogTitle>{data?._id ? 'Edit Specialist' : 'Add Specialist'}</DialogTitle>
+                    <DialogTitle>{watchedId ? 'Edit Specialist' : 'Add Specialist'}</DialogTitle>
                     <DialogContent dividers>
 
                         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -139,8 +211,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.name}
-                                onChange={(e) => handleChange("name", e.target.value)}
+                                {...register("name")}
+                                InputLabelProps={{ shrink: true }}
                             />
                             <TextField
                                 margin="dense"
@@ -149,8 +221,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.specialization}
-                                onChange={(e) => handleChange("specialization", e.target.value)}
+                                {...register("specialization")}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
 
@@ -162,8 +234,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.degree}
-                                onChange={(e) => handleChange("degree", e.target.value)}
+                                {...register("degree")}
+                                InputLabelProps={{ shrink: true }}
                             />
                             <TextField
                                 margin="dense"
@@ -172,8 +244,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="number"
                                 fullWidth
                                 variant="outlined"
-                                value={data.experienceYears}
-                                onChange={(e) => handleChange("experienceYears", Number(e.target.value))}
+                                {...register("experienceYears", { valueAsNumber: true })}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
 
@@ -186,8 +258,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             multiline
                             rows={3}
                             variant="outlined"
-                            value={data.bio}
-                            onChange={(e) => handleChange("bio", e.target.value)}
+                            {...register("bio")}
+                            InputLabelProps={{ shrink: true }}
                         />
 
                         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -198,8 +270,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="email"
                                 fullWidth
                                 variant="outlined"
-                                value={data.email}
-                                onChange={(e) => handleChange("email", e.target.value)}
+                                {...register("email")}
+                                InputLabelProps={{ shrink: true }}
                             />
                             <TextField
                                 margin="dense"
@@ -208,8 +280,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.phone}
-                                onChange={(e) => handleChange("phone", e.target.value)}
+                                {...register("phone")}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
                         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -220,8 +292,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="number"
                                 fullWidth
                                 variant="outlined"
-                                value={data.consultationFee}
-                                onChange={(e) => handleChange("consultationFee", Number(e.target.value))}
+                                {...register("consultationFee", { valueAsNumber: true })}
+                                InputLabelProps={{ shrink: true }}
                             />
 
                             <TextField
@@ -231,8 +303,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="number"
                                 fullWidth
                                 variant="outlined"
-                                value={data.rating}
-                                onChange={(e) => handleChange("rating", Number(e.target.value))}
+                                {...register("rating", { valueAsNumber: true })}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
                         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -243,8 +315,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.address}
-                                onChange={(e) => handleChange("address", e.target.value)}
+                                {...register("address")}
+                                InputLabelProps={{ shrink: true }}
                             />
                             <TextField
                                 margin="dense"
@@ -253,8 +325,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.city}
-                                onChange={(e) => handleChange("city", e.target.value)}
+                                {...register("city")}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
 
@@ -266,8 +338,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.state}
-                                onChange={(e) => handleChange("state", e.target.value)}
+                                {...register("state")}
+                                InputLabelProps={{ shrink: true }}
                             />
                             <TextField
                                 margin="dense"
@@ -276,8 +348,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                value={data.pincode}
-                                onChange={(e) => handleChange("pincode", e.target.value)}
+                                {...register("pincode")}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
 
@@ -285,8 +357,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             <FormControlLabel
                                 control={
                                     <Switch
-                                        checked={data.isConsultationFree ?? false}
-                                        onChange={(e) => handleChange("isConsultationFree", e.target.checked)}
+                                        checked={watchedIsConsultationFree ?? false}
+                                        onChange={(e) => setValue("isConsultationFree", e.target.checked)}
                                     />
                                 }
                                 label="Free Consultation"
@@ -294,8 +366,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             <FormControlLabel
                                 control={
                                     <Switch
-                                        checked={data.isActive ?? true}
-                                        onChange={(e) => handleChange("isActive", e.target.checked)}
+                                        checked={watchedIsActive ?? true}
+                                        onChange={(e) => setValue("isActive", e.target.checked)}
                                     />
                                 }
                                 label="Active"
@@ -303,16 +375,24 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             <FormControlLabel
                                 control={
                                     <Switch
-                                        checked={data.isVerified ?? false}
-                                        onChange={(e) => handleChange("isVerified", e.target.checked)}
+                                        checked={watchedIsVerified ?? false}
+                                        onChange={(e) => setValue("isVerified", e.target.checked)}
                                     />
                                 }
                                 label="Verified"
                             />
                         </Stack>
 
-                        {data.profilePictureUrl && typeof data.profilePictureUrl === 'string' ? <CustomImage src={data.profilePictureUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
-                        <ImageUpload onChange={(files: any) => handleChange("profilePictureUrl", files?.length ? files[0] : null)} allow="image/*" />
+                        {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
+                        <ImageUpload
+                            onChange={(files: any) => {
+                                imageFileRef.current = files?.length ? files[0] : null;
+                                if (files?.length) {
+                                    setExistingImageUrl("");
+                                }
+                            }}
+                            allow="image/*"
+                        />
 
                     </DialogContent>
                     <DialogActions>

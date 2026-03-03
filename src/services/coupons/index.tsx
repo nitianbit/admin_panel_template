@@ -2,9 +2,9 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { ICoupon, CreateCouponRequest, CouponQueryParams, CouponState } from '../../types/coupons';
-import { ENDPOINTS } from '../api/constants';
-import { MODULES } from '../../utils/constants';
+import { ICoupon, CreateCouponRequest, CouponQueryParams, CouponState, ValidateCouponRequest } from '../../types/coupons';
+
+const BASE_URL = '/coupons';
 
 const store = create<CouponState>((set, get) => ({
     data: [],
@@ -15,6 +15,7 @@ const store = create<CouponState>((set, get) => ({
     isLoading: false,
     limit: 10,
 
+    // GET /coupons (with query params for pagination & filters)
     fetchGrid: async () => {
         try {
             const { filters, currentPage, limit, isLoading } = get();
@@ -26,16 +27,19 @@ const store = create<CouponState>((set, get) => ({
             queryParams.append('page', String(currentPage));
             queryParams.append('limit', String(limit));
 
-            const apiUrl = `${ENDPOINTS.grid(MODULES.COUPON)}?${queryParams.toString()}`;
+            const apiUrl = `${BASE_URL}?${queryParams.toString()}`;
 
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data || response.data;
+                const rows = resData?.rows || resData;
+                const total = resData?.total ?? (Array.isArray(rows) ? rows.length : 0);
                 set({
-                    data: response.data.data.rows,
+                    data: Array.isArray(rows) ? rows : [],
                     ...(currentPage === 1 && {
-                        totalPages: Math.ceil((response.data.data.total ?? 0) / limit),
-                        total: response.data.data.total ?? 0
+                        totalPages: Math.ceil(total / limit),
+                        total: total
                     }),
                 });
             } else {
@@ -75,7 +79,6 @@ const store = create<CouponState>((set, get) => ({
 
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
         const { totalPages } = get();
-        // Assuming page is 0-indexed from component, adjusting to 1-indexed for backend if needed
         const newPage = page + 1;
         if (newPage >= 1 && newPage <= totalPages) {
             set({
@@ -85,9 +88,10 @@ const store = create<CouponState>((set, get) => ({
         }
     },
 
+    // POST /coupons
     onCreate: async (data: CreateCouponRequest) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.COUPON), data);
+            const response = await doPOST(BASE_URL, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -98,9 +102,11 @@ const store = create<CouponState>((set, get) => ({
         }
     },
 
+    // PUT /coupons/:id
     onUpdate: async (data: ICoupon) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.COUPON), data);
+            const id = data._id;
+            const response = await doPUT(`${BASE_URL}/${id}`, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -111,9 +117,10 @@ const store = create<CouponState>((set, get) => ({
         }
     },
 
+    // DELETE /coupons/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.COUPON, id));
+            const response = await doDELETE(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -124,11 +131,12 @@ const store = create<CouponState>((set, get) => ({
         }
     },
 
+    // GET /coupons/:id
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.COUPON, id));
+            const response = await doGET(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
-                return response.data;
+                return response.data?.data || response.data;
             } else {
                 showError(response.message || 'Failed to fetch coupon details');
                 return null;
@@ -137,7 +145,71 @@ const store = create<CouponState>((set, get) => ({
             showError('Failed to fetch coupon details');
             return null;
         }
-    }
+    },
+
+    // GET /coupons/active
+    fetchActive: async () => {
+        try {
+            const response = await doGET(`${BASE_URL}/active`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || response.data;
+            } else {
+                showError(response.message || 'Failed to fetch active coupons');
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch active coupons');
+            return [];
+        }
+    },
+
+    // GET /coupons/applicable?bookingType=...
+    fetchApplicable: async (bookingType: string) => {
+        try {
+            const response = await doGET(`${BASE_URL}/applicable?bookingType=${bookingType}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || response.data;
+            } else {
+                showError(response.message || 'Failed to fetch applicable coupons');
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch applicable coupons');
+            return [];
+        }
+    },
+
+    // POST /coupons/validate
+    validateCoupon: async (data: ValidateCouponRequest) => {
+        try {
+            const response = await doPOST(`${BASE_URL}/validate`, data);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data;
+            } else {
+                showError(response.message || 'Coupon validation failed');
+                return null;
+            }
+        } catch (error) {
+            showError('Failed to validate coupon');
+            return null;
+        }
+    },
+
+    // GET /coupons/code/:code
+    fetchByCode: async (code: string) => {
+        try {
+            const response = await doGET(`${BASE_URL}/code/${code}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data;
+            } else {
+                showError(response.message || 'Failed to fetch coupon by code');
+                return null;
+            }
+        } catch (error) {
+            showError('Failed to fetch coupon by code');
+            return null;
+        }
+    },
 }));
 
 export const useCouponStore = () => store((state) => state);

@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { ENDPOINTS } from '../api/constants';
 import { HealthTip, HealthTipFilters, HealthTipState } from '../../types/healthTips';
-import { MODULES } from '../../utils/constants';
+
+const BASE = '/health-tips';
 
 const store = create<HealthTipState>((set, get) => ({
     data: [],
@@ -15,28 +15,27 @@ const store = create<HealthTipState>((set, get) => ({
     total: 0,
     allData: [],
 
-    fetchGrid: async (page?: number, filters?: HealthTipFilters) => {
+    // GET /health-tips
+    fetchGrid: async () => {
         try {
-            const state = get();
-            const currentPage = page ?? state.currentPage;
-            const currentFilters = filters ?? state.filters;
-
-            if (state.isLoading) return;
+            const { filters, currentPage, rows, isLoading } = get();
+            if (isLoading) return;
 
             set({ isLoading: true });
 
-            const queryParams = new URLSearchParams(currentFilters);
+            const queryParams = new URLSearchParams(filters as any);
             queryParams.append('page', String(currentPage));
-            queryParams.append('rows', String(state.rows));
-            const apiUrl = `${ENDPOINTS.grid(MODULES.HEALTH_TIP)}?${queryParams.toString()}`;
+            queryParams.append('limit', String(rows));
 
+            const apiUrl = `${BASE}?${queryParams.toString()}`;
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
                 set({
-                    data: response.data.data.rows,
-                    total: response.data.data.total ?? 0,
-                    totalPages: Math.ceil((response.data.data.total ?? 0) / state.rows),
+                    data: resData?.rows ?? resData ?? [],
+                    total: resData?.total ?? 0,
+                    totalPages: Math.ceil((resData?.total ?? 0) / rows),
                 });
             } else {
                 showError(response.message || 'Failed to fetch health tips');
@@ -48,38 +47,71 @@ const store = create<HealthTipState>((set, get) => ({
         }
     },
 
+    // GET /health-tips/active
+    fetchActive: async () => {
+        try {
+            const response = await doGET(`${BASE}/active`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data ?? [];
+            } else {
+                showError(response.message);
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch active health tips');
+            return [];
+        }
+    },
+
+    // GET /health-tips/category/:category
+    fetchByCategory: async (category: string) => {
+        try {
+            const response = await doGET(`${BASE}/category/${category}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data ?? [];
+            } else {
+                showError(response.message);
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch health tips by category');
+            return [];
+        }
+    },
+
     setFilters: (newFilters: HealthTipFilters) => {
         set({ filters: newFilters, currentPage: 1 });
-        get().fetchGrid(1, newFilters);
+        get().fetchGrid();
     },
 
     nextPage: () => {
         const { currentPage, totalPages, fetchGrid } = get();
         if (currentPage < totalPages) {
-            const next = currentPage + 1;
-            set({ currentPage: next });
-            fetchGrid(next);
+            set(state => ({ currentPage: state.currentPage + 1 }));
+            fetchGrid();
         }
     },
 
     prevPage: () => {
         const { currentPage, fetchGrid } = get();
         if (currentPage > 1) {
-            const prev = currentPage - 1;
-            set({ currentPage: prev });
-            fetchGrid(prev);
+            set(state => ({ currentPage: state.currentPage - 1 }));
+            fetchGrid();
         }
     },
 
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
-        const next = page + 1;
-        set({ currentPage: next });
-        get().fetchGrid(next);
+        const { currentPage, fetchGrid, totalPages } = get();
+        if (currentPage > 1 || currentPage <= totalPages) {
+            set({ currentPage: page + 1 });
+            fetchGrid();
+        }
     },
 
+    // POST /health-tips
     onCreate: async (data: HealthTip) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.HEALTH_TIP), data);
+            const response = await doPOST(BASE, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 return response?.data?.data;
@@ -93,9 +125,15 @@ const store = create<HealthTipState>((set, get) => ({
         }
     },
 
+    // PUT /health-tips/:id
     onUpdate: async (data: HealthTip) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.HEALTH_TIP), data);
+            const id = data._id;
+            if (!id) {
+                showError('Health Tip ID is required for update');
+                return null;
+            }
+            const response = await doPUT(`${BASE}/${id}`, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
                 return response?.data?.data;
@@ -109,9 +147,10 @@ const store = create<HealthTipState>((set, get) => ({
         }
     },
 
+    // DELETE /health-tips/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.HEALTH_TIP, id));
+            const response = await doDELETE(`${BASE}/${id}`);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -122,9 +161,10 @@ const store = create<HealthTipState>((set, get) => ({
         }
     },
 
+    // GET /health-tips/:id
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.HEALTH_TIP, id));
+            const response = await doGET(`${BASE}/${id}`);
             return response.data;
         } catch (error) {
             showError('Failed to fetch health tip details');
@@ -134,3 +174,4 @@ const store = create<HealthTipState>((set, get) => ({
 }));
 
 export const useHealthTipStore = () => store((state) => state);
+

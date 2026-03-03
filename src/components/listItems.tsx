@@ -233,7 +233,7 @@ const secondaryNavList = [
     icon: <ViewCarouselIcon sx={{ color: "#009688" }} />, // Teal
   },
   {
-    link: "/specialist",
+    link: "/specialists",
     label: "Specialist",
     icon: <PersonIcon sx={{ color: "#009688" }} />, // Teal
   },

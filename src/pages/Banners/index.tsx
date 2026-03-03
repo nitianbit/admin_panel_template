@@ -5,13 +5,20 @@ import { COLUMNS } from './constants';
 import { MODULES } from '../../utils/constants';
 import AddBannerDialog from './AddBannerDialog';
 import { useBannerStore } from '../../services/banners';
+import { useCompanyStore } from '../../services/company';
 
 
 const Banners = () => {
     const { data, totalPages, currentPage, total, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useBannerStore();
+    const { globalCompanyId } = useCompanyStore();
+
     React.useEffect(() => {
-        fetchGrid()
-    }, [])
+        if (globalCompanyId) {
+            setFilters({ corporateId: globalCompanyId });
+        } else {
+            fetchGrid();
+        }
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Banners">

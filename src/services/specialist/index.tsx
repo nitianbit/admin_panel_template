@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { ENDPOINTS } from '../api/constants';
 import { Specialist, SpecialistFilters, SpecialistState } from '../../types/specialist';
-import { MODULES } from '../../utils/constants';
+
+const BASE = '/specialists';
 
 const store = create<SpecialistState>((set, get) => ({
     data: [],
@@ -15,9 +15,10 @@ const store = create<SpecialistState>((set, get) => ({
     total: 0,
     allData: [],
 
+    // GET /specialists
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows, isLoading, total } = get();
+            const { filters, currentPage, rows, isLoading } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
@@ -25,14 +26,18 @@ const store = create<SpecialistState>((set, get) => ({
             const queryParams = new URLSearchParams(filters);
             queryParams.append('page', String(currentPage));
             queryParams.append('rows', String(rows));
-            const apiUrl = `${ENDPOINTS.grid(MODULES.SPECIALIST)}?${queryParams.toString()}`;
+            const apiUrl = `${BASE}?${queryParams.toString()}`;
 
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
                 set({
-                    data: response.data.data.rows,
-                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows), total: response.data.data.total ?? 0 }),
+                    data: resData?.rows ?? resData ?? [],
+                    ...(currentPage == 1 && {
+                        totalPages: Math.ceil((resData?.total ?? 0) / rows),
+                        total: resData?.total ?? 0,
+                    }),
                 });
             } else {
                 showError(response.message);
@@ -44,9 +49,41 @@ const store = create<SpecialistState>((set, get) => ({
         }
     },
 
+    // GET /specialists/verified
+    fetchVerified: async () => {
+        try {
+            const response = await doGET(`${BASE}/verified`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data ?? [];
+            } else {
+                showError(response.message);
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch verified specialists');
+            return [];
+        }
+    },
+
+    // GET /specialists/specialization/:specialization
+    fetchBySpecialization: async (specialization: string) => {
+        try {
+            const response = await doGET(`${BASE}/specialization/${specialization}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data ?? [];
+            } else {
+                showError(response.message);
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch specialists by specialization');
+            return [];
+        }
+    },
+
     setFilters: (newFilters: SpecialistFilters) => {
         set({ filters: newFilters, currentPage: 1 });
-        get().fetchGrid(1, newFilters);
+        get().fetchGrid();
     },
 
     nextPage: () => {
@@ -60,7 +97,7 @@ const store = create<SpecialistState>((set, get) => ({
     },
 
     prevPage: () => {
-        const { currentPage, filters, fetchGrid } = get();
+        const { currentPage, fetchGrid } = get();
         if (currentPage > 1) {
             set(state => ({
                 currentPage: state.currentPage - 1
@@ -70,7 +107,7 @@ const store = create<SpecialistState>((set, get) => ({
     },
 
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
-        const { currentPage, filters, fetchGrid, totalPages } = get();
+        const { currentPage, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
                 currentPage: page + 1
@@ -79,9 +116,10 @@ const store = create<SpecialistState>((set, get) => ({
         }
     },
 
+    // POST /specialists
     onCreate: async (data: any) => {
         try {
-            const response = await doPOST(MODULES.SPECIALIST, data);
+            const response = await doPOST(BASE, data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
@@ -91,9 +129,16 @@ const store = create<SpecialistState>((set, get) => ({
             return null
         }
     },
+
+    // PUT /specialists/:id
     onUpdate: async (data: Specialist) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.SPECIALIST), data);
+            const id = data._id;
+            if (!id) {
+                showError('Specialist ID is required for update');
+                return null;
+            }
+            const response = await doPUT(`${BASE}/${id}`, data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
@@ -103,9 +148,11 @@ const store = create<SpecialistState>((set, get) => ({
             return null
         }
     },
+
+    // DELETE /specialists/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.SPECIALIST, id));
+            const response = await doDELETE(`${BASE}/${id}`);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
@@ -114,9 +161,11 @@ const store = create<SpecialistState>((set, get) => ({
 
         }
     },
+
+    // GET /specialists/:id
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.SPECIALIST, id));
+            const response = await doGET(`${BASE}/${id}`);
             return response.data;
         } catch (error) {
 

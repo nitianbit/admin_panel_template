@@ -9,6 +9,7 @@ import SearchInput from "../../components/SearchInput";
 import CustomImage from "../../components/CustomImage";
 import ImageUpload from "../../components/ImageUploader";
 import { useBannerStore } from "../../services/banners";
+import { useCompanyStore } from "../../services/company";
 import { showError } from "../../services/toaster";
 import { Banner, BannerType } from "../../types/banners";
 import { MODULES } from "../../utils/constants";
@@ -48,7 +49,8 @@ const initialData: Banner = {
 };
 
 const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
-    const { onCreate, detail, onUpdate } = useBannerStore();
+    const { onCreate, detail, onUpdate, setFilters, filters } = useBannerStore();
+    const { globalCompanyId } = useCompanyStore();
     const { register, handleSubmit, reset, watch, setValue, control } = useForm<Banner>({
         defaultValues: { ...initialData },
     });
@@ -58,6 +60,48 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
     const handleClickOpen = () => toggleModal(true);
     const handleClose = () => toggleModal(false);
+
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Check if user is searching for a Banner Type
+            const matchedType = BANNER_TYPES.find(
+                t => t.label.toLowerCase().includes(searchTerm) || t.value.toLowerCase().includes(searchTerm)
+            );
+
+            if (matchedType) {
+                // If the search looks like a banner type, filter by that type
+                newFilters.bannerType = matchedType.value;
+                delete newFilters.title;
+            } else {
+                // Otherwise, perform a regular title search
+                newFilters.title = query.trim();
+                delete newFilters.bannerType;
+            }
+        } else {
+            delete newFilters.title;
+            delete newFilters.bannerType;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
+    };
 
     const onSubmit = async (formValues: Banner) => {
         if (!formValues?.title) {
@@ -105,6 +149,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             isActive: formValues.isActive ?? true,
             order: formValues.order ?? 0,
             imageUrl: imageUrl,
+            corporateId: globalCompanyId,
         };
 
         let response = null;
@@ -149,7 +194,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     return (
         <>
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                <SearchInput />
+                <SearchInput handleChange={handleSearchChange} />
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}

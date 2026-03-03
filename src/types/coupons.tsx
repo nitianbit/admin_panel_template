@@ -100,5 +100,9 @@ export interface CouponState {
     onCreate: (data: CreateCouponRequest) => Promise<void>;
     onUpdate: (data: ICoupon) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
-    detail: (id: string) => Promise<{ data: ICoupon } | null>;
+    detail: (id: string) => Promise<ICoupon | null>;
+    fetchActive: () => Promise<ICoupon[]>;
+    fetchApplicable: (bookingType: string) => Promise<ICoupon[]>;
+    validateCoupon: (data: ValidateCouponRequest) => Promise<any>;
+    fetchByCode: (code: string) => Promise<{ data: ICoupon } | null>;
 }

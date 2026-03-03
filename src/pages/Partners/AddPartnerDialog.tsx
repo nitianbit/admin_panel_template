@@ -35,9 +35,10 @@ const Transition = React.forwardRef(function Transition(
 });
 
 const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
-    const { onCreate, onUpdate, detail, fetchGrid } = usePartnerStore();
-    const [logoFile, setLogoFile] = React.useState<File | null>(null);
-    const [previewLogo, setPreviewLogo] = React.useState<string>("");
+    const { onCreate, onUpdate, detail, fetchGrid, filters, setFilters } = usePartnerStore();
+
+    const imageFileRef = React.useRef<File | null>(null);
+    const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
 
     const { register, handleSubmit, control, setValue, reset, formState: { errors } } = useForm<PartnerData>({
         defaultValues: {
@@ -51,32 +52,94 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const handleClose = () => {
         toggleModal(false);
         reset();
-        setLogoFile(null);
-        setPreviewLogo("");
+        imageFileRef.current = null;
+        setExistingImageUrl("");
+    };
+
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Common locations to check against
+            const LOCATIONS = [
+                'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai',
+                'Kolkata', 'Surat', 'Pune', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur',
+                'Indore', 'Thane', 'Bhopal', 'Patna', 'Vadodara', 'Ghaziabad', 'Ludhiana',
+                'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Varanasi', 'Srinagar',
+                'Aurangabad', 'Dhanbad', 'Amritsar', 'Navi Mumbai', 'Allahabad', 'Ranchi',
+                'Howrah', 'Coimbatore', 'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur',
+                'Madurai', 'Raipur', 'Kota', 'Guwahati', 'Chandigarh', 'Noida', 'Gurugram'
+            ];
+
+            const matchedLocation = LOCATIONS.find(
+                l => l.toLowerCase().includes(searchTerm) || searchTerm.includes(l.toLowerCase())
+            );
+
+            if (matchedLocation) {
+                // If search term matches a known location, filter by city
+                newFilters.city = matchedLocation;
+                delete newFilters.name;
+            } else {
+                // Otherwise, perform a regular name search
+                newFilters.name = query.trim();
+                delete newFilters.city;
+            }
+        } else {
+            delete newFilters.name;
+            delete newFilters.city;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
     };
 
     const onSubmit = async (data: PartnerData) => {
         try {
-            let response: PartnerData | null = null;
-            if (selectedId) {
-                response = await onUpdate({ ...data, _id: selectedId });
-            } else {
-                response = await onCreate(data);
-            }
-
-            if (response?._id && logoFile) {
-                const res = await uploadFile(
-                    { module: MODULES.PARTNER, record_id: response._id },
-                    [logoFile]
-                );
-                if (res.status >= 200 && res.status < 400) {
-                    const logoPath = res.data?.data?.length ? res.data.data[0] : "";
-                    await onUpdate({ ...response, logoUrl: logoPath });
+            // Upload image first if a new file is selected
+            let logoUrl = existingImageUrl || "";
+            if (imageFileRef.current instanceof File) {
+                const uploadRes = await uploadFile({ module: MODULES.PARTNER }, [imageFileRef.current]);
+                if (uploadRes.error) {
+                    showError(uploadRes.message || 'Failed to upload image');
+                    return;
+                }
+                const uploadedFiles = uploadRes.data?.data?.files;
+                if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                    logoUrl = uploadedFiles[0].url;
                 }
             }
 
-            handleClose();
-            fetchGrid();
+            const payload: PartnerData = {
+                ...data,
+                ...(logoUrl && { logoUrl }),
+            };
+
+            let response: PartnerData | null = null;
+            if (selectedId) {
+                payload._id = selectedId;
+                response = await onUpdate(payload);
+            } else {
+                response = await onCreate(payload);
+            }
+
+            if (response) {
+                handleClose();
+            }
         } catch (error) {
             console.error("Error saving partner:", error);
             showError("Failed to save partner");
@@ -88,7 +151,9 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             detail(selectedId).then(res => {
                 if (res.data) {
                     reset(res.data);
-                    if (res.data.logoUrl) setPreviewLogo(res.data.logoUrl);
+                    if (res.data.logoUrl && typeof res.data.logoUrl === 'string') {
+                        setExistingImageUrl(res.data.logoUrl);
+                    }
                 }
             });
         } else if (isModalOpen) {
@@ -107,7 +172,8 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 state: "",
                 pincode: ""
             });
-            setPreviewLogo("");
+            imageFileRef.current = null;
+            setExistingImageUrl("");
         }
     }, [selectedId, isModalOpen]);
 
@@ -116,7 +182,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     return (
         <>
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                <SearchInput handleChange={(e: any) => fetchGrid(1, { search: e.target.value })} />
+                <SearchInput handleChange={handleSearchChange} />
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}
@@ -133,8 +199,8 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             <Grid item xs={12} md={4}>
                                 <Stack spacing={2} alignItems="center">
                                     <Box sx={{ width: 150, height: 150, border: '1px dashed #ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 1, overflow: 'hidden' }}>
-                                        {previewLogo ? (
-                                            <CustomImage src={previewLogo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                        {existingImageUrl ? (
+                                            <CustomImage src={existingImageUrl} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                         ) : (
                                             <Typography variant="caption">Partner Logo</Typography>
                                         )}
@@ -142,8 +208,8 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                     <ImageUpload
                                         onChange={(files: any) => {
                                             if (files?.length) {
-                                                setLogoFile(files[0]);
-                                                setPreviewLogo(URL.createObjectURL(files[0]));
+                                                imageFileRef.current = files[0];
+                                                setExistingImageUrl(URL.createObjectURL(files[0]));
                                             }
                                         }}
                                         allow="image/*"
@@ -239,3 +305,4 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 };
 
 export default AddPartnerDialog;
+

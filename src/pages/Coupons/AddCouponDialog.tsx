@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -34,7 +33,7 @@ export default function AddCouponDialog({
         isActive: true,
     }
 
-    const { onCreate, detail, onUpdate } = useCouponStore();
+    const { onCreate, detail, onUpdate, filters, setFilters } = useCouponStore();
     const [couponData, setCouponData] = React.useState<Partial<CreateCouponRequest>>(defaultData)
 
     const handleChange = (key: keyof CreateCouponRequest, value: any) => {
@@ -57,6 +56,59 @@ export default function AddCouponDialog({
     const handleClose = () => {
         toggleModal(false);
         setCouponData(defaultData);
+    };
+
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Check if search matches a discount type
+            const matchedDiscount = DISCOUNT_TYPES.find(
+                t => t.label.toLowerCase().includes(searchTerm) || t.value.toLowerCase().includes(searchTerm)
+            );
+
+            // Check if search matches an applicableTo type
+            const matchedApplicable = APPLICABLE_TO_TYPES.find(
+                t => t.label.toLowerCase().includes(searchTerm) || t.value.toLowerCase().includes(searchTerm)
+            );
+
+            if (matchedDiscount) {
+                newFilters.discountType = matchedDiscount.value;
+                delete newFilters.applicableTo;
+                delete newFilters.code;
+            } else if (matchedApplicable) {
+                newFilters.applicableTo = matchedApplicable.value;
+                delete newFilters.discountType;
+                delete newFilters.code;
+            } else {
+                // Default: search by coupon code
+                newFilters.code = query.trim();
+                delete newFilters.discountType;
+                delete newFilters.applicableTo;
+            }
+        } else {
+            delete newFilters.code;
+            delete newFilters.discountType;
+            delete newFilters.applicableTo;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
     };
 
     const onSubmit = () => {
@@ -89,11 +141,12 @@ export default function AddCouponDialog({
 
     const fetchDetail = async (id: string) => {
         try {
-            const data = await detail(id);
-            if (data?.data) {
+            const response = await detail(id);
+            const coupon = response;
+            if (coupon) {
                 // Format dates for input (YYYYMMDD to YYYY-MM-DD)
-                const start = data.data.startDate;
-                const end = data.data.endDate;
+                const start = coupon.startDate;
+                const end = coupon.endDate;
 
                 const formattedStart = start && start.length === 8
                     ? `${start.substring(0, 4)}-${start.substring(4, 6)}-${start.substring(6, 8)}`
@@ -105,7 +158,7 @@ export default function AddCouponDialog({
 
 
                 setCouponData({
-                    ...data.data as unknown as CreateCouponRequest, // Casting to match state type
+                    ...coupon as unknown as CreateCouponRequest,
                     startDate: formattedStart,
                     endDate: formattedEnd
                 });
@@ -131,7 +184,7 @@ export default function AddCouponDialog({
                 alignItems="center"
                 spacing={2}
             >
-                <SearchInput />
+                <SearchInput handleChange={handleSearchChange} />
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}

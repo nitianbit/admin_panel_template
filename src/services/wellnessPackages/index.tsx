@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
-import { ENDPOINTS } from '../api/constants';
 import { WellnessPackage, WellnessPackageFilters, WellnessPackageState } from '../../types/WellnessPackage';
-import { MODULES } from '../../utils/constants';
+
+const BASE = '/wellness-packages';
 
 const store = create<WellnessPackageState>((set, get) => ({
     data: [],
@@ -15,24 +15,35 @@ const store = create<WellnessPackageState>((set, get) => ({
     total: 0,
     allData: [],
 
+    // GET /wellness-packages?isActive=true&isPopular=true&page=1&limit=10
     fetchGrid: async () => {
         try {
-            const { filters, currentPage, rows, isLoading, total } = get();
+            const { filters, currentPage, rows, isLoading } = get();
             if (isLoading) return;
 
             set({ isLoading: true });
 
-            const queryParams = new URLSearchParams(filters);
+            const queryParams = new URLSearchParams();
+            // Add filter params: isActive, isPopular, etc.
+            if (filters.isActive !== undefined) queryParams.append('isActive', String(filters.isActive));
+            if (filters.isPopular !== undefined) queryParams.append('isPopular', String(filters.isPopular));
+            if (filters.category) queryParams.append('category', filters.category);
+            if (filters.search) queryParams.append('search', filters.search);
             queryParams.append('page', String(currentPage));
-            queryParams.append('rows', String(rows));
-            const apiUrl = `${ENDPOINTS.grid(MODULES.WELLNESS_PACKAGE)}?${queryParams.toString()}`;
+            queryParams.append('limit', String(rows));
+
+            const apiUrl = `${BASE}?${queryParams.toString()}`;
 
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
                 set({
-                    data: response.data.data.rows,
-                    ...(currentPage == 1 && { totalPages: Math.ceil(response.data.data.total / rows), total: response.data.data.total ?? 0 }),
+                    data: resData?.rows ?? resData ?? [],
+                    ...(currentPage == 1 && {
+                        totalPages: Math.ceil((resData?.total ?? 0) / rows),
+                        total: resData?.total ?? 0,
+                    }),
                 });
             } else {
                 showError(response.message);
@@ -46,7 +57,7 @@ const store = create<WellnessPackageState>((set, get) => ({
 
     setFilters: (newFilters: WellnessPackageFilters) => {
         set({ filters: newFilters, currentPage: 1 });
-        get().fetchGrid(1, newFilters);
+        get().fetchGrid();
     },
 
     nextPage: () => {
@@ -60,7 +71,7 @@ const store = create<WellnessPackageState>((set, get) => ({
     },
 
     prevPage: () => {
-        const { currentPage, filters, fetchGrid } = get();
+        const { currentPage, fetchGrid } = get();
         if (currentPage > 1) {
             set(state => ({
                 currentPage: state.currentPage - 1
@@ -70,7 +81,7 @@ const store = create<WellnessPackageState>((set, get) => ({
     },
 
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
-        const { currentPage, filters, fetchGrid, totalPages } = get();
+        const { currentPage, fetchGrid, totalPages } = get();
         if (currentPage > 1 || currentPage <= totalPages) {
             set({
                 currentPage: page + 1
@@ -79,9 +90,10 @@ const store = create<WellnessPackageState>((set, get) => ({
         }
     },
 
+    // POST /wellness-packages
     onCreate: async (data: any) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.WELLNESS_PACKAGE), data);
+            const response = await doPOST(BASE, data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
@@ -91,9 +103,16 @@ const store = create<WellnessPackageState>((set, get) => ({
             return null
         }
     },
+
+    // PUT /wellness-packages/:id
     onUpdate: async (data: WellnessPackage) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.WELLNESS_PACKAGE), data);
+            const id = data._id;
+            if (!id) {
+                showError('Wellness Package ID is required for update');
+                return null;
+            }
+            const response = await doPUT(`${BASE}/${id}`, data);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
@@ -103,9 +122,11 @@ const store = create<WellnessPackageState>((set, get) => ({
             return null
         }
     },
+
+    // DELETE /wellness-packages/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.WELLNESS_PACKAGE, id));
+            const response = await doDELETE(`${BASE}/${id}`);
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
@@ -114,9 +135,11 @@ const store = create<WellnessPackageState>((set, get) => ({
 
         }
     },
+
+    // GET /wellness-packages/:id
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.WELLNESS_PACKAGE, id));
+            const response = await doGET(`${BASE}/${id}`);
             return response.data;
         } catch (error) {
 
@@ -125,3 +148,4 @@ const store = create<WellnessPackageState>((set, get) => ({
 }));
 
 export const useWellnessPackageStore = () => store((state) => state);
+

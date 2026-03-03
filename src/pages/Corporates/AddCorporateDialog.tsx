@@ -11,13 +11,21 @@ import { useForm, Controller } from "react-hook-form";
 import { useCorporateStore } from "../../services/corporates";
 import { ICorporate, CreateCorporateRequest, UpdateCorporateRequest } from "../../types/corporates";
 import { INDUSTRIES } from "./constants";
+import CustomImage from "../../components/CustomImage";
+import ImageUpload from "../../components/ImageUploader";
+import { showError } from "../../services/toaster";
+import { MODULES } from "../../utils/constants";
+import { uploadFile } from "../../utils/helper";
 
 export default function AddCorporateDialog({
     isModalOpen,
     toggleModal,
     selectedId
 }: any) {
-    const { onCreate, detail, onUpdate } = useCorporateStore();
+    const { onCreate, detail, onUpdate, filters, setFilters } = useCorporateStore();
+
+    const imageFileRef = React.useRef<File | null>(null);
+    const [existingLogoUrl, setExistingLogoUrl] = React.useState<string>("");
 
     const defaultValues: CreateCorporateRequest = {
         name: "",
@@ -51,19 +59,104 @@ export default function AddCorporateDialog({
 
     const handleClickOpen = () => {
         reset(defaultValues);
+        imageFileRef.current = null;
+        setExistingLogoUrl("");
         toggleModal(true);
     };
 
     const handleClose = () => {
         toggleModal(false);
         reset(defaultValues);
+        imageFileRef.current = null;
+        setExistingLogoUrl("");
     };
 
-    const onSubmit = (data: CreateCorporateRequest) => {
-        const payload = {
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const LOCATIONS = [
+        'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai',
+        'Kolkata', 'Surat', 'Pune', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur',
+        'Indore', 'Thane', 'Bhopal', 'Patna', 'Vadodara', 'Ghaziabad', 'Ludhiana',
+        'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Varanasi', 'Srinagar',
+        'Aurangabad', 'Dhanbad', 'Amritsar', 'Navi Mumbai', 'Allahabad', 'Ranchi',
+        'Howrah', 'Coimbatore', 'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur',
+        'Madurai', 'Raipur', 'Kota', 'Guwahati', 'Chandigarh', 'Noida', 'Gurugram'
+    ];
+
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Check if search matches an industry
+            const matchedIndustry = INDUSTRIES.find(
+                i => i.toLowerCase().includes(searchTerm) || searchTerm.includes(i.toLowerCase())
+            );
+
+            // Check if search matches a location
+            const matchedLocation = LOCATIONS.find(
+                l => l.toLowerCase().includes(searchTerm) || searchTerm.includes(l.toLowerCase())
+            );
+
+            if (matchedIndustry) {
+                newFilters.industry = matchedIndustry;
+                delete newFilters.city;
+                delete newFilters.name;
+            } else if (matchedLocation) {
+                newFilters.city = matchedLocation;
+                delete newFilters.industry;
+                delete newFilters.name;
+            } else {
+                newFilters.name = query.trim();
+                delete newFilters.industry;
+                delete newFilters.city;
+            }
+        } else {
+            delete newFilters.name;
+            delete newFilters.industry;
+            delete newFilters.city;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
+    };
+
+    const onSubmit = async (data: CreateCorporateRequest) => {
+        let logoUrl = existingLogoUrl || "";
+        if (imageFileRef.current instanceof File) {
+            const uploadRes = await uploadFile({ module: MODULES.CORPORATE }, [imageFileRef.current]);
+            if (uploadRes.error) {
+                showError(uploadRes.message || 'Failed to upload logo');
+                return;
+            }
+            const uploadedFiles = uploadRes.data?.data?.files;
+            if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                logoUrl = uploadedFiles[0].url;
+            }
+        }
+
+        const rawPayload: any = {
             ...data,
-            employeeCount: Number(data.employeeCount)
+            employeeCount: Number(data.employeeCount),
+            ...(logoUrl && { logoUrl }),
         };
+
+        // Remove empty string values for optional fields to avoid backend validation errors
+        const payload = Object.fromEntries(
+            Object.entries(rawPayload).filter(([key, value]) => key === 'name' || value !== '')
+        ) as unknown as CreateCorporateRequest;
 
         if (selectedId) {
             onUpdate(selectedId, payload as UpdateCorporateRequest);
@@ -76,8 +169,11 @@ export default function AddCorporateDialog({
     const fetchDetail = async (id: string) => {
         try {
             const response = await detail(id);
-            if (response?.data) {
-                reset(response.data as any);
+            if (response) {
+                reset(response as any);
+                if (response.logoUrl && typeof response.logoUrl === 'string') {
+                    setExistingLogoUrl(response.logoUrl);
+                }
             }
         } catch (error) {
             console.error(error);
@@ -89,6 +185,8 @@ export default function AddCorporateDialog({
             fetchDetail(selectedId);
         } else if (!selectedId && isModalOpen) {
             reset(defaultValues);
+            imageFileRef.current = null;
+            setExistingLogoUrl("");
         }
     }, [selectedId, isModalOpen]);
 
@@ -100,7 +198,7 @@ export default function AddCorporateDialog({
                 alignItems="center"
                 spacing={2}
             >
-                <SearchInput />
+                <SearchInput handleChange={handleSearchChange} />
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}
@@ -264,6 +362,22 @@ export default function AddCorporateDialog({
                                     />
                                 </Grid>
 
+                                <Grid item xs={12} sm={6}>
+                                    <Controller
+                                        name="domain"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Domain"
+                                                fullWidth
+                                                size="small"
+                                                placeholder="e.g. company.com"
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+
                                 {/* Location */}
                                 <Grid item xs={12}>
                                     <Divider sx={{ my: 1 }} />
@@ -349,6 +463,22 @@ export default function AddCorporateDialog({
                                                 size="small"
                                             />
                                         )}
+                                    />
+                                </Grid>
+
+                                {/* Logo Upload */}
+                                <Grid item xs={12}>
+                                    <Divider sx={{ my: 1 }} />
+                                    <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 1, fontWeight: 'bold' }}>Logo</Typography>
+                                    {existingLogoUrl ? <CustomImage src={existingLogoUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginBottom: 8 }} /> : null}
+                                    <ImageUpload
+                                        onChange={(files: any) => {
+                                            imageFileRef.current = files?.length ? files[0] : null;
+                                            if (files?.length) {
+                                                setExistingLogoUrl("");
+                                            }
+                                        }}
+                                        allow="image/*"
                                     />
                                 </Grid>
 

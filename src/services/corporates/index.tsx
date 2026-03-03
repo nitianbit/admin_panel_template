@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError } from '../toaster';
@@ -8,8 +9,8 @@ import {
     CorporateQueryParams,
     CorporateState
 } from '../../types/corporates';
-import { ENDPOINTS } from '../api/constants';
-import { MODULES } from '../../utils/constants';
+
+const BASE_URL = '/corporates';
 
 const store = create<CorporateState>((set, get) => ({
     data: [],
@@ -20,6 +21,7 @@ const store = create<CorporateState>((set, get) => ({
     isLoading: false,
     limit: 10,
 
+    // GET /corporates
     fetchGrid: async () => {
         try {
             const { filters, currentPage, limit, isLoading } = get();
@@ -31,16 +33,19 @@ const store = create<CorporateState>((set, get) => ({
             queryParams.append('page', String(currentPage));
             queryParams.append('limit', String(limit));
 
-            const apiUrl = `${ENDPOINTS.grid(MODULES.CORPORATE)}?${queryParams.toString()}`;
+            const apiUrl = `${BASE_URL}?${queryParams.toString()}`;
 
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data || response.data;
+                const rows = resData?.rows || resData;
+                const total = resData?.total ?? (Array.isArray(rows) ? rows.length : 0);
                 set({
-                    data: response.data.data.rows,
+                    data: Array.isArray(rows) ? rows : [],
                     ...(currentPage === 1 && {
-                        totalPages: Math.ceil((response.data.data.total ?? 0) / limit),
-                        total: response.data.data.total ?? 0
+                        totalPages: Math.ceil(total / limit),
+                        total: total
                     }),
                 });
             } else {
@@ -89,9 +94,10 @@ const store = create<CorporateState>((set, get) => ({
         }
     },
 
+    // POST /corporates
     onCreate: async (data: CreateCorporateRequest) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.CORPORATE), data);
+            const response = await doPOST(BASE_URL, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -102,9 +108,10 @@ const store = create<CorporateState>((set, get) => ({
         }
     },
 
+    // PUT /corporates/:id
     onUpdate: async (id: string, data: UpdateCorporateRequest) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.CORPORATE), { ...data, _id: id });
+            const response = await doPUT(`${BASE_URL}/${id}`, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -115,9 +122,10 @@ const store = create<CorporateState>((set, get) => ({
         }
     },
 
+    // DELETE /corporates/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.CORPORATE, id));
+            const response = await doDELETE(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -128,11 +136,12 @@ const store = create<CorporateState>((set, get) => ({
         }
     },
 
+    // GET /corporates/:id
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.CORPORATE, id));
+            const response = await doGET(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
-                return response.data;
+                return response.data?.data || response.data;
             } else {
                 showError(response.message || 'Failed to fetch corporate details');
                 return null;
@@ -141,7 +150,39 @@ const store = create<CorporateState>((set, get) => ({
             showError('Failed to fetch corporate details');
             return null;
         }
-    }
+    },
+
+    // GET /corporates/verified
+    fetchVerified: async () => {
+        try {
+            const response = await doGET(`${BASE_URL}/verified`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || response.data;
+            } else {
+                showError(response.message || 'Failed to fetch verified corporates');
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch verified corporates');
+            return [];
+        }
+    },
+
+    // GET /corporates/industry/:industry
+    fetchByIndustry: async (industry: string) => {
+        try {
+            const response = await doGET(`${BASE_URL}/industry/${industry}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || response.data;
+            } else {
+                showError(response.message || 'Failed to fetch corporates by industry');
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch corporates by industry');
+            return [];
+        }
+    },
 }));
 
 export const useCorporateStore = () => store((state) => state);

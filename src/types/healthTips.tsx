@@ -40,6 +40,8 @@ export interface HealthTipState {
     rows: number;
     allData: HealthTip[];
     fetchGrid: (page?: number, filters?: HealthTipFilters) => Promise<void>;
+    fetchActive: () => Promise<HealthTip[]>;
+    fetchByCategory: (category: string) => Promise<HealthTip[]>;
     setFilters: (newFilters: HealthTipFilters) => void;
     nextPage: () => void;
     prevPage: () => void;

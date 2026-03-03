@@ -22,7 +22,6 @@ import CustomImage from "../../components/CustomImage";
 import ImageUpload from "../../components/ImageUploader";
 import { uploadFile } from "../../utils/helper";
 import { MODULES } from "../../utils/constants";
-import _ from "lodash";
 import { showError } from "../../services/toaster";
 import { useHealthTipStore } from "../../services/healthTips";
 import { HealthTip } from "../../types/healthTips";
@@ -37,11 +36,14 @@ const Transition = React.forwardRef(function Transition(
 });
 
 const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
-    const { onCreate, onUpdate, detail, fetchGrid } = useHealthTipStore();
+    const { onCreate, onUpdate, detail, fetchGrid, filters, setFilters } = useHealthTipStore();
 
-    // We use a separate state for the image file to handle uploads
-    const [imageFile, setImageFile] = React.useState<File | null>(null);
-    const [previewImage, setPreviewImage] = React.useState<string>("");
+    // Image file refs and existing URL states
+    const imageFileRef = React.useRef<File | null>(null);
+    const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
+
+    const iconFileRef = React.useRef<File | null>(null);
+    const [existingIconUrl, setExistingIconUrl] = React.useState<string>("");
 
     const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<HealthTip>({
         defaultValues: {
@@ -51,7 +53,6 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             category: "",
             isActive: true,
             order: 0,
-            imageUrl: "",
         }
     });
 
@@ -60,39 +61,119 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const handleClose = () => {
         toggleModal(false);
         reset();
-        setImageFile(null);
-        setPreviewImage("");
+        imageFileRef.current = null;
+        setExistingImageUrl("");
+        iconFileRef.current = null;
+        setExistingIconUrl("");
+    };
+
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Common categories to check against
+            const CATEGORIES = [
+                'Nutrition', 'Fitness', 'Mental Health', 'Diet', 'Wellness',
+                'Children', 'Senior', 'Women', 'Men', 'Skincare', 'Dental',
+                'Cardio', 'Diabetes', 'Weight Loss', 'Immunity', 'Sleep'
+            ];
+
+            const matchedCategory = CATEGORIES.find(
+                c => c.toLowerCase().includes(searchTerm) || searchTerm.includes(c.toLowerCase())
+            );
+
+            if (matchedCategory) {
+                // If search term matches a known category, filter by category
+                newFilters.category = matchedCategory;
+                delete newFilters.title;
+            } else {
+                // Otherwise, perform a regular title search
+                newFilters.title = query.trim();
+                delete newFilters.category;
+            }
+        } else {
+            delete newFilters.title;
+            delete newFilters.category;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
     };
 
     const onSubmit = async (data: HealthTip) => {
         try {
-            let response: HealthTip | null = null;
-
-            // Prepare payload - usually we don't send the file directly in the JSON payload if using a separate upload endpoint
-            const payload = { ...data };
-            if (selectedId) {
-                payload._id = selectedId;
+            // Upload main image first if a new file is selected
+            let imageUrl = existingImageUrl || "";
+            if (imageFileRef.current instanceof File) {
+                const uploadRes = await uploadFile({ module: MODULES.HEALTH_TIP }, [imageFileRef.current]);
+                if (uploadRes.error) {
+                    showError(uploadRes.message || 'Failed to upload image');
+                    return;
+                }
+                const uploadedFiles = uploadRes.data?.data?.files;
+                if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                    imageUrl = uploadedFiles[0].url;
+                }
             }
 
+            // Upload icon image if a new file is selected
+            let iconUrl = existingIconUrl || "";
+            if (iconFileRef.current instanceof File) {
+                const uploadRes = await uploadFile({ module: MODULES.HEALTH_TIP }, [iconFileRef.current]);
+                if (uploadRes.error) {
+                    showError(uploadRes.message || 'Failed to upload icon');
+                    return;
+                }
+                const uploadedFiles = uploadRes.data?.data?.files;
+                if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                    iconUrl = uploadedFiles[0].url;
+                }
+            }
+
+            // Build payload - only include imageUrl and icon if they have values
+            const payload: any = {
+                title: data.title,
+                description: data.description || "",
+                shortDescription: data.shortDescription || "",
+                category: data.category || "",
+                isActive: data.isActive ?? true,
+                order: data.order ?? 0,
+            };
+
+            // Only include imageUrl and icon if they are non-empty
+            if (imageUrl) {
+                payload.imageUrl = imageUrl;
+            }
+            if (iconUrl) {
+                payload.icon = iconUrl;
+            }
+
+            let response: HealthTip | null = null;
             if (selectedId) {
+                payload._id = selectedId;
                 response = await onUpdate(payload);
             } else {
                 response = await onCreate(payload);
             }
 
-            if (response?._id && imageFile) {
-                const res = await uploadFile(
-                    { module: MODULES.HEALTH_TIP, record_id: response._id },
-                    [imageFile]
-                );
-                if (res.status >= 200 && res.status < 400) {
-                    const imagePath = res.data?.data?.length ? res.data.data[0] : "";
-                    await onUpdate({ ...response, imageUrl: imagePath });
-                }
+            if (response) {
+                handleClose();
             }
-
-            handleClose();
-            fetchGrid(); // Refresh the list
         } catch (error) {
             console.error("Error submitting health tip:", error);
             showError("An error occurred while saving the health tip");
@@ -104,8 +185,11 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             const res = await detail(id);
             if (res.data) {
                 reset(res.data);
-                if (res.data.imageUrl) {
-                    setPreviewImage(res.data.imageUrl);
+                if (res.data.imageUrl && typeof res.data.imageUrl === 'string') {
+                    setExistingImageUrl(res.data.imageUrl);
+                }
+                if (res.data.icon && typeof res.data.icon === 'string') {
+                    setExistingIconUrl(res.data.icon);
                 }
             }
         } catch (error) {
@@ -126,10 +210,11 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                     category: "",
                     isActive: true,
                     order: 0,
-                    imageUrl: "",
                 });
-                setImageFile(null);
-                setPreviewImage("");
+                imageFileRef.current = null;
+                setExistingImageUrl("");
+                iconFileRef.current = null;
+                setExistingIconUrl("");
             }
         }
     }, [selectedId, isModalOpen]);
@@ -139,7 +224,7 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     return (
         <>
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                <SearchInput handleChange={(e: any) => fetchGrid(1, { search: e.target.value })} />
+                <SearchInput handleChange={handleSearchChange} />
                 <Button
                     variant="outlined"
                     startIcon={<AddIcon />}
@@ -224,7 +309,7 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
                             <Grid item xs={12} md={4}>
                                 <Stack spacing={3}>
-                                    <Box sx={{ p: 2, border: '1px border #ddd', borderRadius: 1, bgcolor: 'background.paper' }}>
+                                    <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1, bgcolor: 'background.paper' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 2 }}>Status</Typography>
                                         <FormControlLabel
                                             control={
@@ -245,10 +330,10 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
                                     <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
                                         <Typography variant="subtitle2" sx={{ mb: 2 }}>Main Image</Typography>
-                                        {previewImage && (
+                                        {existingImageUrl && (
                                             <Box sx={{ mb: 2, textAlign: 'center' }}>
                                                 <CustomImage
-                                                    src={previewImage}
+                                                    src={existingImageUrl}
                                                     style={{ width: "100%", maxHeight: 200, objectFit: "contain", borderRadius: 4 }}
                                                 />
                                             </Box>
@@ -256,8 +341,8 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         <ImageUpload
                                             onChange={(files: any) => {
                                                 if (files?.length) {
-                                                    setImageFile(files[0]);
-                                                    setPreviewImage(URL.createObjectURL(files[0]));
+                                                    imageFileRef.current = files[0];
+                                                    setExistingImageUrl(URL.createObjectURL(files[0]));
                                                 }
                                             }}
                                             allow="image/*"
@@ -265,12 +350,27 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         />
                                     </Box>
 
-                                    <TextField
-                                        label="Icon (optional)"
-                                        fullWidth
-                                        placeholder="Enter icon name or SVG path"
-                                        {...register("icon")}
-                                    />
+                                    <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 2 }}>Icon Image</Typography>
+                                        {existingIconUrl && (
+                                            <Box sx={{ mb: 2, textAlign: 'center' }}>
+                                                <CustomImage
+                                                    src={existingIconUrl}
+                                                    style={{ width: 80, height: 80, objectFit: "contain", borderRadius: 4 }}
+                                                />
+                                            </Box>
+                                        )}
+                                        <ImageUpload
+                                            onChange={(files: any) => {
+                                                if (files?.length) {
+                                                    iconFileRef.current = files[0];
+                                                    setExistingIconUrl(URL.createObjectURL(files[0]));
+                                                }
+                                            }}
+                                            allow="image/*"
+                                            multiple={false}
+                                        />
+                                    </Box>
                                 </Stack>
                             </Grid>
                         </Grid>
@@ -289,3 +389,4 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 };
 
 export default AddHealthTipsDialog;
+

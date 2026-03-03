@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { doDELETE, doGET, doPOST, doPUT } from '../../utils/HttpUtils';
 import { showError, showSuccess } from '../toaster';
 import { PartnerData, PartnerFilters, PartnerState } from '../../types/partners';
-import { ENDPOINTS } from '../api/constants';
-import { MODULES } from '../../utils/constants';
+
+const BASE = '/partners';
 
 const store = create<PartnerState>((set, get) => ({
     data: [],
@@ -15,28 +15,27 @@ const store = create<PartnerState>((set, get) => ({
     total: 0,
     allData: [],
 
-    fetchGrid: async (page?: number, filters?: PartnerFilters) => {
+    // GET /partners
+    fetchGrid: async () => {
         try {
-            const state = get();
-            const currentPage = page ?? state.currentPage;
-            const currentFilters = filters ?? state.filters;
-
-            if (state.isLoading) return;
+            const { filters, currentPage, rows, isLoading } = get();
+            if (isLoading) return;
 
             set({ isLoading: true });
 
-            const queryParams = new URLSearchParams(currentFilters);
+            const queryParams = new URLSearchParams(filters as any);
             queryParams.append('page', String(currentPage));
-            queryParams.append('rows', String(state.rows));
-            const apiUrl = `${ENDPOINTS.grid(MODULES.PARTNER)}?${queryParams.toString()}`;
+            queryParams.append('limit', String(rows));
 
+            const apiUrl = `${BASE}?${queryParams.toString()}`;
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
                 set({
-                    data: response.data.data.rows,
-                    total: response.data.data.total ?? 0,
-                    totalPages: Math.ceil((response.data.data.total ?? 0) / state.rows),
+                    data: resData?.rows ?? resData ?? [],
+                    total: resData?.total ?? 0,
+                    totalPages: Math.ceil((resData?.total ?? 0) / rows),
                 });
             } else {
                 showError(response.message || 'Failed to fetch partners');
@@ -48,41 +47,73 @@ const store = create<PartnerState>((set, get) => ({
         }
     },
 
+    // GET /partners/verified
+    fetchVerified: async () => {
+        try {
+            const response = await doGET(`${BASE}/verified`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data ?? [];
+            } else {
+                showError(response.message);
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch verified partners');
+            return [];
+        }
+    },
+
+    // GET /partners/type/:partnerType
+    fetchByType: async (partnerType: string) => {
+        try {
+            const response = await doGET(`${BASE}/type/${partnerType}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data ?? [];
+            } else {
+                showError(response.message);
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch partners by type');
+            return [];
+        }
+    },
+
     setFilters: (newFilters: PartnerFilters) => {
         set({ filters: newFilters, currentPage: 1 });
-        get().fetchGrid(1, newFilters);
+        get().fetchGrid();
     },
 
     nextPage: () => {
         const { currentPage, totalPages, fetchGrid } = get();
         if (currentPage < totalPages) {
-            const next = currentPage + 1;
-            set({ currentPage: next });
-            fetchGrid(next);
+            set(state => ({ currentPage: state.currentPage + 1 }));
+            fetchGrid();
         }
     },
 
     prevPage: () => {
         const { currentPage, fetchGrid } = get();
         if (currentPage > 1) {
-            const prev = currentPage - 1;
-            set({ currentPage: prev });
-            fetchGrid(prev);
+            set(state => ({ currentPage: state.currentPage - 1 }));
+            fetchGrid();
         }
     },
 
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => {
-        const next = page + 1;
-        set({ currentPage: next });
-        get().fetchGrid(next);
+        const { currentPage, fetchGrid, totalPages } = get();
+        if (currentPage > 1 || currentPage <= totalPages) {
+            set({ currentPage: page + 1 });
+            fetchGrid();
+        }
     },
 
+    // POST /partners
     onCreate: async (data: PartnerData) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.PARTNER), data);
+            const response = await doPOST(BASE, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
-                showSuccess("Partner created successfully");
                 return response?.data?.data;
             } else {
                 showError(response.message || 'Failed to create partner');
@@ -94,12 +125,17 @@ const store = create<PartnerState>((set, get) => ({
         }
     },
 
+    // PUT /partners/:id
     onUpdate: async (data: PartnerData) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.PARTNER), data);
+            const id = data._id;
+            if (!id) {
+                showError('Partner ID is required for update');
+                return null;
+            }
+            const response = await doPUT(`${BASE}/${id}`, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
-                showSuccess("Partner updated successfully");
                 return response?.data?.data;
             } else {
                 showError(response.message || 'Failed to update partner');
@@ -111,12 +147,12 @@ const store = create<PartnerState>((set, get) => ({
         }
     },
 
+    // DELETE /partners/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.PARTNER, id));
+            const response = await doDELETE(`${BASE}/${id}`);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
-                showSuccess("Partner deleted successfully");
             } else {
                 showError(response.message || 'Failed to delete partner');
             }
@@ -125,9 +161,10 @@ const store = create<PartnerState>((set, get) => ({
         }
     },
 
+    // GET /partners/:id
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.PARTNER, id));
+            const response = await doGET(`${BASE}/${id}`);
             return response.data;
         } catch (error) {
             showError('Failed to fetch partner details');
@@ -137,3 +174,4 @@ const store = create<PartnerState>((set, get) => ({
 }));
 
 export const usePartnerStore = () => store((state) => state);
+

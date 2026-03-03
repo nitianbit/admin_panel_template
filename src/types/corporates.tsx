@@ -94,5 +94,7 @@ export interface CorporateState {
     onCreate: (data: CreateCorporateRequest) => Promise<void>;
     onUpdate: (id: string, data: UpdateCorporateRequest) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
-    detail: (id: string) => Promise<{ data: ICorporate } | null>;
+    detail: (id: string) => Promise<ICorporate | null>;
+    fetchVerified: () => Promise<ICorporate[]>;
+    fetchByIndustry: (industry: string) => Promise<ICorporate[]>;
 }

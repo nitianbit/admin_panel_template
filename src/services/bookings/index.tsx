@@ -10,8 +10,8 @@ import {
     BookingState,
     UpdateBookingRequest
 } from '../../types/bookings';
-import { ENDPOINTS } from '../api/constants';
-import { MODULES } from '../../utils/constants';
+
+const BASE_URL = '/bookings';
 
 const store = create<BookingState>((set, get) => ({
     data: [],
@@ -22,6 +22,7 @@ const store = create<BookingState>((set, get) => ({
     isLoading: false,
     limit: 10,
 
+    // GET /bookings
     fetchGrid: async () => {
         try {
             const { filters, currentPage, limit, isLoading } = get();
@@ -33,16 +34,19 @@ const store = create<BookingState>((set, get) => ({
             queryParams.append('page', String(currentPage));
             queryParams.append('limit', String(limit));
 
-            const apiUrl = `${ENDPOINTS.grid(MODULES.BOOKING)}?${queryParams.toString()}`;
+            const apiUrl = `${BASE_URL}?${queryParams.toString()}`;
 
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data || response.data;
+                const rows = resData?.rows || resData;
+                const total = resData?.total ?? (Array.isArray(rows) ? rows.length : 0);
                 set({
-                    data: response.data.data.rows,
+                    data: Array.isArray(rows) ? rows : [],
                     ...(currentPage === 1 && {
-                        totalPages: Math.ceil((response.data.data.total ?? 0) / limit),
-                        total: response.data.data.total ?? 0
+                        totalPages: Math.ceil(total / limit),
+                        total: total
                     }),
                 });
             } else {
@@ -91,22 +95,38 @@ const store = create<BookingState>((set, get) => ({
         }
     },
 
-    onCreate: async (data: CreateWellnessPackageBookingRequest | CreateSpecialistBookingRequest) => {
+    // POST /bookings/specialist - Create Specialist Booking
+    onCreateSpecialist: async (data: CreateSpecialistBookingRequest) => {
         try {
-            const response = await doPOST(ENDPOINTS.create(MODULES.BOOKING), data);
+            const response = await doPOST(`${BASE_URL}/specialist`, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
-                showError(response.message || 'Failed to create booking');
+                showError(response.message || 'Failed to create specialist booking');
             }
         } catch (error) {
-            showError('Failed to create booking');
+            showError('Failed to create specialist booking');
         }
     },
 
+    // POST /bookings/wellness-package - Create Wellness Package Booking
+    onCreateWellnessPackage: async (data: CreateWellnessPackageBookingRequest) => {
+        try {
+            const response = await doPOST(`${BASE_URL}/wellness-package`, data);
+            if (response.status >= 200 && response.status < 400) {
+                get().fetchGrid();
+            } else {
+                showError(response.message || 'Failed to create wellness package booking');
+            }
+        } catch (error) {
+            showError('Failed to create wellness package booking');
+        }
+    },
+
+    // PUT /bookings/:id - Update Booking
     onUpdate: async (id: string, data: UpdateBookingRequest) => {
         try {
-            const response = await doPUT(ENDPOINTS.update(MODULES.BOOKING), { ...data, _id: id });
+            const response = await doPUT(`${BASE_URL}/${id}`, data);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -117,9 +137,10 @@ const store = create<BookingState>((set, get) => ({
         }
     },
 
+    // DELETE /bookings/:id
     onDelete: async (id: string) => {
         try {
-            const response = await doDELETE(ENDPOINTS.delete(MODULES.BOOKING, id));
+            const response = await doDELETE(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
             } else {
@@ -130,11 +151,12 @@ const store = create<BookingState>((set, get) => ({
         }
     },
 
+    // GET /bookings/:id - Get Booking by ID
     detail: async (id: string) => {
         try {
-            const response = await doGET(ENDPOINTS.detail(MODULES.BOOKING, id));
+            const response = await doGET(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
-                return response.data;
+                return response.data?.data || response.data;
             } else {
                 showError(response.message || 'Failed to fetch booking details');
                 return null;
@@ -143,7 +165,39 @@ const store = create<BookingState>((set, get) => ({
             showError('Failed to fetch booking details');
             return null;
         }
-    }
+    },
+
+    // GET /bookings/user/:userId - Get Bookings by User ID
+    fetchByUserId: async (userId: string) => {
+        try {
+            const response = await doGET(`${BASE_URL}/user/${userId}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || response.data;
+            } else {
+                showError(response.message || 'Failed to fetch bookings by user');
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch bookings by user');
+            return [];
+        }
+    },
+
+    // GET /bookings/upcoming - Get Upcoming Bookings
+    fetchUpcoming: async () => {
+        try {
+            const response = await doGET(`${BASE_URL}/upcoming`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || response.data;
+            } else {
+                showError(response.message || 'Failed to fetch upcoming bookings');
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch upcoming bookings');
+            return [];
+        }
+    },
 }));
 
 export const useBookingStore = () => store((state) => state);

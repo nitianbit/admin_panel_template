@@ -3,13 +3,15 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Drawer from "@mui/material/Drawer";
-import { Stack, Box, Typography, Grid, IconButton, MenuItem, FormControl, InputLabel, Select, FormHelperText } from "@mui/material";
+import { Stack, Box, Typography, Grid, IconButton, MenuItem, FormControl, InputLabel, Select, FormHelperText, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
 import { useForm, Controller } from "react-hook-form";
 import { useBookingStore } from "../../services/bookings";
+import { useSlotStore } from "../../services/slots";
 import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest, IBooking } from "../../types/bookings";
+import { ISlot } from "../../types/slots";
 import { BOOKING_TYPES, SERVICE_MODES, CONSULTATION_MODES, BOOKING_STATUSES, PAYMENT_STATUSES } from "./constants";
 import dayjs from "dayjs";
 
@@ -18,8 +20,11 @@ export default function AddBookingDialog({
     toggleModal,
     selectedId
 }: any) {
-    const { onCreate, detail, onUpdate } = useBookingStore();
+    const { onCreateSpecialist, onCreateWellnessPackage, detail, onUpdate } = useBookingStore();
+    const { fetchBySpecialist, fetchByWellnessPackage } = useSlotStore();
     const [bookingType, setBookingType] = React.useState<'package' | 'consultation'>('package');
+    const [availableSlots, setAvailableSlots] = React.useState<ISlot[]>([]);
+    const [loadingSlots, setLoadingSlots] = React.useState(false);
 
     const defaultValues = {
         bookingType: 'package',
@@ -30,6 +35,7 @@ export default function AddBookingDialog({
         paymentStatus: 'pending',
         price: 0,
         documents: [],
+        slotId: '',
     };
 
     const {
@@ -44,20 +50,86 @@ export default function AddBookingDialog({
     });
 
     const watchedBookingType = watch('bookingType');
+    const watchedSpecialistId = watch('specialistId');
+    const watchedWellnessPackageId = watch('wellnessPackageId');
 
     React.useEffect(() => {
         setBookingType(watchedBookingType);
+        // Clear slots and slotId when booking type changes
+        setAvailableSlots([]);
+        setValue('slotId', '');
     }, [watchedBookingType]);
+
+    // Fetch available slots when specialistId changes (for consultation type)
+    React.useEffect(() => {
+        if (bookingType === 'consultation' && watchedSpecialistId && !selectedId) {
+            const fetchSlots = async () => {
+                setLoadingSlots(true);
+                try {
+                    const slots = await fetchBySpecialist(watchedSpecialistId);
+                    setAvailableSlots(Array.isArray(slots) ? slots : []);
+                } catch (error) {
+                    console.error('Failed to fetch slots for specialist', error);
+                    setAvailableSlots([]);
+                } finally {
+                    setLoadingSlots(false);
+                }
+            };
+            fetchSlots();
+            setValue('slotId', '');
+        }
+    }, [watchedSpecialistId, bookingType]);
+
+    // Fetch available slots when wellnessPackageId changes (for package type)
+    React.useEffect(() => {
+        if (bookingType === 'package' && watchedWellnessPackageId && !selectedId) {
+            const fetchSlots = async () => {
+                setLoadingSlots(true);
+                try {
+                    const slots = await fetchByWellnessPackage(watchedWellnessPackageId);
+                    setAvailableSlots(Array.isArray(slots) ? slots : []);
+                } catch (error) {
+                    console.error('Failed to fetch slots for wellness package', error);
+                    setAvailableSlots([]);
+                } finally {
+                    setLoadingSlots(false);
+                }
+            };
+            fetchSlots();
+            setValue('slotId', '');
+        }
+    }, [watchedWellnessPackageId, bookingType]);
+
+    // Auto-fill bookingDate and bookingTime when a slot is selected
+    const watchedSlotId = watch('slotId');
+    React.useEffect(() => {
+        if (watchedSlotId && availableSlots.length > 0) {
+            const selectedSlot = availableSlots.find(s => s._id === watchedSlotId);
+            if (selectedSlot) {
+                // Convert slot date YYYYMMDD to YYYY-MM-DD for the date input
+                const slotDate = selectedSlot.date;
+                if (slotDate && slotDate.length === 8) {
+                    const formatted = `${slotDate.substring(0, 4)}-${slotDate.substring(4, 6)}-${slotDate.substring(6, 8)}`;
+                    setValue('bookingDate', formatted);
+                }
+                if (selectedSlot.startTime) {
+                    setValue('bookingTime', selectedSlot.startTime);
+                }
+            }
+        }
+    }, [watchedSlotId, availableSlots]);
 
 
     const handleClickOpen = () => {
         reset(defaultValues);
+        setAvailableSlots([]);
         toggleModal(true);
     };
 
     const handleClose = () => {
         toggleModal(false);
         reset(defaultValues);
+        setAvailableSlots([]);
     };
 
     const onSubmit = (data: any) => {
@@ -70,9 +142,6 @@ export default function AddBookingDialog({
         };
 
         if (selectedId) {
-            // For update, we might need to filter fields based on UpdateBookingRequest
-            // But usually passing the spread object works if backend handles it gracefully.
-            // Let's create a specific update payload to be safe as per type definition
             const updatePayload: UpdateBookingRequest = {
                 corporateId: payload.corporateId,
                 bookingDate: payload.bookingDate,
@@ -92,9 +161,9 @@ export default function AddBookingDialog({
             onUpdate(selectedId, updatePayload);
         } else {
             if (bookingType === 'package') {
-                onCreate(payload as CreateWellnessPackageBookingRequest);
+                onCreateWellnessPackage(payload as CreateWellnessPackageBookingRequest);
             } else {
-                onCreate(payload as CreateSpecialistBookingRequest);
+                onCreateSpecialist(payload as CreateSpecialistBookingRequest);
             }
         }
         handleClose();
@@ -128,6 +197,14 @@ export default function AddBookingDialog({
             reset(defaultValues);
         }
     }, [selectedId, isModalOpen]);
+
+    // Helper to format slot display label
+    const formatSlotLabel = (slot: ISlot) => {
+        const date = slot.date && slot.date.length === 8
+            ? `${slot.date.substring(0, 4)}-${slot.date.substring(4, 6)}-${slot.date.substring(6, 8)}`
+            : slot.date;
+        return `${date} | ${slot.startTime} - ${slot.endTime}${slot.isAvailable === false ? ' (Booked)' : ''}`;
+    };
 
     return (
         <div>
@@ -283,6 +360,54 @@ export default function AddBookingDialog({
                                             />
                                         </Grid>
                                     </>
+                                )}
+
+                                {/* Slot Selection */}
+                                {!selectedId && (
+                                    <Grid item xs={12} sm={6}>
+                                        <Controller
+                                            name="slotId"
+                                            control={control}
+                                            rules={{ required: 'Slot is required' }}
+                                            render={({ field }) => (
+                                                <FormControl fullWidth size="small" error={!!errors.slotId}>
+                                                    <InputLabel>Select Slot</InputLabel>
+                                                    <Select
+                                                        {...field}
+                                                        label="Select Slot"
+                                                        disabled={loadingSlots || availableSlots.length === 0}
+                                                        endAdornment={loadingSlots ? <CircularProgress size={20} sx={{ mr: 2 }} /> : null}
+                                                    >
+                                                        {availableSlots.length === 0 && !loadingSlots && (
+                                                            <MenuItem disabled value="">
+                                                                {(bookingType === 'consultation' && !watchedSpecialistId) || (bookingType === 'package' && !watchedWellnessPackageId)
+                                                                    ? `Enter ${bookingType === 'consultation' ? 'Specialist' : 'Package'} ID first`
+                                                                    : 'No slots available'}
+                                                            </MenuItem>
+                                                        )}
+                                                        {availableSlots.map((slot) => (
+                                                            <MenuItem
+                                                                key={slot._id}
+                                                                value={slot._id}
+                                                                disabled={slot.isAvailable === false}
+                                                            >
+                                                                {formatSlotLabel(slot)}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                    {errors.slotId && (
+                                                        <FormHelperText>{errors.slotId?.message as string}</FormHelperText>
+                                                    )}
+                                                    {!loadingSlots && availableSlots.length === 0 && (
+                                                        (bookingType === 'consultation' && watchedSpecialistId) ||
+                                                        (bookingType === 'package' && watchedWellnessPackageId)
+                                                    ) && (
+                                                            <FormHelperText>No available slots found. Create a slot first.</FormHelperText>
+                                                        )}
+                                                </FormControl>
+                                            )}
+                                        />
+                                    </Grid>
                                 )}
 
                                 {/* Schedule */}

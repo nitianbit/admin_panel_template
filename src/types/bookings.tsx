@@ -23,6 +23,7 @@ export interface IBooking {
     userId: string; // User making the booking
     dependentId?: string; // If booking is for a dependent
     corporateId?: string; // Corporate ID if booking is through corporate
+    slotId: string; // Slot ID for the booking
 
     // Wellness Package Booking fields
     wellnessPackageId?: string;
@@ -66,6 +67,7 @@ export interface CreateWellnessPackageBookingRequest {
     dependentId?: string;
     corporateId?: string; // Corporate ID if booking is through corporate
     wellnessPackageId: string;
+    slotId: string; // Slot ID for the booking
     bookingDate: string; // YYYYMMDD format
     bookingTime: string;
     serviceMode: ServiceMode;
@@ -82,6 +84,7 @@ export interface CreateSpecialistBookingRequest {
     dependentId?: string;
     corporateId?: string; // Corporate ID if booking is through corporate
     specialistId: string;
+    slotId: string; // Slot ID for the booking
     primaryConcern: string;
     consultationMode: ConsultationMode;
     bookingDate: string; // YYYYMMDD format
@@ -142,8 +145,11 @@ export interface BookingState {
     nextPage: () => void;
     prevPage: () => void;
     onPageChange: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void;
-    onCreate: (data: CreateWellnessPackageBookingRequest | CreateSpecialistBookingRequest) => Promise<void>;
+    onCreateSpecialist: (data: CreateSpecialistBookingRequest) => Promise<void>;
+    onCreateWellnessPackage: (data: CreateWellnessPackageBookingRequest) => Promise<void>;
     onUpdate: (id: string, data: UpdateBookingRequest) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
     detail: (id: string) => Promise<{ data: IBooking } | null>;
+    fetchByUserId: (userId: string) => Promise<IBooking[] | any>;
+    fetchUpcoming: () => Promise<IBooking[] | any>;
 }

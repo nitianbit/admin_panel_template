@@ -71,6 +71,9 @@ export interface SlotState {
     isLoading: boolean;
     limit: number;
     fetchGrid: () => Promise<void>;
+    fetchAvailable: () => Promise<ISlot[]>;
+    fetchBySpecialist: (specialistId: string) => Promise<ISlot[]>;
+    fetchByWellnessPackage: (wellnessPackageId: string) => Promise<ISlot[]>;
     setFilters: (newFilters: SlotQueryParams) => void;
     nextPage: () => void;
     prevPage: () => void;
