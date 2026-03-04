@@ -1,51 +1,92 @@
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
-import PieChart from "./PieChart";
-import BarChart from "./BarChart";
-import OrganData from "./OrganData";
-import HealthCard from "./HealthCard";
-import LatestAppointments from "./LatestAppointments";
-import Appbar from "../../components/Appbar";
+"use client"
 
-import PeopleIcon from "@mui/icons-material/People";
-import TodayIcon from "@mui/icons-material/Today";
-import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import Box from "@mui/material/Box"
+import Container from "@mui/material/Container"
+import Grid from "@mui/material/Grid"
+import Paper from "@mui/material/Paper"
+import Toolbar from "@mui/material/Toolbar"
+import * as React from "react"
+import Appbar from "../../components/Appbar"
+import BarChart from "./BarChart"
+import HealthCard from "./HealthCard"
+import PieChart from "./PieChart"
+
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee"
+import PeopleIcon from "@mui/icons-material/People"
+import TodayIcon from "@mui/icons-material/Today"
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism"
+import { ENDPOINTS } from "../../services/api/constants"
+import { doGET } from "../../utils/HttpUtils"
+import AppointmentsByCompany from "./AppointmentsByCompany"
+import { dashboard_default_stats,  dashboardCards } from "./constants"
+import type{ DASHBOARD_STATS,} from "./constants"
+import PatientsByCompany from "./PatientsByCompany"
+import PatientsByDoctor from "./PatientsByDoctor"
+import { useCompanyStore } from "../../services/company"
+import PatientsByAge from "./PatientsByAge"
+import PatientsByGender from "./PatientsByGender"
+import { Typography, Divider } from "@mui/material"
 
 const cardData = [
   {
     icon: <PeopleIcon />,
-    title: "Patients",
-    value: 1000
+    title: "Employees",
+    value: 1000,
   },
   {
     icon: <TodayIcon />,
     title: "Appointments",
-    value: 80
+    value: 80,
   },
   {
     icon: <VolunteerActivismIcon />,
     title: "Treatments",
-    value: 200
+    value: 200,
   },
   {
     icon: <CurrencyRupeeIcon />,
     title: "Income",
-    value: "₹40000"
+    value: "₹40000",
+  },
+]
+
+const chartData = [{ chartName: <PieChart /> }, { chartName: <BarChart /> }]
+
+// Define gradient colors for cards
+const cardGradients = [
+  "linear-gradient(135deg, #6B73FF 0%, #000DFF 100%)",
+  "linear-gradient(135deg, #FF9966 0%, #FF5E62 100%)",
+  "linear-gradient(135deg, #43C6AC 0%, #191654 100%)",
+  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  "linear-gradient(135deg, #F5515F 0%, #A1051D 100%)",
+  "linear-gradient(135deg, #52ACFF 0%, #0072FF 100%)",
+]
+
+export default function Dashboard({ companyWise = false }: { companyWise?: boolean }) {
+  const [data, setData] = React.useState<DASHBOARD_STATS>(dashboard_default_stats)
+  const { globalCompanyId } = useCompanyStore()
+
+  const fetchData = async () => {
+    try {
+      let url = ENDPOINTS.dashboardStats
+
+      if (globalCompanyId && companyWise) {
+        url += `?company_id=${globalCompanyId}`
+      }
+
+      const response = await doGET(url.toString())
+      if (response.status == 200) {
+        setData(response.data?.data)
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
-];
 
-const chartData = [
-  { chartName: <PieChart /> },
-  { chartName: <BarChart /> }
-  //{ chartName: <OrganData /> }
-];
+  React.useEffect(() => {
+    fetchData()
+  }, [companyWise, globalCompanyId])
 
-export default function Dashboard() {
   return (
     <Box sx={{ display: "flex" }}>
       <Appbar appBarTitle="Dashboard" />
@@ -53,62 +94,83 @@ export default function Dashboard() {
       <Box
         component="main"
         sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light"
-              ? theme.palette.grey[100]
-              : theme.palette.grey[900],
+          backgroundColor: "#f0f2f5",
           flexGrow: 1,
-          height: "100vh",
-          overflow: "auto"
+          minHeight: "100vh",
+          overflow: "auto",
         }}
       >
         <Toolbar />
 
-        <Container sx={{ mt: 4, mb: 4 }}>
-          <Grid container spacing={3}>
-            {cardData.map((item, index) => (
-              <Grid key={index} item xs={12} md={4} lg={3}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    height: 200
-                  }}
-                >
-                  <HealthCard
-                    icon={item.icon}
-                    title={item.title}
-                    value={item.value}
-                  />
-                </Paper>
-              </Grid>
-            ))}
+        {/* Dashboard Header */}
+        <Box
+          sx={{
+            background: "linear-gradient(90deg, #02989D 0%, rgb(74, 220, 225) 100%)",
+            color: "white",
+            py: 4,
+            px: 3,
+            mb: 4,
+          }}
+        >
+          <Container maxWidth="xl">
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+              Myewacare Dashboard
+            </Typography>
+          </Container>
+        </Box>
 
-            {/* Chart */}
-            {chartData.map((item, index) => (
-              <Grid key={index} item xs={12} md={6} lg={6}>
+        <Container maxWidth="xl" sx={{ mb: 6 }}>
+          {/* Stats Cards */}
+          <Grid container spacing={3}>
+            {dashboardCards.map((item, index) => (
+              <Grid key={index} item xs={12} sm={6} md={4} lg={4} xl={2}>
                 <Paper
                   sx={{
-                    p: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    height: 400
+                    p: 0,
+                    overflow: "hidden",
+                    height: 180,
+                    borderRadius: 4,
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.08)",
+                    background: cardGradients[index % cardGradients.length],
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-5px)",
+                      boxShadow: "0 15px 30px rgba(0,0,0,0.12)",
+                    },
                   }}
                 >
-                  {item.chartName}
+                  <HealthCard icon={item.icon} title={item.title} value={data[item.value]} color="white" />
                 </Paper>
               </Grid>
             ))}
-            {/* <img src="https://echarts.apache.org/examples/data/asset/geo/Veins_Medical_Diagram_clip_art.svg" /> */}
-            <Grid item xs={12}>
-              <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-                <LatestAppointments />
-              </Paper>
-            </Grid>
+          </Grid>
+
+          {/* Section Divider */}
+          <Box sx={{ my: 5, display: "flex", alignItems: "center" }}>
+            <Divider sx={{ flexGrow: 1, borderColor: "rgba(0,0,0,0.1)" }} />
+            <Typography
+              variant="h5"
+              sx={{
+                px: 2,
+                fontWeight: "bold",
+                color: "#333",
+              }}
+            >
+              Analytics & Insights
+            </Typography>
+            <Divider sx={{ flexGrow: 1, borderColor: "rgba(0,0,0,0.1)" }} />
+          </Box>
+
+          {/* Charts */}
+          <Grid container spacing={3}>
+            <AppointmentsByCompany companyWise={companyWise} />
+            <PatientsByDoctor companyWise={companyWise} />
+            <PatientsByCompany companyWise={companyWise} />
+            <PatientsByAge companyWise={companyWise} />
+            <PatientsByGender companyWise={companyWise} />
           </Grid>
         </Container>
       </Box>
     </Box>
-  );
+  )
 }

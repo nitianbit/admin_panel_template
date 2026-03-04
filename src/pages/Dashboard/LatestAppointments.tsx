@@ -1,26 +1,21 @@
-import * as React from "react";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
-import Title from "../../components/Title";
-import AppointmentTableData from "../Appointments/AppointmentTableData";
-import { appointmentsData } from "../../mockData";
-import { useNavigate } from "react-router-dom";
+"use client"
+
+import * as React from "react"
+import Link from "@mui/material/Link"
+import Typography from "@mui/material/Typography"
+import AppointmentTableData from "../Appointments/AppointmentTableData"
+import { appointmentsData } from "../../mockData"
+import { useNavigate } from "react-router-dom"
 
 export default function LatestAppointments() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   function preventDefault(event: React.MouseEvent) {
-    event.preventDefault();
-    navigate(`/appointments`);
+    event.preventDefault()
+    navigate(`/appointments`)
   }
   return (
     <React.Fragment>
-      <Typography
-        component="h2"
-        align="left"
-        variant="h6"
-        gutterBottom
-        color="primary"
-      >
+      <Typography component="h2" align="left" variant="h6" gutterBottom color="primary">
         Recent Appointments
       </Typography>
       <AppointmentTableData appointments={appointmentsData} />
@@ -28,5 +23,5 @@ export default function LatestAppointments() {
         See all appointments
       </Link>
     </React.Fragment>
-  );
+  )
 }

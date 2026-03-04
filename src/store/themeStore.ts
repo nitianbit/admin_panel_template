@@ -27,10 +27,10 @@ export const useThemeStore = create<ThemeStore>((set) => ({
   theme: {
     palette: {
       primary: {
-        main: "#2C5F2D" // Blue color
+        main: "#01999E" // Blue color
       },
       secondary: {
-        main: "#97BC62"
+        main: "#9CE0E2"
       },
       mode: "light"
     },

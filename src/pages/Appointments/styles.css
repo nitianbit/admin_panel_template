@@ -1,0 +1,19 @@
+.w-100{
+    width: 100%;
+}
+
+.time-input{
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease;
+    outline-color: green;
+  
+}
+
+.time-container{ 
+    margin: 10px 0;
+}

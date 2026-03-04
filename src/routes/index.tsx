@@ -1,0 +1,417 @@
+import ErrorPage from "../components/ErrorPage";
+import SignInSide from "../pages/Auth/SignInSide";
+import SignUp from "../pages/Auth/SignUp";
+import Dashboard from "../pages/Dashboard/Dashboard";
+import ForgotPassword from "../pages/Auth/ForgotPassword";
+import AllOrders from "../pages/Orders/AllOrders";
+import PatientList from "../pages/PatientInfo/PatientList";
+import { mockPatientData } from "../mockData";
+import PatientInfo from "../pages/PatientInfo/PatientInfo";
+import DoctorList from "../pages/Doctors/DoctorList";
+import Appointments from "../pages/Appointments/Appointments";
+import Kanban from "../pages/Kanban/Kanban";
+import Settings from "../pages/Settings/Settings";
+import Account from "../pages/Account/Account";
+import Profile from "../pages/Profile/Profile";
+import { hasAccess } from "../utils/helper";
+import { useAppContext } from "../services/context/AppContext";
+import Company from "../pages/Company/Company";
+import PushNotification from "../pages/PushNotification";
+import LaboratoryList from "../pages/Laboratory/LaboratoryList";
+import AdminList from "../pages/Admin/AdminList";
+import WellnessForm from "../pages/Wellness";
+import Departments from "../pages/Departments";
+import Services from "../pages/Services";
+import Offers from "../pages/Offers";
+import HRList from "../pages/HR/HRList";
+import Report from "../pages/Report";
+import ServiceImages from "../pages/ServiceImages";
+import GalleryImages from "../pages/GalleryImage";
+import Packages from "../pages/Packages";
+import PushNotificationGrid from "../pages/PushNotification/list";
+import Form from "../pages/Form/list";
+import Blogs from "../pages/Blogs";
+import VendorCompanyPackageAssign from "../pages/VendorPackages/VendorCompanyPackageAssign";
+import VendorPackages from "../pages/VendorPackages";
+import Vendors from "../pages/Vendors/Vendor";
+import MARKETINGList from "../pages/Marketing/MarketingList";
+import Events from "../pages/Events";
+import SuperBlogs from "../pages/SuperBlogs";
+import Surgery from "../pages/Surgery";
+import CorporatePlan from "../pages/CorporatePlan/list";
+import SecondOpinion from "../pages/SecondOpinion";
+import EwaPackage from "../pages/EwaPackage/list";
+import Banners from "../pages/Banners";
+import Specialists from "../pages/Specialist";
+import WellnessPackages from "../pages/WellnessPackages";
+import HeartRateLoader from "../components/HeartRateLoader";
+import HealthTips from "../pages/HealthTips";
+import Users from "../pages/User";
+import Partners from "../pages/Partners";
+import Slots from "../pages/Slots";
+import Coupons from "../pages/Coupons";
+import Bookings from "../pages/Bookings";
+import Corporates from "../pages/Corporates";
+
+const USER_TYPES = {
+  NORMAL_USER: "Normal User",
+  ADMIN_USER: "Admin User"
+};
+
+const AdminElement = ({ children }: any) => {
+  const { userData, isLoggedIn } = useAppContext()
+
+  if (isLoggedIn && !userData) {
+    return <HeartRateLoader message="Checking permissions..." />;
+  }
+
+  // Normalize roles to an array if it's a string
+  const userRoles = Array.isArray(userData?.role)
+    ? userData.role
+    : (userData?.role ? [userData.role] : []);
+
+  if (hasAccess(userRoles)) {
+    return <>{children}</>;
+  } else {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h3>Access Denied</h3>
+        <p>You are not authorized to access this route.</p>
+        <button onClick={() => window.location.href = '/'}>Go back to Login</button>
+      </div>
+    );
+  }
+};
+
+
+export const authRoutes = [
+  {
+    path: "/",
+    element: <SignInSide />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: "/login",
+    element: <SignInSide />,
+
+  },
+  {
+    path: "/signup",
+    element: <SignUp />,
+
+  },
+  {
+    path: "/forgot",
+    element: <ForgotPassword />
+  },
+]
+
+export const openRoutes = [];
+
+
+export const protectedRoutes = [
+  {
+    path: "/dashboard",
+    element: <AdminElement>
+      <Dashboard />
+    </AdminElement>,
+  },
+  {
+    path: "/stats",
+    element: <AdminElement>
+      <Dashboard companyWise={true} />
+    </AdminElement>,
+  },
+  {
+    path: "/orders",
+    element: (
+      <AdminElement>
+        <AllOrders />
+      </AdminElement>
+    )
+  },
+
+  {
+    path: "/profile",
+    element: (
+      <AdminElement>
+        <Profile />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/patient-info/:id",
+    element: (
+      <AdminElement>
+        <PatientInfo patients={mockPatientData} />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/patient-list",
+    element: (
+      <AdminElement>
+        <PatientList data={mockPatientData} />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/doctor-list",
+    element: (
+      <AdminElement>
+        <DoctorList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/hr-list",
+    element: (
+      <AdminElement>
+        <HRList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/marketing",
+    element: (
+      <AdminElement>
+        <MARKETINGList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/laboratory-list",
+    element: (
+      <AdminElement>
+        <LaboratoryList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/admin",
+    element: (
+      <AdminElement>
+        <AdminList />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/appointments",
+    element: (
+      <AdminElement>
+        <Appointments />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/kanban",
+    element: (
+      <AdminElement>
+        <Kanban />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/account",
+    element: (
+      <AdminElement>
+        <Account />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/settings",
+    element: (
+      <AdminElement>
+        <Settings />
+      </AdminElement>
+    )
+  },
+  {
+    path: "/company",
+    element: <AdminElement>
+      <Company />
+    </AdminElement>,
+  },
+  {
+    path: "/push-notification",
+    element: <AdminElement>
+      {/* <PushNotification /> */}
+      <PushNotificationGrid />
+    </AdminElement>,
+  },
+  {
+    path: "/wellness-events",
+    element: <AdminElement>
+      <WellnessForm />
+    </AdminElement>,
+  },
+  {
+    path: "/departments",
+    element: <AdminElement>
+      <Departments />
+    </AdminElement>,
+  },
+  {
+    path: "/report",
+    element: <AdminElement>
+      <Report />
+    </AdminElement>,
+  },
+  {
+    path: "/services",
+    element: <AdminElement>
+      <Services />
+    </AdminElement>,
+  },
+  {
+    path: "/offers",
+    element: <AdminElement>
+      <Offers />
+    </AdminElement>,
+  },
+  {
+    path: "/service-images",
+    element: <AdminElement>
+      <ServiceImages />
+    </AdminElement>,
+  },
+  {
+    path: "/packages",
+    element: <AdminElement>
+      <Packages />
+    </AdminElement>,
+  },
+  {
+    path: "/forms",
+    element: <AdminElement>
+      <Form />
+    </AdminElement>,
+  },
+  {
+    path: "/blogs",
+    element: <AdminElement>
+      <Blogs />
+    </AdminElement>,
+  },
+  {
+    path: "/superblogs",
+    element: <AdminElement>
+      <SuperBlogs />
+    </AdminElement>,
+  },
+  {
+    path: "/external-packages",
+    element: <AdminElement>
+      <VendorPackages />
+    </AdminElement>,
+  },
+  {
+    path: "/company-external-packages",
+    element: <AdminElement>
+      <VendorCompanyPackageAssign />
+    </AdminElement>,
+  },
+  {
+    path: "/vendors",
+    element: <AdminElement>
+      <Vendors />
+    </AdminElement>,
+  },
+  {
+    path: "/gallery-images",
+    element: <AdminElement>
+      <GalleryImages />
+    </AdminElement>,
+  },
+  {
+    path: "/event",
+    element: <AdminElement>
+      <Events />
+    </AdminElement>,
+  },
+  {
+    path: "/surgery",
+    element: <AdminElement>
+      <Surgery />
+    </AdminElement>,
+  },
+  {
+    path: "/corporate-plan",
+    element: <AdminElement>
+      <CorporatePlan />
+    </AdminElement>,
+  },
+  {
+    path: "/second-opinion",
+    element: <AdminElement>
+      <SecondOpinion />
+    </AdminElement>,
+  },
+  {
+    path: "/ewa-package",
+    element: <AdminElement>
+      <EwaPackage />
+    </AdminElement>,
+  },
+  {
+    path: "/banners",
+    element: <AdminElement>
+      <Banners />
+    </AdminElement>,
+  },
+  {
+    path: "/specialists",
+    element: <AdminElement>
+      <Specialists />
+    </AdminElement>,
+  },
+  {
+    path: "/wellness-package",
+    element: <AdminElement>
+      <WellnessPackages />
+    </AdminElement>,
+  },
+  {
+    path: "/health-tips",
+    element: <AdminElement>
+      <HealthTips />
+    </AdminElement>,
+  },
+  {
+    path: "/users",
+    element: <AdminElement>
+      <Users />
+    </AdminElement>,
+  },
+  {
+    path: "/partners",
+    element: <AdminElement>
+      <Partners />
+    </AdminElement>,
+  },
+  {
+    path: "/slots",
+    element: <AdminElement>
+      <Slots />
+    </AdminElement>,
+  },
+  {
+    path: "/coupons",
+    element: <AdminElement>
+      <Coupons />
+    </AdminElement>,
+  },
+  {
+    path: "/bookings",
+    element: <AdminElement>
+      <Bookings />
+    </AdminElement>,
+  },
+  {
+    path: "/corporates",
+    element: <AdminElement>
+      <Corporates />
+    </AdminElement>,
+  }
+]

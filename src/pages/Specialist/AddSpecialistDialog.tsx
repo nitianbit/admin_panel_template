@@ -1,0 +1,411 @@
+import AddIcon from "@mui/icons-material/Add";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Stack, Switch, TextField } from "@mui/material";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
+import React from 'react';
+import { useForm } from "react-hook-form";
+import SearchInput from "../../components/SearchInput";
+
+import CustomImage from "../../components/CustomImage";
+import ImageUpload from "../../components/ImageUploader";
+import { showError } from "../../services/toaster";
+import { Specialist } from "../../types/specialist";
+import { MODULES } from "../../utils/constants";
+import { uploadFile } from "../../utils/helper";
+import { useSpecialistStore } from "../../services/specialist";
+
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+        children: React.ReactElement<any, any>;
+    },
+    ref: React.Ref<unknown>
+) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const initialData: Specialist = {
+    name: "",
+    profilePictureUrl: "",
+    rating: 0,
+    specialization: "",
+    degree: "",
+    experienceYears: 0,
+    languages: [],
+    bio: "",
+    consultationFee: 0,
+    isConsultationFree: false,
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+    isActive: true,
+    isVerified: false,
+};
+
+const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
+    const { onCreate, detail, onUpdate, filters, setFilters } = useSpecialistStore();
+    const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<Specialist>({
+        defaultValues: { ...initialData },
+    });
+
+    const imageFileRef = React.useRef<File | null>(null);
+    const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
+
+    const handleClickOpen = () => toggleModal(true);
+    const handleClose = () => toggleModal(false);
+
+    // Filter states
+    const [searchQuery, setSearchQuery] = React.useState<string>("");
+    const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const applyFilters = (query: string) => {
+        const newFilters: any = { ...filters };
+
+        if (query.trim()) {
+            const searchTerm = query.trim().toLowerCase();
+
+            // Common specializations to check against
+            const SPECIALIZATIONS = [
+                'Cardiologist', 'Dermatologist', 'Endocrinologist', 'Gastroenterologist',
+                'Neurologist', 'Oncologist', 'Orthopedic', 'Pediatrician', 'Psychiatrist',
+                'Radiologist', 'Urologist', 'Gynecologist', 'Surgeon', 'Dentist', 'Physician',
+                'Ophthalmologist', 'ENT', 'Pulmonologist', 'Rheumatologist', 'Nephrologist',
+                'General Physician', 'Orthopaedics', 'Obstetrics', 'Pathologist'
+            ];
+
+            const matchedSpec = SPECIALIZATIONS.find(
+                s => s.toLowerCase().includes(searchTerm) || searchTerm.includes(s.toLowerCase())
+            );
+
+            if (matchedSpec) {
+                // If search term matches a specialization, filter by specialization
+                newFilters.specialization = matchedSpec;
+                delete newFilters.name;
+            } else {
+                // Otherwise, perform a regular name search
+                newFilters.name = query.trim();
+                delete newFilters.specialization;
+            }
+        } else {
+            delete newFilters.name;
+            delete newFilters.specialization;
+            delete newFilters.search;
+        }
+
+        setFilters(newFilters);
+    };
+
+    const handleSearchChange = (e: any) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 300);
+    };
+
+    const onSubmit = async (formValues: Specialist) => {
+        if (!formValues?.name) {
+            showError('Please enter a name');
+            return;
+        }
+
+        if (!formValues?.specialization) {
+            showError('Please enter a specialization');
+            return;
+        }
+
+        let profilePictureUrl = existingImageUrl || "";
+        if (imageFileRef.current instanceof File) {
+            const uploadRes = await uploadFile({ module: MODULES.SPECIALIST }, [imageFileRef.current]);
+
+            if (uploadRes.error) {
+                showError(uploadRes.message || 'Failed to upload image');
+                return;
+            }
+
+            const uploadedFiles = uploadRes.data?.data?.files;
+            if (uploadedFiles?.length && uploadedFiles[0]?.url) {
+                profilePictureUrl = uploadedFiles[0].url;
+            }
+        }
+
+        const payload: any = {
+            ...formValues,
+            profilePictureUrl: profilePictureUrl,
+        };
+
+        let response = null;
+        if (formValues?._id) {
+            response = await onUpdate(payload);
+        } else {
+            response = await onCreate(payload);
+        }
+
+        if (response) {
+            reset({ ...initialData });
+            imageFileRef.current = null;
+            setExistingImageUrl("");
+            handleClose();
+        }
+    };
+
+    const fetchDetail = async (selectedId: string) => {
+        try {
+            const data = await detail(selectedId);
+            reset(data?.data);
+            if (data?.data?.profilePictureUrl && typeof data.data.profilePictureUrl === 'string') {
+                setExistingImageUrl(data.data.profilePictureUrl);
+            }
+        } catch (error) {
+
+        }
+    }
+
+    React.useEffect(() => {
+        reset({ ...initialData });
+        imageFileRef.current = null;
+        setExistingImageUrl("");
+        if (selectedId) {
+            fetchDetail(selectedId);
+        }
+    }, [selectedId]);
+
+    const watchedId = watch("_id");
+    const watchedIsConsultationFree = watch("isConsultationFree");
+    const watchedIsActive = watch("isActive");
+    const watchedIsVerified = watch("isVerified");
+
+    return (
+        <>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                <SearchInput handleChange={handleSearchChange} />
+                <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={handleClickOpen}
+                >
+                    Add Specialist
+                </Button>
+            </Stack>
+
+            <Dialog
+                open={isModalOpen}
+                onClose={handleClose}
+                TransitionComponent={Transition}
+                maxWidth="lg"
+                fullWidth
+                sx={{ height: "100%" }}
+            >
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <DialogTitle>{watchedId ? 'Edit Specialist' : 'Add Specialist'}</DialogTitle>
+                    <DialogContent dividers>
+
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="dense"
+                                id="name"
+                                label="Name"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("name")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                id="specialization"
+                                label="Specialization"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("specialization")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="dense"
+                                id="degree"
+                                label="Degree"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("degree")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                id="experienceYears"
+                                label="Experience (Years)"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                {...register("experienceYears", { valueAsNumber: true })}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+
+                        <TextField
+                            margin="dense"
+                            id="bio"
+                            label="Bio"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={3}
+                            variant="outlined"
+                            {...register("bio")}
+                            InputLabelProps={{ shrink: true }}
+                        />
+
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="dense"
+                                id="email"
+                                label="Email"
+                                type="email"
+                                fullWidth
+                                variant="outlined"
+                                {...register("email")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                id="phone"
+                                label="Phone"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("phone")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="dense"
+                                id="consultationFee"
+                                label="Consultation Fee"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                {...register("consultationFee", { valueAsNumber: true })}
+                                InputLabelProps={{ shrink: true }}
+                            />
+
+                            <TextField
+                                margin="dense"
+                                id="rating"
+                                label="Rating"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                {...register("rating", { valueAsNumber: true })}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="dense"
+                                id="address"
+                                label="Address"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("address")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                id="city"
+                                label="City"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("city")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+
+                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                            <TextField
+                                margin="dense"
+                                id="state"
+                                label="State"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("state")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                id="pincode"
+                                label="Pincode"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                {...register("pincode")}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Stack>
+
+                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={watchedIsConsultationFree ?? false}
+                                        onChange={(e) => setValue("isConsultationFree", e.target.checked)}
+                                    />
+                                }
+                                label="Free Consultation"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={watchedIsActive ?? true}
+                                        onChange={(e) => setValue("isActive", e.target.checked)}
+                                    />
+                                }
+                                label="Active"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={watchedIsVerified ?? false}
+                                        onChange={(e) => setValue("isVerified", e.target.checked)}
+                                    />
+                                }
+                                label="Verified"
+                            />
+                        </Stack>
+
+                        {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
+                        <ImageUpload
+                            onChange={(files: any) => {
+                                imageFileRef.current = files?.length ? files[0] : null;
+                                if (files?.length) {
+                                    setExistingImageUrl("");
+                                }
+                            }}
+                            allow="image/*"
+                        />
+
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button type="submit" variant="contained">
+                            Submit
+                        </Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+
+        </>
+    )
+}
+
+export default AddSpecialistDialog

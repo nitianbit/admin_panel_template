@@ -1,11 +1,10 @@
-import * as React from "react";
-import ReactECharts from "echarts-for-react";
-import * as echarts from "echarts";
+import * as React from "react"
+import ReactECharts from "echarts-for-react"
+import * as echarts from "echarts"
 
-var ROOT_PATH =
-  "https://echarts.apache.org/examples/data/asset/geo/Veins_Medical_Diagram_clip_art.svg";
+var ROOT_PATH = "https://echarts.apache.org/examples/data/asset/geo/Veins_Medical_Diagram_clip_art.svg"
 
-echarts.registerMap("organ_diagram", { svg: ROOT_PATH });
+echarts.registerMap("organ_diagram", { svg: ROOT_PATH })
 
 export default function OrganData() {
   var option: echarts.EChartsOption = {
@@ -45,15 +44,7 @@ export default function OrganData() {
     },
     xAxis: {},
     yAxis: {
-      data: [
-        "heart",
-        "large-intestine",
-        "small-intestine",
-        "spleen",
-        "kidney",
-        "lung",
-        "liver",
-      ],
+      data: ["heart", "large-intestine", "small-intestine", "spleen", "kidney", "lung", "liver"],
     },
     series: [
       {
@@ -64,11 +55,11 @@ export default function OrganData() {
         data: [121, 321, 141, 52, 198, 289, 139],
       },
     ],
-  };
+  }
 
   return (
     <React.Fragment>
       <ReactECharts option={option} opts={{ renderer: "canvas" }} />
     </React.Fragment>
-  );
+  )
 }

@@ -3,5 +3,10 @@ export const drawerWidth: number = 240;
 export const settings = [
   { text: "Profile", url: "/profile" },
   { text: "Dashboard", url: "/dashboard" },
-  { text: "Logout", url: "/login" }
+  {
+    text: "Logout", url: "/login", onClick: () => {
+      localStorage.clear();
+      window.location.reload()
+    }
+  }
 ];

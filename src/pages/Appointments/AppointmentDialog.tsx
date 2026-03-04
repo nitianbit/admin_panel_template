@@ -1,70 +1,172 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-import { Stack } from "@mui/material";
+import Drawer from "@mui/material/Drawer";
+import { Box, Stack, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
-import { useForm } from "react-hook-form";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import dayjs from "dayjs";
+import { useAppContext } from "../../services/context/AppContext";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { useAppointmentStore } from "../../services/appointment";
+import { Appointment } from "../../types/appointment";
+import { showError } from "../../services/toaster";
+import GridDialog from "../../components/Dialog/GridDialog";
+import { usePatientStore } from "../../services/patient";
+import { useDoctorStore } from "../../services/doctors";
+import { APPOINTMENT_STATUS, MODULES, PAYMENT_STATUS } from "../../utils/constants";
+import PatientDetail from "../../components/PatientDetail";
+import DoctorDetail from "../../components/DoctorDetail";
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import { useCompanyStore } from "../../services/company";
+import CompanySelect from "../../components/DropDowns/CompanySelect";
+import DoctorSelect from "../../components/DoctorSelect";
+import LabSelect from "../../components/LabSelect";
+import PatientSelectDropdown from "../../components/PatientSelect/PatientSelectDropdown";
+import PatientSelect from "../../components/PatientSelect";
+import DepartmentSelect from "../../components/DropDowns/DepartmentSelect/DepartmentSelect";
+import moment from "moment";
+import { PatientFilters } from "../../types/patient";
+import DateTimePickerWithInterval from "../../components/DateTimePicker";
+import DatePicker2 from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "./styles.css"
+import PackagetSelect from "../../components/DropDowns/PackageSelect/PackageSelect";
+import ExternalAppointment from "./ExternalAppointment";
+import AppointmentCommonFields from "./AppointmentCommonFields";
+import TimePickerField from "../../components/TimePickerField";
 
-type FormValues = {
-  id: string;
-  fullName: string;
-  gender: string;
-  phone: string;
-  age: string;
-  appointmentDate: string;
-  referredByDoctor: string;
-  assignedDoctor: string;
-};
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 export default function AppointmentDialog({
-  appointments,
-  setAppointments,
+  isModalOpen,
+  toggleModal,
+  selectedId
 }: any) {
-  const [open, setOpen] = React.useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>();
+  const { onCreate, detail, setFilters, filters, onUpdate } = useAppointmentStore();
+  const { globalCompanyId } = useCompanyStore();
+  const { data: patientData, totalPages: patientTotalPages, total: patientTotal, currentPage: patientCurrentPage, isLoading: patientIsLoading, onPageChange: patientOnPageChange, fetchGrid: patientFetchtGrid, onDelete: patientOnDelete } = usePatientStore();
+  const { data: doctorData, totalPages: doctorTotalPages, total: doctorTotal, currentPage: doctorCurrentPage, isLoading: doctorIsLoading, onPageChange: doctorOnPageChange, fetchGrid: doctorFetchtGrid, onDelete: doctorOnDelete } = useDoctorStore();
+  const { userData } = useAppContext();
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const [patientDialogOpen, setPatientDialogOpen] = React.useState(false);
+  const [doctorDialogOpen, setDoctorDialogOpen] = React.useState(false);
+
+  const defaultData = {
+    fee: 0,
+    type: "1",
+    status: APPOINTMENT_STATUS.SCHEDULED,
+    paymentStatus: PAYMENT_STATUS.PENDING,
+    appointmentDate: "",
+    timeSlot: {
+      start: "",
+      end: ""
+    },
+    lab: "",
+    doctor: userData?.role?.includes("doctors") ? userData?._id : "",
+    patient: "",
+    company: globalCompanyId ?? "",
+    location: {
+      latitude: undefined,
+      longitude: undefined
+    },
+    address: "",
+    city: "",
+    zipcode: ""
+  }
+
+  const [appointMentData, setAppointMentData] = React.useState<Appointment>(defaultData)
+
+  const fetchData = async (id: string) => {
+    try {
+      const data = await detail(id)
+      setAppointMentData({ ...data?.data, appointmentDate: dayjs(String(data?.data?.appointmentDate), "YYYYMMDD") })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  React.useEffect(() => {
+    setAppointMentData(defaultData)
+    if (selectedId) {
+      fetchData(selectedId)
+    }
+  }, [selectedId])
+
+  const handleChange = (key: any, value: any) => {
+    if (key.startsWith("timeSlot.")) {
+      const field = key.split(".")[1];
+      setAppointMentData({
+        ...appointMentData,
+        timeSlot: { ...appointMentData.timeSlot, [field]: value }
+      });
+    } else if (key.startsWith("location.")) {
+      const field = key.split(".")[1];
+      setAppointMentData({
+        ...appointMentData,
+        location: { ...appointMentData.location, [field]: value }
+      });
+    } else {
+      setAppointMentData({ ...appointMentData, [key]: value });
+    }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleChangeTimeSlot = (data: Partial<Appointment>) => {
+    setAppointMentData({
+      ...appointMentData,
+      ...data
+    });
+  }
 
-  const onSubmit = (data: FormValues) => {
-    data.id = appointments.length + 1;
-    setAppointments((prevState: any) => [...prevState, data]);
-    handleClose();
-  };
+  const handlePatientDialogSave = (ids: string[]) => {
+    setPatientDialogOpen(false)
+    appointMentData.patient = ids?.length ? ids[0] : ""
+  }
+
+  const handleDoctorDialogSave = (ids: string[]) => {
+    setDoctorDialogOpen(false)
+    appointMentData.doctor = ids?.length ? ids[0] : ""
+  }
+
+  const handlePatientDialogClose = () => {
+    setPatientDialogOpen(false)
+  }
+
+  const handleDoctorDialogClose = () => {
+    setDoctorDialogOpen(false)
+  }
+
+  const handleSave = async () => {
+    const data = { ...appointMentData }
+
+    const date = dayjs(appointMentData.appointmentDate).format("YYYYMMDD");
+    data.appointmentDate = date;
+
+    if (data.patient?.length === 0) return showError("Please select a patient")
+    if (!data.doctor) delete data.doctor;
+    if (!data.lab) delete data.lab;
+
+    if (data?._id) {
+      onUpdate(data)
+    } else {
+      onCreate(data)
+    }
+    toggleModal()
+  }
+
+  if (Array.isArray(userData.role) && ![MODULES.ADMIN, MODULES.SUPERVISOR, MODULES.HR].some(role => userData.role.includes(role))) {
+    return null;
+  }
 
   return (
     <div>
@@ -74,132 +176,193 @@ export default function AppointmentDialog({
         alignItems="center"
         spacing={2}
       >
-        <SearchInput />
+        <div className="d-flex align-items-center" style={{ display: 'flex', alignItems: 'center' }}>
+          <SearchInput />
+          <PatientSelect
+            sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+            value={filters?.patient}
+            onSelect={function (id: string): void {
+              const filter: PatientFilters = id ? { patient: id } : {}
+              filter.company = globalCompanyId;
+              setFilters(filter)
+            }} />
+        </div>
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
-          onClick={handleClickOpen}
+          onClick={toggleModal}
         >
           Book an Appointment
         </Button>
       </Stack>
+      <GridDialog
+        open={patientDialogOpen}
+        handleClose={handlePatientDialogClose}
+        handleSave={handlePatientDialogSave}
+        data={patientData}
+        totalPages={patientTotalPages}
+        total={patientTotal}
+        currentPage={patientCurrentPage}
+        isLoading={patientIsLoading}
+        onPageChange={patientOnPageChange}
+        fetchGrid={patientFetchtGrid}
+        onDelete={patientOnDelete}
+        title="Patient"
+      />
 
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        TransitionComponent={Transition}
-        maxWidth="xs"
-        fullWidth
-        sx={{ height: "100%" }}
+      <Drawer
+        anchor="right"
+        open={isModalOpen}
+        onClose={toggleModal}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>Appointment Details</DialogTitle>
+        <Box sx={{ width: { xs: '100%', sm: 600 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.main', color: 'white' }}>
+            <Typography variant="h6">Appointment Details</Typography>
+            <IconButton onClick={toggleModal} sx={{ color: 'white' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-          <DialogContent dividers>
-            <TextField
-              margin="dense"
-              id="fullName"
-              label="Full Name"
-              type="fullName"
-              fullWidth
-              variant="outlined"
-              {...register("fullName", {
-                required: "Name is required",
-              })}
-              error={!!errors.fullName}
-              helperText={errors.fullName?.message}
+          <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
+            <PatientSelect
+              onSelect={function (id: string): void {
+                setPatientDialogOpen(false)
+                handleChange("patient", id);
+              }}
+              value={appointMentData?.patient}
             />
+
             <FormControl fullWidth margin="dense">
-              <InputLabel id="gender">Gender</InputLabel>
+              <InputLabel id="type">Select Type</InputLabel>
               <Select
-                labelId="gender"
-                id="gender"
-                label="Gender"
-                {...register("gender")}
+                labelId="type"
+                id="type"
+                label="Select Type"
+                value={appointMentData?.type}
+                onChange={(e) => handleChange("type", e.target.value)}
               >
-                <MenuItem value={"Male"}>Male</MenuItem>
-                <MenuItem value={"Female"}>Female</MenuItem>
-                <MenuItem value={"Other"}>Other</MenuItem>
+                <MenuItem value={"1"}>Report</MenuItem>
+                <MenuItem value={"2"}>Prescription</MenuItem>
               </Select>
             </FormControl>
-            <TextField
-              margin="dense"
-              id="phone"
-              label="Phone no"
-              type="phone"
-              fullWidth
-              variant="outlined"
-              placeholder="0 123456789"
-              {...register("phone", {
-                required: "Phone no is required",
-              })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
+
+            {userData.role.includes("admin") && (
+              <>
+                {appointMentData?.type == "2" && (
+                  <DoctorSelect
+                    sx={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px 10px' }}
+                    value={appointMentData.doctor}
+                    onSelect={(id: string): void => {
+                      handleChange("doctor", id);
+                    }}
+                  />
+                )}
+              </>
+            )}
+
+            <AppointmentCommonFields
+              handleChange={handleChange}
+              appointMentData={appointMentData}
+              module={MODULES.APPOINTMENT}
             />
+
+            {/* New Fields Start */}
             <TextField
-              margin="dense"
-              id="age"
-              label="Age"
-              type="age"
               fullWidth
-              variant="outlined"
-              placeholder="ex: 18"
-              {...register("age", {
-                required: "Age is required",
-              })}
-              error={!!errors.age}
-              helperText={errors.age?.message}
+              margin="dense"
+              label="Address"
+              value={appointMentData.address || ""}
+              onChange={(e) => handleChange("address", e.target.value)}
             />
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["DatePicker"]}>
-                <DatePicker
-                  label="Appointment Date"
-                  sx={{ width: "100%" }}
-                  slotProps={{
-                    textField: {
-                      helperText: "Date is required",
-                    },
-                  }}
+
+            <TextField
+              fullWidth
+              margin="dense"
+              label="City"
+              value={appointMentData.city || ""}
+              onChange={(e) => handleChange("city", e.target.value)}
+            />
+
+            <TextField
+              fullWidth
+              margin="dense"
+              label="Zip Code"
+              value={appointMentData.zipcode || ""}
+              onChange={(e) => handleChange("zipcode", e.target.value)}
+            />
+
+            <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+              <Box flex={1}>
+                <TextField
+                  label="Latitude"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={appointMentData.location?.latitude || ""}
+                  onChange={(e) =>
+                    handleChange("location.latitude", parseFloat(e.target.value))
+                  }
                 />
-              </DemoContainer>
-            </LocalizationProvider>
-            <TextField
-              margin="dense"
-              id="referredByDoctor"
-              label="Referred By Doctor"
-              type="referredByDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("referredByDoctor", {
-                required: "Specialist is required",
-              })}
-              error={!!errors.referredByDoctor}
-              helperText={errors.referredByDoctor?.message}
-            />
-            <TextField
-              margin="dense"
-              id="assignedDoctor"
-              label="Assigned Doctor"
-              type="assignedDoctor"
-              fullWidth
-              variant="outlined"
-              placeholder="ex: Dr. Smith"
-              {...register("assignedDoctor", {
-                required: "Assigned Doctor is required",
-              })}
-              error={!!errors.assignedDoctor}
-              helperText={errors.assignedDoctor?.message}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
+              </Box>
+              <Box flex={1}>
+                <TextField
+                  label="Longitude"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={appointMentData.location?.longitude || ""}
+                  onChange={(e) =>
+                    handleChange("location.longitude", parseFloat(e.target.value))
+                  }
+                />
+              </Box>
+            </Stack>
+
+            {/* New Fields End */}
+
+            {appointMentData?.type == "2" ? (
+              <>
+                <DepartmentSelect
+                  isMultiple={false}
+                  value={appointMentData.department}
+                  onChange={(value) => {
+                    handleChange("department", value)
+                  }}
+                  module={MODULES.APPOINTMENT}
+                />
+
+                <TimePickerField
+                  label="Start Time"
+                  value={appointMentData?.timeSlot.start}
+                  field="timeSlot.start"
+                  onChange={handleChange}
+                />
+
+                <TimePickerField
+                  label="End Time"
+                  value={appointMentData?.timeSlot.end}
+                  field="timeSlot.end"
+                  onChange={handleChange}
+                />
+              </>
+            ) : (
+              <ExternalAppointment
+                handleChange={handleChange}
+                appointMentData={appointMentData}
+                module={MODULES.APPOINTMENT}
+                handleChangeTimeSlot={handleChangeTimeSlot}
+              />
+            )}
+          </Box>
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button onClick={toggleModal}>Cancel</Button>
+            <Button onClick={handleSave} type="submit" variant="contained">
               Submit
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </Box>
+        </Box>
+      </Drawer>
     </div>
   );
 }

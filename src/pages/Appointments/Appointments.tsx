@@ -1,14 +1,60 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Box } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Appbar from "../../components/Appbar";
 import AppointmentDialog from "./AppointmentDialog";
-import { appointmentsData } from "../../mockData";
-import AppointmentTableData from "./AppointmentTableData";
+import { useAppointmentStore } from "../../services/appointment";
+import GeneralTable from '../../components/GridTable/index'
+import { COLUMNS } from "./constants";
+import { MODULES } from "../../utils/constants";
+import Layout from "../../components/Layout";
+import { useCompanyStore } from "../../services/company";
+import { useAppContext } from "../../services/context/AppContext";
 
 function Appointments() {
-  const [appointments, setAppointments] = React.useState(appointmentsData);
+  const { data, totalPages, total, rows, currentPage, setFilters, isLoading, onPageChange, fetchGrid, onDelete, nextPage, prevPage } = useAppointmentStore();
+  const { globalCompanyId } = useCompanyStore();
+  const { userData } = useAppContext();
+
+  useEffect(() => {
+    if (globalCompanyId && userData) {
+      const isDoctor = userData.role.includes(MODULES.DOCTOR);
+      const isLab = userData.role.includes(MODULES.LABORATORY);
+      setFilters({
+        company: globalCompanyId,
+        ...(isDoctor && { doctor: userData._id }),
+        ...(isLab && { laboratory: userData._id })
+      })
+    } else {
+      fetchGrid()
+    }
+  }, [globalCompanyId])
+
+
+  return (
+    <Layout appBarTitle="Appointment">
+      <Layout.Header component={AppointmentDialog} />
+      <Layout.Body
+        component={GeneralTable}
+        props={{
+          data,
+          columns: COLUMNS,
+          currentPage,
+          totalPages,
+          total,
+          loading: isLoading,
+          onPageChange,
+          module: MODULES.DOCTOR,
+          onDelete: (data: any) => onDelete(data._id),
+          rows
+        }}
+      />
+
+
+    </Layout>
+  )
+
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -28,17 +74,21 @@ function Appointments() {
         <Toolbar />
 
         <Container sx={{ mt: 4, mb: 4 }}>
-          <AppointmentDialog
-            appointments={appointments}
-            setAppointments={setAppointments}
+          <AppointmentDialog />
+          <GeneralTable
+            data={data}
+            columns={COLUMNS}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            total={total}
+            loading={isLoading}
+            onPageChange={onPageChange}
+            module={MODULES.DOCTOR}
+            onDelete={(data: any) => {
+              onDelete(data._id)
+            }}
           />
-          <Grid
-            container
-            spacing={2}
-            sx={{ marginleft: "10px", marginTop: "40px" }}
-          >
-            <AppointmentTableData appointments={appointments} />
-          </Grid>
+
         </Container>
       </Box>
     </Box>
