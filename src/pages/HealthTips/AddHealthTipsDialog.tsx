@@ -24,6 +24,7 @@ import { uploadFile } from "../../utils/helper";
 import { MODULES } from "../../utils/constants";
 import { showError } from "../../services/toaster";
 import { useHealthTipStore } from "../../services/healthTips";
+import { useCompanyStore } from "../../services/company";
 import { HealthTip } from "../../types/healthTips";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -37,6 +38,7 @@ const Transition = React.forwardRef(function Transition(
 
 const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, onUpdate, detail, fetchGrid, filters, setFilters } = useHealthTipStore();
+    const { globalCompanyId } = useCompanyStore();
 
     // Image file refs and existing URL states
     const imageFileRef = React.useRef<File | null>(null);
@@ -153,6 +155,7 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 category: data.category || "",
                 isActive: data.isActive ?? true,
                 order: data.order ?? 0,
+                corporateId: globalCompanyId,
             };
 
             // Only include imageUrl and icon if they are non-empty

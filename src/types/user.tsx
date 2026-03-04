@@ -73,7 +73,7 @@ export interface UserState {
     rows: number;
     allData: UserData[];
 
-    fetchGrid: (page?: number, filters?: UserFilters) => Promise<void>;
+    fetchGrid: () => Promise<void>;
     setFilters: (newFilters: UserFilters) => void;
     nextPage: () => void;
     prevPage: () => void;

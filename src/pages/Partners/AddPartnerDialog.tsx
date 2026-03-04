@@ -25,6 +25,7 @@ import { uploadFile } from "../../utils/helper";
 import { MODULES } from "../../utils/constants";
 import { showError } from "../../services/toaster";
 import { usePartnerStore } from "../../services/partners";
+import { useCompanyStore } from "../../services/company";
 import { PartnerData } from "../../types/partners";
 
 const Transition = React.forwardRef(function Transition(
@@ -36,6 +37,7 @@ const Transition = React.forwardRef(function Transition(
 
 const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, onUpdate, detail, fetchGrid, filters, setFilters } = usePartnerStore();
+    const { globalCompanyId } = useCompanyStore();
 
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
@@ -127,6 +129,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             const payload: PartnerData = {
                 ...data,
                 ...(logoUrl && { logoUrl }),
+                corporateId: globalCompanyId,
             };
 
             let response: PartnerData | null = null;

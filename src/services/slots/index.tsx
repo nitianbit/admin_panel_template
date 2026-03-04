@@ -29,20 +29,19 @@ const store = create<SlotState>((set, get) => ({
             if (filters.date) queryParams.append('date', filters.date);
             if (filters.isAvailable !== undefined) queryParams.append('isAvailable', String(filters.isAvailable));
             if (filters.isActive !== undefined) queryParams.append('isActive', String(filters.isActive));
-            // queryParams.append('page', String(currentPage));
-            // queryParams.append('limit', String(limit));
+            queryParams.append('page', String(currentPage));
+            queryParams.append('limit', String(limit));
 
             const apiUrl = `${BASE}?${queryParams.toString()}`;
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
                 const resData = response.data?.data;
+                const pagination = response.data?.pagination;
                 set({
-                    data: resData?.rows ?? resData ?? [],
-                    ...(currentPage === 1 && {
-                        totalPages: Math.ceil((resData?.total ?? 0) / limit),
-                        total: resData?.total ?? 0
-                    }),
+                    data: resData ?? [],
+                    totalPages: pagination?.totalPages ?? 1,
+                    total: pagination?.total ?? 0,
                 });
             } else {
                 showError(response.message);

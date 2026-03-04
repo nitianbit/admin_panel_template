@@ -2,7 +2,12 @@ import { Avatar, Chip, Stack, Typography } from "@mui/material";
 import moment from "moment";
 import CustomImage from "../../components/CustomImage";
 
-export const COLUMNS = [
+export const getColumns = (currentPage: number, rows: number) => [
+    {
+        header: "S.No.",
+        accessor: "_index",
+        render: (_row: any, index?: number) => (currentPage - 1) * rows + (index ?? 0) + 1,
+    },
     {
         header: "User",
         accessor: "name",

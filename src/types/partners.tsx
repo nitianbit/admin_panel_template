@@ -14,6 +14,7 @@ export interface PartnerData {
     isActive?: boolean;
     isVerified?: boolean;
     order?: number; // For display ordering
+    corporateId?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -11,7 +11,7 @@ const store = create<WellnessPackageState>((set, get) => ({
     currentPage: 1,
     filters: {},
     isLoading: false,
-    rows: 20,
+    rows: 10,
     total: 0,
     allData: [],
 
@@ -38,12 +38,11 @@ const store = create<WellnessPackageState>((set, get) => ({
 
             if (response.status >= 200 && response.status < 400) {
                 const resData = response.data?.data;
+                const pagination = response.data?.pagination;
                 set({
-                    data: resData?.rows ?? resData ?? [],
-                    ...(currentPage == 1 && {
-                        totalPages: Math.ceil((resData?.total ?? 0) / rows),
-                        total: resData?.total ?? 0,
-                    }),
+                    data: resData ?? [],
+                    totalPages: pagination?.totalPages ?? 1,
+                    total: pagination?.total ?? 0,
                 });
             } else {
                 showError(response.message);

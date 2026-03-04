@@ -38,15 +38,12 @@ const store = create<CorporateState>((set, get) => ({
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
-                const resData = response.data?.data || response.data;
-                const rows = resData?.rows || resData;
-                const total = resData?.total ?? (Array.isArray(rows) ? rows.length : 0);
+                const resData = response.data?.data;
+                const pagination = response.data?.pagination;
                 set({
-                    data: Array.isArray(rows) ? rows : [],
-                    ...(currentPage === 1 && {
-                        totalPages: Math.ceil(total / limit),
-                        total: total
-                    }),
+                    data: Array.isArray(resData) ? resData : [],
+                    totalPages: pagination?.totalPages ?? 1,
+                    total: pagination?.total ?? 0,
                 });
             } else {
                 showError(response.message);

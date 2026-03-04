@@ -37,26 +37,26 @@ const GridTable: React.FC<GridTableProps> = ({
   setSelectedIds,
   toggleModal,
   module,
-  rows=2,
+  rows = 2,
   onUpdate = (...args: any) => { },
-  hideAction=false
+  hideAction = false
 }) => {
-   const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: any | null,type:string | null }>({
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ visible: boolean, data: any | null, type: string | null }>({
     visible: false,
     data: null,
     type: null
   });
- 
-  const handleOpenDialog = (data: any,type="Delete") => setDeleteConfirmation({ visible: true, data ,type});
-  const handleCloseDialog = () => setDeleteConfirmation({ visible: false, data: null,type:null });
-  const {userData}=useAppContext();
+
+  const handleOpenDialog = (data: any, type = "Delete") => setDeleteConfirmation({ visible: true, data, type });
+  const handleCloseDialog = () => setDeleteConfirmation({ visible: false, data: null, type: null });
+  const { userData } = useAppContext();
 
   const handleConfirm = () => {
     try {
-      if(deleteConfirmation.type=="Delete"){
+      if (deleteConfirmation.type == "Delete") {
         onDelete(deleteConfirmation.data);
-      }else if(deleteConfirmation.type=="Approval" && onUpdate){
-        onUpdate({...deleteConfirmation.data, isVerified: !deleteConfirmation.data?.isVerified});
+      } else if (deleteConfirmation.type == "Approval" && onUpdate) {
+        onUpdate({ ...deleteConfirmation.data, isVerified: !deleteConfirmation.data?.isVerified });
       }
       handleCloseDialog();
     } catch (error) {
@@ -96,13 +96,13 @@ const GridTable: React.FC<GridTableProps> = ({
                     color="primary"
                     indeterminate={selectedIds.length > 0 && selectedIds.length < data.length}
                     checked={selectedIds.length === data.length}
-                    // onChange={handleSelectAll}
+                  // onChange={handleSelectAll}
                   />
                 </TableCell>}
                 {columns.map((col, index) => (
                   <TableCell key={index}>{col.header}</TableCell>
                 ))}
-                {!hideAction?<TableCell
+                {!hideAction ? <TableCell
                   sx={{
                     position: "sticky",
                     right: 0,
@@ -112,7 +112,7 @@ const GridTable: React.FC<GridTableProps> = ({
                   }}
                 >
                   ACTIONS
-                </TableCell>:null}
+                </TableCell> : null}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -130,7 +130,7 @@ const GridTable: React.FC<GridTableProps> = ({
                     </TableCell>}
                     {columns.map((col, colIndex) => (
                       <TableCell key={colIndex}>
-                        {col.render ? col.render(row) : row[col.accessor]}
+                        {col.render ? col.render(row, rowIndex) : row[col.accessor]}
                       </TableCell>
                     ))}
                     {/* Action Column */}

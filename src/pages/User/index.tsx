@@ -3,7 +3,7 @@ import GridTable from '../../components/GridTable';
 import Layout from '../../components/Layout';
 import { MODULES } from '../../utils/constants';
 import AddUserDialog from './AddUserDialog';
-import { COLUMNS } from './constants';
+import { getColumns } from './constants';
 import { useUserStore } from '../../services/user';
 
 const Users = () => {
@@ -30,7 +30,7 @@ const Users = () => {
                 component={GridTable}
                 props={{
                     data,
-                    columns: COLUMNS,
+                    columns: getColumns(currentPage, rows),
                     currentPage,
                     totalPages,
                     total,
@@ -46,3 +46,4 @@ const Users = () => {
 };
 
 export default Users;
+

@@ -8,6 +8,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
 import { useCouponStore } from "../../services/coupons";
+import { useCompanyStore } from "../../services/company";
 import { ICoupon, CreateCouponRequest } from "../../types/coupons";
 import { DISCOUNT_TYPES, APPLICABLE_TO_TYPES } from "./constants";
 import dayjs from "dayjs";
@@ -34,6 +35,7 @@ export default function AddCouponDialog({
     }
 
     const { onCreate, detail, onUpdate, filters, setFilters } = useCouponStore();
+    const { globalCompanyId } = useCompanyStore();
     const [couponData, setCouponData] = React.useState<Partial<CreateCouponRequest>>(defaultData)
 
     const handleChange = (key: keyof CreateCouponRequest, value: any) => {
@@ -126,7 +128,7 @@ export default function AddCouponDialog({
             maximumDiscountAmount: Number(couponData.maximumDiscountAmount),
             usageLimitPerUser: Number(couponData.usageLimitPerUser),
             totalUsageLimit: Number(couponData.totalUsageLimit),
-
+            corporateId: globalCompanyId,
         };
 
         if (selectedId) {

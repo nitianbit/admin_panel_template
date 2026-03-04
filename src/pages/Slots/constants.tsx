@@ -2,7 +2,12 @@
 import { Chip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 
-export const COLUMNS = [
+export const getColumns = (currentPage: number, rows: number) => [
+    {
+        header: "S.No.",
+        accessor: "_index",
+        render: (_row: any, index?: number) => (currentPage - 1) * rows + (index ?? 0) + 1,
+    },
     {
         header: "Date",
         accessor: "date",

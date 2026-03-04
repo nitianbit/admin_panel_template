@@ -3,8 +3,9 @@ import GridTable from '../../components/GridTable';
 import Layout from '../../components/Layout';
 import { MODULES } from '../../utils/constants';
 import AddPartnerDialog from './AddPartnerDialog';
-import { COLUMNS } from './constants';
+import { getColumns } from './constants';
 import { usePartnerStore } from '../../services/partners';
+import { useCompanyStore } from '../../services/company';
 
 const Partners = () => {
     const {
@@ -15,13 +16,19 @@ const Partners = () => {
         rows,
         isLoading,
         fetchGrid,
+        setFilters,
         onPageChange,
         onDelete
     } = usePartnerStore();
+    const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        fetchGrid();
-    }, []);
+        if (globalCompanyId) {
+            setFilters({ corporateId: globalCompanyId });
+        } else {
+            fetchGrid();
+        }
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Partners Management">
@@ -30,7 +37,7 @@ const Partners = () => {
                 component={GridTable}
                 props={{
                     data,
-                    columns: COLUMNS,
+                    columns: getColumns(currentPage, rows),
                     currentPage,
                     totalPages,
                     total,
@@ -46,3 +53,4 @@ const Partners = () => {
 };
 
 export default Partners;
+

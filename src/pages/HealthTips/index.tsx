@@ -3,8 +3,9 @@ import GridTable from '../../components/GridTable';
 import Layout from '../../components/Layout';
 import { MODULES } from '../../utils/constants';
 import AddHealthTipsDialog from './AddHealthTipsDialog';
-import { COLUMNS } from './constants';
+import { getColumns } from './constants';
 import { useHealthTipStore } from '../../services/healthTips';
+import { useCompanyStore } from '../../services/company';
 
 const HealthTips = () => {
     const {
@@ -15,13 +16,19 @@ const HealthTips = () => {
         rows,
         isLoading,
         fetchGrid,
+        setFilters,
         onPageChange,
         onDelete
     } = useHealthTipStore();
+    const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        fetchGrid();
-    }, []);
+        if (globalCompanyId) {
+            setFilters({ corporateId: globalCompanyId });
+        } else {
+            fetchGrid();
+        }
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Health Tips">
@@ -30,7 +37,7 @@ const HealthTips = () => {
                 component={GridTable}
                 props={{
                     data,
-                    columns: COLUMNS,
+                    columns: getColumns(currentPage, rows),
                     currentPage,
                     totalPages,
                     total,
@@ -46,3 +53,4 @@ const HealthTips = () => {
 };
 
 export default HealthTips;
+

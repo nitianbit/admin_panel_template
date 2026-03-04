@@ -1,6 +1,11 @@
 import moment from "moment";
 
-export const COLUMNS = [
+export const getColumns = (currentPage: number, rows: number) => [
+    {
+        header: "S.No.",
+        accessor: "_index",
+        render: (_row: any, index?: number) => (currentPage - 1) * rows + (index ?? 0) + 1,
+    },
     {
         header: "Title",
         accessor: "title",

@@ -4,7 +4,7 @@ import GridTable from '../../components/GridTable';
 import Layout from '../../components/Layout';
 import { MODULES } from '../../utils/constants';
 import AddSlotsDialog from './AddSlotsDialog';
-import { COLUMNS } from './constants';
+import { getColumns } from './constants';
 import { useSlotStore } from '../../services/slots';
 
 const Slots = () => {
@@ -32,7 +32,7 @@ const Slots = () => {
                 component={GridTable}
                 props={{
                     data,
-                    columns: COLUMNS,
+                    columns: getColumns(currentPage, limit),
                     currentPage,
                     totalPages,
                     total,
@@ -48,3 +48,4 @@ const Slots = () => {
 };
 
 export default Slots;
+

@@ -6,6 +6,7 @@ import { MODULES } from '../../utils/constants';
 import AddCouponDialog from './AddCouponDialog';
 import { COLUMNS } from './constants';
 import { useCouponStore } from '../../services/coupons';
+import { useCompanyStore } from '../../services/company';
 
 const Coupons = () => {
     const {
@@ -15,14 +16,20 @@ const Coupons = () => {
         total,
         isLoading,
         fetchGrid,
+        setFilters,
         onPageChange,
         onDelete,
         limit
     } = useCouponStore();
+    const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        fetchGrid();
-    }, []);
+        if (globalCompanyId) {
+            setFilters({ corporateId: globalCompanyId });
+        } else {
+            fetchGrid();
+        }
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Coupons Management">

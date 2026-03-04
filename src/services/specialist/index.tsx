@@ -11,7 +11,7 @@ const store = create<SpecialistState>((set, get) => ({
     currentPage: 1,
     filters: {},
     isLoading: false,
-    rows: 20,
+    rows: 10,
     total: 0,
     allData: [],
 
@@ -25,19 +25,18 @@ const store = create<SpecialistState>((set, get) => ({
 
             const queryParams = new URLSearchParams(filters);
             queryParams.append('page', String(currentPage));
-            queryParams.append('rows', String(rows));
+            queryParams.append('limit', String(rows));
             const apiUrl = `${BASE}?${queryParams.toString()}`;
 
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
                 const resData = response.data?.data;
+                const pagination = response.data?.pagination;
                 set({
-                    data: resData?.rows ?? resData ?? [],
-                    ...(currentPage == 1 && {
-                        totalPages: Math.ceil((resData?.total ?? 0) / rows),
-                        total: resData?.total ?? 0,
-                    }),
+                    data: resData ?? [],
+                    totalPages: pagination?.totalPages ?? 1,
+                    total: pagination?.total ?? 0,
                 });
             } else {
                 showError(response.message);
