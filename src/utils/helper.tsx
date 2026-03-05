@@ -9,7 +9,7 @@ export function isError(e: unknown): e is Error {
 
 
 export const moduleRoles = {
-  "/dashboard": [MODULES.SUPERVISOR, MODULES.USER],
+  "/dashboard": [MODULES.ADMIN,MODULES.SUPERVISOR, MODULES.USER],
   "/stats": [MODULES.SUPERVISOR, MODULES.HR, MODULES.MARKETING],
   "/patient-list": [ MODULES.SUPERVISOR, MODULES.DOCTOR, MODULES.HR, MODULES.LABORATORY],
   "/patient-info/1": [ MODULES.SUPERVISOR, MODULES.DOCTOR],
