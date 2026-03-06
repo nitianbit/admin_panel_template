@@ -1,6 +1,27 @@
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, IconButton, Stack, Switch, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    Switch,
+    TextField,
+    Typography
+} from "@mui/material";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import React from 'react';
@@ -14,6 +35,7 @@ import { TestCategory, WellnessPackage } from "../../types/WellnessPackage";
 import { MODULES } from "../../utils/constants";
 import { uploadFile } from "../../utils/helper";
 import { useWellnessPackageStore } from "../../services/wellnessPackages";
+import { useCorporateStore } from "../../services/corporates";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -42,6 +64,7 @@ const initialData: WellnessPackage = {
 
 const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, filters, setFilters } = useWellnessPackageStore();
+    const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
     const [data, setData] = React.useState<WellnessPackage>({ ...initialData });
     const { handleSubmit } = useForm<WellnessPackage>();
     const resetData = () => {
@@ -54,6 +77,7 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
     const [newSubTestInput, setNewSubTestInput] = React.useState<{ [key: number]: string }>({});
+    const [targetType, setTargetType] = React.useState<string>('');
 
     const handleChange = (key: any, value: any) => setData(prev => ({ ...prev, [key]: value }));
     const handleClickOpen = () => toggleModal(true);
@@ -251,6 +275,10 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             ...(imageUrl && { imageUrl }),
         };
 
+        if (!data?._id && targetType === 'corporate' && data.corporate_id) {
+            payload.corporate_id = data.corporate_id;
+        }
+
         let response = null;
         if (data?._id) {
             payload._id = data._id;
@@ -271,9 +299,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
     const fetchDetail = async (selectedId: string) => {
         try {
             const res = await detail(selectedId);
-            setData(res?.data);
-            if (res?.data?.imageUrl && typeof res.data.imageUrl === 'string') {
-                setExistingImageUrl(res.data.imageUrl);
+            if (res?.data) {
+                setData(res.data);
+                setTargetType(res.data.corporate_id ? 'corporate' : 'all');
+                if (res.data.imageUrl && typeof res.data.imageUrl === 'string') {
+                    setExistingImageUrl(res.data.imageUrl);
+                }
             }
         } catch (error) {
 
@@ -282,6 +313,7 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
 
     React.useEffect(() => {
         setData({ ...initialData });
+        setTargetType('');
         imageFileRef.current = null;
         setExistingImageUrl("");
         setNewSubTestInput({});
@@ -289,6 +321,15 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             fetchDetail(selectedId);
         }
     }, [selectedId]);
+
+    React.useEffect(() => {
+        if (isModalOpen) {
+            fetchCorporates();
+        }
+    }, [isModalOpen, fetchCorporates]);
+
+    const isEditMode = Boolean(data?._id);
+    const canShowMainForm = isEditMode || targetType === 'all' || (targetType === 'corporate' && Boolean(data.corporate_id));
 
     return (
         <>
@@ -314,285 +355,331 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>{data?._id ? 'Edit Wellness Package' : 'Add Wellness Package'}</DialogTitle>
                     <DialogContent dividers>
+                        {!isEditMode && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                                    Package Scope
+                                </Typography>
+                                <FormControl>
+                                    <RadioGroup
+                                        row
+                                        value={targetType}
+                                        onChange={(e) => {
+                                            const nextTarget = e.target.value as 'all' | 'corporate';
+                                            setTargetType(nextTarget);
+                                            if (nextTarget === 'all') {
+                                                handleChange("corporate_id", undefined);
+                                            }
+                                        }}
+                                    >
+                                        <FormControlLabel value="all" control={<Radio />} label="For All" />
+                                        <FormControlLabel value="corporate" control={<Radio />} label="For Corporate" />
+                                    </RadioGroup>
+                                </FormControl>
 
-                        <TextField
-                            margin="dense"
-                            id="name"
-                            label="Name"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            value={data.name}
-                            onChange={(e) => {
-                                handleChange("name", e.target.value);
-                                if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
-                            }}
-                            error={!!fieldErrors.name}
-                            helperText={fieldErrors.name}
-                        />
-
-                        <TextField
-                            margin="dense"
-                            id="description"
-                            label="Description"
-                            type="text"
-                            fullWidth
-                            multiline
-                            rows={3}
-                            variant="outlined"
-                            value={data.description}
-                            onChange={(e) => {
-                                handleChange("description", e.target.value);
-                                if (fieldErrors.description) setFieldErrors(prev => ({ ...prev, description: '' }));
-                            }}
-                            error={!!fieldErrors.description}
-                            helperText={fieldErrors.description}
-                        />
-
-                        <TextField
-                            margin="dense"
-                            id="bookingProcedure"
-                            label="Booking Procedure"
-                            type="text"
-                            fullWidth
-                            multiline
-                            rows={3}
-                            variant="outlined"
-                            value={data.bookingProcedure}
-                            onChange={(e) => handleChange("bookingProcedure", e.target.value)}
-                        />
-
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="originalPrice"
-                                label="Original Price"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                value={data.originalPrice}
-                                onChange={(e) => {
-                                    handleChange("originalPrice", Number(e.target.value));
-                                    if (fieldErrors.originalPrice) setFieldErrors(prev => ({ ...prev, originalPrice: '' }));
-                                }}
-                                error={!!fieldErrors.originalPrice}
-                                helperText={fieldErrors.originalPrice}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="discountedPrice"
-                                label="Discounted Price"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                value={data.discountedPrice}
-                                onChange={(e) => {
-                                    handleChange("discountedPrice", Number(e.target.value));
-                                    if (fieldErrors.discountedPrice) setFieldErrors(prev => ({ ...prev, discountedPrice: '' }));
-                                }}
-                                error={!!fieldErrors.discountedPrice}
-                                helperText={fieldErrors.discountedPrice}
-                            />
-                        </Stack>
-
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="totalTestsCount"
-                                label="Total Tests Count"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                value={data.totalTestsCount}
-                                InputProps={{ readOnly: true }}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="category"
-                                label="Category"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                value={data.category}
-                                onChange={(e) => {
-                                    handleChange("category", e.target.value);
-                                    if (fieldErrors.category) setFieldErrors(prev => ({ ...prev, category: '' }));
-                                }}
-                                error={!!fieldErrors.category}
-                                helperText={fieldErrors.category}
-                            />
-                        </Stack>
-
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="order"
-                                label="Order"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                value={data.order}
-                                onChange={(e) => {
-                                    handleChange("order", Number(e.target.value));
-                                    if (fieldErrors.order) setFieldErrors(prev => ({ ...prev, order: '' }));
-                                }}
-                                error={!!fieldErrors.order}
-                                helperText={fieldErrors.order}
-                            />
-                        </Stack>
-
-                        {/* Tests Included Section */}
-                        <Divider sx={{ my: 2 }} />
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography variant="subtitle1" fontWeight="bold">
-                                Tests Included ({data.totalTestsCount} total tests)
-                            </Typography>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<AddIcon />}
-                                onClick={addTestCategory}
-                            >
-                                Add Category
-                            </Button>
-                        </Stack>
-                        {fieldErrors.testsIncluded && (
-                            <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                                {fieldErrors.testsIncluded}
-                            </Typography>
+                                {targetType === 'corporate' && (
+                                    <FormControl fullWidth margin="dense">
+                                        <InputLabel id="corporate-select-label">Select Corporate</InputLabel>
+                                        <Select
+                                            labelId="corporate-select-label"
+                                            label="Select Corporate"
+                                            value={data.corporate_id ?? ''}
+                                            onChange={(e) => handleChange("corporate_id", e.target.value)}
+                                        >
+                                            {corporates.map((corporate) => (
+                                                <MenuItem key={corporate._id} value={corporate._id}>
+                                                    {corporate.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </Box>
                         )}
 
-                        {data.testsIncluded.map((category: TestCategory, catIndex: number) => (
-                            <Box
-                                key={catIndex}
-                                sx={{
-                                    mt: 2,
-                                    p: 2,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    borderRadius: 1,
-                                }}
-                            >
-                                <Stack direction="row" spacing={2} alignItems="center">
+                        {canShowMainForm && (
+                            <>
+
+                                <TextField
+                                    margin="dense"
+                                    id="name"
+                                    label="Name"
+                                    type="text"
+                                    fullWidth
+                                    variant="outlined"
+                                    value={data.name}
+                                    onChange={(e) => {
+                                        handleChange("name", e.target.value);
+                                        if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                                    }}
+                                    error={!!fieldErrors.name}
+                                    helperText={fieldErrors.name}
+                                />
+
+                                <TextField
+                                    margin="dense"
+                                    id="description"
+                                    label="Description"
+                                    type="text"
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    variant="outlined"
+                                    value={data.description}
+                                    onChange={(e) => {
+                                        handleChange("description", e.target.value);
+                                        if (fieldErrors.description) setFieldErrors(prev => ({ ...prev, description: '' }));
+                                    }}
+                                    error={!!fieldErrors.description}
+                                    helperText={fieldErrors.description}
+                                />
+
+                                <TextField
+                                    margin="dense"
+                                    id="bookingProcedure"
+                                    label="Booking Procedure"
+                                    type="text"
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    variant="outlined"
+                                    value={data.bookingProcedure}
+                                    onChange={(e) => handleChange("bookingProcedure", e.target.value)}
+                                />
+
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
                                     <TextField
                                         margin="dense"
-                                        label="Category Name"
+                                        id="originalPrice"
+                                        label="Original Price"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        value={data.originalPrice}
+                                        onChange={(e) => {
+                                            handleChange("originalPrice", Number(e.target.value));
+                                            if (fieldErrors.originalPrice) setFieldErrors(prev => ({ ...prev, originalPrice: '' }));
+                                        }}
+                                        error={!!fieldErrors.originalPrice}
+                                        helperText={fieldErrors.originalPrice}
+                                    />
+                                    <TextField
+                                        margin="dense"
+                                        id="discountedPrice"
+                                        label="Discounted Price"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        value={data.discountedPrice}
+                                        onChange={(e) => {
+                                            handleChange("discountedPrice", Number(e.target.value));
+                                            if (fieldErrors.discountedPrice) setFieldErrors(prev => ({ ...prev, discountedPrice: '' }));
+                                        }}
+                                        error={!!fieldErrors.discountedPrice}
+                                        helperText={fieldErrors.discountedPrice}
+                                    />
+                                </Stack>
+
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="totalTestsCount"
+                                        label="Total Tests Count"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        value={data.totalTestsCount}
+                                        InputProps={{ readOnly: true }}
+                                    />
+                                    <TextField
+                                        margin="dense"
+                                        id="category"
+                                        label="Category"
                                         type="text"
                                         fullWidth
                                         variant="outlined"
-                                        size="small"
-                                        value={category.categoryName}
+                                        value={data.category}
                                         onChange={(e) => {
-                                            updateCategoryName(catIndex, e.target.value);
-                                            if (fieldErrors[`category_${catIndex}`]) setFieldErrors(prev => ({ ...prev, [`category_${catIndex}`]: '' }));
+                                            handleChange("category", e.target.value);
+                                            if (fieldErrors.category) setFieldErrors(prev => ({ ...prev, category: '' }));
                                         }}
-                                        error={!!fieldErrors[`category_${catIndex}`]}
-                                        helperText={fieldErrors[`category_${catIndex}`]}
-                                        placeholder="e.g. Blood Tests, Imaging"
+                                        error={!!fieldErrors.category}
+                                        helperText={fieldErrors.category}
                                     />
-                                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                                        {category.subTests.length} tests
-                                    </Typography>
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => removeTestCategory(catIndex)}
-                                        size="small"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
                                 </Stack>
-                                {fieldErrors[`subTests_${catIndex}`] && (
+
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="order"
+                                        label="Order"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        value={data.order}
+                                        onChange={(e) => {
+                                            handleChange("order", Number(e.target.value));
+                                            if (fieldErrors.order) setFieldErrors(prev => ({ ...prev, order: '' }));
+                                        }}
+                                        error={!!fieldErrors.order}
+                                        helperText={fieldErrors.order}
+                                    />
+                                </Stack>
+
+                                {/* Tests Included Section */}
+                                <Divider sx={{ my: 2 }} />
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Tests Included ({data.totalTestsCount} total tests)
+                                    </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<AddIcon />}
+                                        onClick={addTestCategory}
+                                    >
+                                        Add Category
+                                    </Button>
+                                </Stack>
+                                {fieldErrors.testsIncluded && (
                                     <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                                        {fieldErrors[`subTests_${catIndex}`]}
+                                        {fieldErrors.testsIncluded}
                                     </Typography>
                                 )}
 
-                                {/* Sub-tests chips */}
-                                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 0.5 }}>
-                                    {category.subTests.map((subTest: string, subIndex: number) => (
-                                        <Chip
-                                            key={subIndex}
-                                            label={subTest}
-                                            onDelete={() => removeSubTest(catIndex, subIndex)}
-                                            size="small"
-                                            color="primary"
-                                            variant="outlined"
-                                        />
-                                    ))}
-                                </Stack>
-
-                                {/* Add sub-test input */}
-                                <Stack direction="row" spacing={1} sx={{ mt: 1 }} alignItems="center">
-                                    <TextField
-                                        size="small"
-                                        label="Add Sub Test"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={newSubTestInput[catIndex] || ""}
-                                        onChange={(e) =>
-                                            setNewSubTestInput(prev => ({ ...prev, [catIndex]: e.target.value }))
-                                        }
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                addSubTest(catIndex);
-                                            }
+                                {data.testsIncluded.map((category: TestCategory, catIndex: number) => (
+                                    <Box
+                                        key={catIndex}
+                                        sx={{
+                                            mt: 2,
+                                            p: 2,
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            borderRadius: 1,
                                         }}
-                                        placeholder="e.g. CBC, Lipid Profile"
-                                    />
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() => addSubTest(catIndex)}
-                                        sx={{ whiteSpace: 'nowrap' }}
                                     >
-                                        Add
-                                    </Button>
+                                        <Stack direction="row" spacing={2} alignItems="center">
+                                            <TextField
+                                                margin="dense"
+                                                label="Category Name"
+                                                type="text"
+                                                fullWidth
+                                                variant="outlined"
+                                                size="small"
+                                                value={category.categoryName}
+                                                onChange={(e) => {
+                                                    updateCategoryName(catIndex, e.target.value);
+                                                    if (fieldErrors[`category_${catIndex}`]) setFieldErrors(prev => ({ ...prev, [`category_${catIndex}`]: '' }));
+                                                }}
+                                                error={!!fieldErrors[`category_${catIndex}`]}
+                                                helperText={fieldErrors[`category_${catIndex}`]}
+                                                placeholder="e.g. Blood Tests, Imaging"
+                                            />
+                                            <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                                                {category.subTests.length} tests
+                                            </Typography>
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => removeTestCategory(catIndex)}
+                                                size="small"
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Stack>
+                                        {fieldErrors[`subTests_${catIndex}`] && (
+                                            <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                                                {fieldErrors[`subTests_${catIndex}`]}
+                                            </Typography>
+                                        )}
+
+                                        {/* Sub-tests chips */}
+                                        <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 0.5 }}>
+                                            {category.subTests.map((subTest: string, subIndex: number) => (
+                                                <Chip
+                                                    key={subIndex}
+                                                    label={subTest}
+                                                    onDelete={() => removeSubTest(catIndex, subIndex)}
+                                                    size="small"
+                                                    color="primary"
+                                                    variant="outlined"
+                                                />
+                                            ))}
+                                        </Stack>
+
+                                        {/* Add sub-test input */}
+                                        <Stack direction="row" spacing={1} sx={{ mt: 1 }} alignItems="center">
+                                            <TextField
+                                                size="small"
+                                                label="Add Sub Test"
+                                                variant="outlined"
+                                                fullWidth
+                                                value={newSubTestInput[catIndex] || ""}
+                                                onChange={(e) =>
+                                                    setNewSubTestInput(prev => ({ ...prev, [catIndex]: e.target.value }))
+                                                }
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        addSubTest(catIndex);
+                                                    }
+                                                }}
+                                                placeholder="e.g. CBC, Lipid Profile"
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                onClick={() => addSubTest(catIndex)}
+                                                sx={{ whiteSpace: 'nowrap' }}
+                                            >
+                                                Add
+                                            </Button>
+                                        </Stack>
+                                    </Box>
+                                ))}
+                                <Divider sx={{ my: 2 }} />
+
+                                <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={data.hasFreeDoctorConsultation ?? false}
+                                                onChange={(e) => handleChange("hasFreeDoctorConsultation", e.target.checked)}
+                                            />
+                                        }
+                                        label="Free Consultation"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={data.isActive ?? true}
+                                                onChange={(e) => handleChange("isActive", e.target.checked)}
+                                            />
+                                        }
+                                        label="Active"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={data.isPopular ?? false}
+                                                onChange={(e) => handleChange("isPopular", e.target.checked)}
+                                            />
+                                        }
+                                        label="Popular"
+                                    />
                                 </Stack>
-                            </Box>
-                        ))}
-                        <Divider sx={{ my: 2 }} />
 
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={data.hasFreeDoctorConsultation ?? false}
-                                        onChange={(e) => handleChange("hasFreeDoctorConsultation", e.target.checked)}
-                                    />
-                                }
-                                label="Free Consultation"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={data.isActive ?? true}
-                                        onChange={(e) => handleChange("isActive", e.target.checked)}
-                                    />
-                                }
-                                label="Active"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={data.isPopular ?? false}
-                                        onChange={(e) => handleChange("isPopular", e.target.checked)}
-                                    />
-                                }
-                                label="Popular"
-                            />
-                        </Stack>
-
-                        {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
-                        <ImageUpload
-                            onChange={(files: any) => {
-                                imageFileRef.current = files?.length ? files[0] : null;
-                                if (files?.length) {
-                                    setExistingImageUrl("");
-                                }
-                            }}
-                            allow="image/*"
-                        />
+                                {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
+                                <ImageUpload
+                                    onChange={(files: any) => {
+                                        imageFileRef.current = files?.length ? files[0] : null;
+                                        if (files?.length) {
+                                            setExistingImageUrl("");
+                                        }
+                                    }}
+                                    allow="image/*"
+                                />
+                            </>
+                        )}
 
                     </DialogContent>
                     <DialogActions>

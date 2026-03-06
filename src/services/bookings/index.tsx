@@ -156,7 +156,8 @@ const store = create<BookingState>((set, get) => ({
         try {
             const response = await doGET(`${BASE_URL}/${id}`);
             if (response.status >= 200 && response.status < 400) {
-                return response.data?.data || response.data;
+                const bookingData = response.data?.data || response.data;
+                return { data: bookingData };
             } else {
                 showError(response.message || 'Failed to fetch booking details');
                 return null;

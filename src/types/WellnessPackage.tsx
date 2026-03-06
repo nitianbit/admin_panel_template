@@ -6,6 +6,7 @@ export interface TestCategory {
 
 export interface WellnessPackage {
     _id?: string;
+    corporate_id?: string;
     name: string;
     description?: string;
     bookingProcedure?: string;
@@ -63,5 +64,5 @@ export interface WellnessPackageState {
     onCreate: (...args: any) => Promise<WellnessPackage | null>;
     onUpdate: (...args: any) => Promise<WellnessPackage | null>;
     onDelete: (...args: any) => Promise<void>;
-    detail: (id: string) => Promise<{ data: WellnessPackage }>;
+    detail: (id: string) => Promise<{ data: WellnessPackage } | undefined>;
 }
