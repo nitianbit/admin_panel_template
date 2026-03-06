@@ -6,6 +6,7 @@ export interface TestCategory {
 
 export interface WellnessPackage {
     _id?: string;
+    corporate_id?: string;
     name: string;
     description?: string;
     bookingProcedure?: string;

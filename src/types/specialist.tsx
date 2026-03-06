@@ -1,5 +1,6 @@
 export interface Specialist {
     _id?: string;
+    corporate_id?: string;
     name: string;
     profilePictureUrl?: string;
     rating?: number;

@@ -1,6 +1,27 @@
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, IconButton, Stack, Switch, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    Switch,
+    TextField,
+    Typography
+} from "@mui/material";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import React from 'react';
@@ -14,6 +35,7 @@ import { TestCategory, WellnessPackage } from "../../types/WellnessPackage";
 import { MODULES } from "../../utils/constants";
 import { uploadFile } from "../../utils/helper";
 import { useWellnessPackageStore } from "../../services/wellnessPackages";
+import { useCorporateStore } from "../../services/corporates";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -42,9 +64,11 @@ const initialData: WellnessPackage = {
 
 const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, filters, setFilters } = useWellnessPackageStore();
+    const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
     const [data, setData] = React.useState<WellnessPackage>({ ...initialData });
     const { handleSubmit } = useForm<WellnessPackage>();
     const resetData = () => setData({ ...initialData });
+    const [targetType, setTargetType] = React.useState<'all' | 'corporate' | ''>('');
 
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
@@ -165,6 +189,16 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
     };
 
     const onSubmit = async () => {
+        if (!data?._id && !targetType) {
+            showError('Please select whether this package is for all users or a corporate');
+            return;
+        }
+
+        if (!data?._id && targetType === 'corporate' && !data.corporate_id) {
+            showError('Please select a corporate');
+            return;
+        }
+
         if (!data?.name) {
             showError('Please enter a name');
             return;
@@ -216,6 +250,10 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             ...(imageUrl && { imageUrl }),
         };
 
+        if (!data?._id && targetType === 'corporate' && data.corporate_id) {
+            payload.corporate_id = data.corporate_id;
+        }
+
         let response = null;
         if (data?._id) {
             payload._id = data._id;
@@ -237,6 +275,7 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
         try {
             const res = await detail(selectedId);
             setData(res?.data);
+            setTargetType(res?.data?.corporate_id ? 'corporate' : 'all');
             if (res?.data?.imageUrl && typeof res.data.imageUrl === 'string') {
                 setExistingImageUrl(res.data.imageUrl);
             }
@@ -247,6 +286,7 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
 
     React.useEffect(() => {
         setData({ ...initialData });
+        setTargetType('');
         imageFileRef.current = null;
         setExistingImageUrl("");
         setNewSubTestInput({});
@@ -254,6 +294,15 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             fetchDetail(selectedId);
         }
     }, [selectedId]);
+
+    React.useEffect(() => {
+        if (isModalOpen) {
+            fetchCorporates();
+        }
+    }, [isModalOpen, fetchCorporates]);
+
+    const isEditMode = Boolean(data?._id);
+    const canShowMainForm = isEditMode || targetType === 'all' || (targetType === 'corporate' && Boolean(data.corporate_id));
 
     return (
         <>
@@ -279,6 +328,50 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>{data?._id ? 'Edit Wellness Package' : 'Add Wellness Package'}</DialogTitle>
                     <DialogContent dividers>
+                        {!isEditMode && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                                    Package Scope
+                                </Typography>
+                                <FormControl>
+                                    <RadioGroup
+                                        row
+                                        value={targetType}
+                                        onChange={(e) => {
+                                            const nextTarget = e.target.value as 'all' | 'corporate';
+                                            setTargetType(nextTarget);
+                                            if (nextTarget === 'all') {
+                                                handleChange("corporate_id", undefined);
+                                            }
+                                        }}
+                                    >
+                                        <FormControlLabel value="all" control={<Radio />} label="For All" />
+                                        <FormControlLabel value="corporate" control={<Radio />} label="For Corporate" />
+                                    </RadioGroup>
+                                </FormControl>
+
+                                {targetType === 'corporate' && (
+                                    <FormControl fullWidth margin="dense">
+                                        <InputLabel id="corporate-select-label">Select Corporate</InputLabel>
+                                        <Select
+                                            labelId="corporate-select-label"
+                                            label="Select Corporate"
+                                            value={data.corporate_id ?? ''}
+                                            onChange={(e) => handleChange("corporate_id", e.target.value)}
+                                        >
+                                            {corporates.map((corporate) => (
+                                                <MenuItem key={corporate._id} value={corporate._id}>
+                                                    {corporate.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </Box>
+                        )}
+
+                        {canShowMainForm && (
+                            <>
 
                         <TextField
                             margin="dense"
@@ -513,6 +606,8 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                             }}
                             allow="image/*"
                         />
+                            </>
+                        )}
 
                     </DialogContent>
                     <DialogActions>

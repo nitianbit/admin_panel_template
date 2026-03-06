@@ -1,5 +1,23 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Stack, Switch, TextField } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormControlLabel,
+    InputLabel,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    Switch,
+    TextField,
+    Typography
+} from "@mui/material";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import React from 'react';
@@ -13,6 +31,7 @@ import { Specialist } from "../../types/specialist";
 import { MODULES } from "../../utils/constants";
 import { uploadFile } from "../../utils/helper";
 import { useSpecialistStore } from "../../services/specialist";
+import { useCorporateStore } from "../../services/corporates";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -46,9 +65,11 @@ const initialData: Specialist = {
 
 const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, filters, setFilters } = useSpecialistStore();
+    const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
     const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<Specialist>({
         defaultValues: { ...initialData },
     });
+    const [targetType, setTargetType] = React.useState<'all' | 'corporate' | ''>('');
 
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
@@ -107,6 +128,16 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     };
 
     const onSubmit = async (formValues: Specialist) => {
+        if (!formValues?._id && !targetType) {
+            showError('Please select whether this specialist is for all users or a corporate');
+            return;
+        }
+
+        if (!formValues?._id && targetType === 'corporate' && !formValues.corporate_id) {
+            showError('Please select a corporate');
+            return;
+        }
+
         if (!formValues?.name) {
             showError('Please enter a name');
             return;
@@ -137,6 +168,14 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             profilePictureUrl: profilePictureUrl,
         };
 
+        if (formValues?._id) {
+            delete payload.corporate_id;
+        } else if (targetType === 'corporate' && formValues.corporate_id) {
+            payload.corporate_id = formValues.corporate_id;
+        } else {
+            delete payload.corporate_id;
+        }
+
         let response = null;
         if (formValues?._id) {
             response = await onUpdate(payload);
@@ -156,6 +195,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         try {
             const data = await detail(selectedId);
             reset(data?.data);
+            setTargetType(data?.data?.corporate_id ? 'corporate' : 'all');
             if (data?.data?.profilePictureUrl && typeof data.data.profilePictureUrl === 'string') {
                 setExistingImageUrl(data.data.profilePictureUrl);
             }
@@ -166,6 +206,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
     React.useEffect(() => {
         reset({ ...initialData });
+        setTargetType('');
         imageFileRef.current = null;
         setExistingImageUrl("");
         if (selectedId) {
@@ -173,10 +214,18 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         }
     }, [selectedId]);
 
+    React.useEffect(() => {
+        if (isModalOpen) {
+            fetchCorporates();
+        }
+    }, [isModalOpen, fetchCorporates]);
+
     const watchedId = watch("_id");
+    const watchedCorporateId = watch("corporate_id");
     const watchedIsConsultationFree = watch("isConsultationFree");
     const watchedIsActive = watch("isActive");
     const watchedIsVerified = watch("isVerified");
+    const canShowMainForm = Boolean(watchedId) || targetType === 'all' || (targetType === 'corporate' && Boolean(watchedCorporateId));
 
     return (
         <>
@@ -202,6 +251,50 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>{watchedId ? 'Edit Specialist' : 'Add Specialist'}</DialogTitle>
                     <DialogContent dividers>
+                        {!watchedId && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                                    Specialist Scope
+                                </Typography>
+                                <FormControl>
+                                    <RadioGroup
+                                        row
+                                        value={targetType}
+                                        onChange={(e) => {
+                                            const nextTarget = e.target.value as 'all' | 'corporate';
+                                            setTargetType(nextTarget);
+                                            if (nextTarget === 'all') {
+                                                setValue("corporate_id", undefined);
+                                            }
+                                        }}
+                                    >
+                                        <FormControlLabel value="all" control={<Radio />} label="For All" />
+                                        <FormControlLabel value="corporate" control={<Radio />} label="For Corporate" />
+                                    </RadioGroup>
+                                </FormControl>
+
+                                {targetType === 'corporate' && (
+                                    <FormControl fullWidth margin="dense">
+                                        <InputLabel id="specialist-corporate-select-label">Select Corporate</InputLabel>
+                                        <Select
+                                            labelId="specialist-corporate-select-label"
+                                            label="Select Corporate"
+                                            value={watchedCorporateId ?? ''}
+                                            onChange={(e) => setValue("corporate_id", e.target.value)}
+                                        >
+                                            {corporates.map((corporate) => (
+                                                <MenuItem key={corporate._id} value={corporate._id}>
+                                                    {corporate.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </Box>
+                        )}
+
+                        {canShowMainForm && (
+                            <>
 
                         <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
                             <TextField
@@ -393,6 +486,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             }}
                             allow="image/*"
                         />
+                            </>
+                        )}
 
                     </DialogContent>
                     <DialogActions>
