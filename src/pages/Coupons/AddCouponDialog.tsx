@@ -11,6 +11,7 @@ import { useCouponStore } from "../../services/coupons";
 import { useCompanyStore } from "../../services/company";
 import { ICoupon, CreateCouponRequest } from "../../types/coupons";
 import { DISCOUNT_TYPES, APPLICABLE_TO_TYPES } from "./constants";
+import { showError } from "../../services/toaster";
 import dayjs from "dayjs";
 
 export default function AddCouponDialog({
@@ -40,7 +41,10 @@ export default function AddCouponDialog({
 
     const handleChange = (key: keyof CreateCouponRequest, value: any) => {
         setCouponData(prev => ({ ...prev, [key]: value }));
+        if (fieldErrors[key]) setFieldErrors(prev => ({ ...prev, [key]: '' }));
     }
+
+    const [fieldErrors, setFieldErrors] = React.useState<{ [key: string]: string }>({});
 
     const {
         register,
@@ -113,7 +117,63 @@ export default function AddCouponDialog({
         }, 300);
     };
 
+    const validateForm = (): boolean => {
+        const errs: { [key: string]: string } = {};
+
+        if (!couponData.code || couponData.code.trim().length === 0) {
+            errs.code = 'Coupon code is required';
+        } else if (couponData.code.trim().length < 3) {
+            errs.code = 'Coupon code must be at least 3 characters';
+        } else if (!/^[A-Z0-9]+$/.test(couponData.code.trim())) {
+            errs.code = 'Coupon code must contain only uppercase letters and numbers';
+        }
+
+        if (!couponData.title || couponData.title.trim().length === 0) {
+            errs.title = 'Title is required';
+        }
+
+        if (!couponData.discountValue || Number(couponData.discountValue) <= 0) {
+            errs.discountValue = 'Discount value must be greater than 0';
+        } else if (couponData.discountType === 'percentage' && Number(couponData.discountValue) > 100) {
+            errs.discountValue = 'Percentage discount cannot exceed 100%';
+        }
+
+        if (couponData.discountType === 'percentage' && couponData.maximumDiscountAmount !== undefined && Number(couponData.maximumDiscountAmount) < 0) {
+            errs.maximumDiscountAmount = 'Max discount amount cannot be negative';
+        }
+
+        if (couponData.minimumPurchaseAmount !== undefined && Number(couponData.minimumPurchaseAmount) < 0) {
+            errs.minimumPurchaseAmount = 'Min purchase amount cannot be negative';
+        }
+
+        if (!couponData.startDate) {
+            errs.startDate = 'Start date is required';
+        }
+
+        if (!couponData.endDate) {
+            errs.endDate = 'End date is required';
+        } else if (couponData.startDate && couponData.endDate && couponData.endDate < couponData.startDate) {
+            errs.endDate = 'End date must be after start date';
+        }
+
+        if (!couponData.usageLimitPerUser || Number(couponData.usageLimitPerUser) < 1) {
+            errs.usageLimitPerUser = 'Limit per user must be at least 1';
+        }
+
+        if (!couponData.totalUsageLimit || Number(couponData.totalUsageLimit) < 1) {
+            errs.totalUsageLimit = 'Total usage limit must be at least 1';
+        }
+
+        setFieldErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const onSubmit = () => {
+        if (!validateForm()) {
+            showError('Please fix the highlighted errors');
+            return;
+        }
+
         // Format dates (YYYY-MM-DD to YYYYMMDD)
         const formattedStartDate = couponData.startDate ? couponData.startDate.replace(/-/g, '') : '';
         const formattedEndDate = couponData.endDate ? couponData.endDate.replace(/-/g, '') : '';
@@ -132,7 +192,6 @@ export default function AddCouponDialog({
         };
 
         if (selectedId) {
-            // For update, we need _id which is not in CreateCouponRequest but available in detail response
             onUpdate({ _id: selectedId, ...payload } as ICoupon);
         } else {
             onCreate(payload as CreateCouponRequest);
@@ -231,7 +290,8 @@ export default function AddCouponDialog({
                                         inputProps={{ style: { textTransform: 'uppercase' } }}
                                         value={couponData.code}
                                         onChange={(e) => handleChange("code", e.target.value.toUpperCase())}
-                                        required
+                                        error={!!fieldErrors.code}
+                                        helperText={fieldErrors.code}
                                     />
                                 </Grid>
 
@@ -246,6 +306,8 @@ export default function AddCouponDialog({
                                         placeholder="Display Title"
                                         value={couponData.title}
                                         onChange={(e) => handleChange("title", e.target.value)}
+                                        error={!!fieldErrors.title}
+                                        helperText={fieldErrors.title}
                                     />
                                 </Grid>
 
@@ -300,7 +362,8 @@ export default function AddCouponDialog({
                                         variant="outlined"
                                         value={couponData.discountValue}
                                         onChange={(e) => handleChange("discountValue", e.target.value)}
-                                        required
+                                        error={!!fieldErrors.discountValue}
+                                        helperText={fieldErrors.discountValue}
                                     />
                                 </Grid>
 
@@ -313,10 +376,11 @@ export default function AddCouponDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        helperText="For percentage discounts only"
                                         value={couponData.maximumDiscountAmount}
                                         onChange={(e) => handleChange("maximumDiscountAmount", e.target.value)}
                                         disabled={couponData.discountType === 'fixed'}
+                                        error={!!fieldErrors.maximumDiscountAmount}
+                                        helperText={fieldErrors.maximumDiscountAmount || 'For percentage discounts only'}
                                     />
                                 </Grid>
 
@@ -331,6 +395,8 @@ export default function AddCouponDialog({
                                         variant="outlined"
                                         value={couponData.minimumPurchaseAmount}
                                         onChange={(e) => handleChange("minimumPurchaseAmount", e.target.value)}
+                                        error={!!fieldErrors.minimumPurchaseAmount}
+                                        helperText={fieldErrors.minimumPurchaseAmount}
                                     />
                                 </Grid>
 
@@ -370,7 +436,8 @@ export default function AddCouponDialog({
                                         InputLabelProps={{ shrink: true }}
                                         value={couponData.startDate}
                                         onChange={(e) => handleChange("startDate", e.target.value)}
-                                        required
+                                        error={!!fieldErrors.startDate}
+                                        helperText={fieldErrors.startDate}
                                     />
                                 </Grid>
 
@@ -386,7 +453,8 @@ export default function AddCouponDialog({
                                         InputLabelProps={{ shrink: true }}
                                         value={couponData.endDate}
                                         onChange={(e) => handleChange("endDate", e.target.value)}
-                                        required
+                                        error={!!fieldErrors.endDate}
+                                        helperText={fieldErrors.endDate}
                                     />
                                 </Grid>
 
@@ -402,6 +470,8 @@ export default function AddCouponDialog({
                                         variant="outlined"
                                         value={couponData.usageLimitPerUser}
                                         onChange={(e) => handleChange("usageLimitPerUser", e.target.value)}
+                                        error={!!fieldErrors.usageLimitPerUser}
+                                        helperText={fieldErrors.usageLimitPerUser}
                                     />
                                 </Grid>
 
@@ -416,6 +486,8 @@ export default function AddCouponDialog({
                                         variant="outlined"
                                         value={couponData.totalUsageLimit}
                                         onChange={(e) => handleChange("totalUsageLimit", e.target.value)}
+                                        error={!!fieldErrors.totalUsageLimit}
+                                        helperText={fieldErrors.totalUsageLimit}
                                     />
                                 </Grid>
 

@@ -251,9 +251,12 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                     <TextField
                                         label="Title"
                                         fullWidth
-                                        {...register("title", { required: "Title is required" })}
+                                        {...register("title", {
+                                            required: "Title is required",
+                                            minLength: { value: 3, message: "Title must be at least 3 characters" },
+                                        })}
                                         error={!!errors.title}
-                                        helperText={errors.title?.message}
+                                        helperText={errors.title?.message as string}
                                     />
 
                                     <Grid container spacing={2}>
@@ -261,7 +264,11 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             <TextField
                                                 label="Category"
                                                 fullWidth
-                                                {...register("category")}
+                                                {...register("category", {
+                                                    required: "Category is required",
+                                                })}
+                                                error={!!errors.category}
+                                                helperText={errors.category?.message as string}
                                             />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
@@ -269,7 +276,12 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                                 label="Order"
                                                 type="number"
                                                 fullWidth
-                                                {...register("order", { valueAsNumber: true })}
+                                                {...register("order", {
+                                                    valueAsNumber: true,
+                                                    min: { value: 0, message: "Order must be 0 or greater" },
+                                                })}
+                                                error={!!errors.order}
+                                                helperText={errors.order?.message as string}
                                             />
                                         </Grid>
                                     </Grid>
@@ -279,7 +291,12 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         fullWidth
                                         multiline
                                         rows={2}
-                                        {...register("shortDescription")}
+                                        {...register("shortDescription", {
+                                            required: "Short description is required",
+                                            minLength: { value: 10, message: "Short description must be at least 10 characters" },
+                                        })}
+                                        error={!!errors.shortDescription}
+                                        helperText={errors.shortDescription?.message as string}
                                     />
 
                                     <Box>

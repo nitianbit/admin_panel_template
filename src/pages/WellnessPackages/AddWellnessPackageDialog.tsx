@@ -44,7 +44,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
     const { onCreate, detail, onUpdate, filters, setFilters } = useWellnessPackageStore();
     const [data, setData] = React.useState<WellnessPackage>({ ...initialData });
     const { handleSubmit } = useForm<WellnessPackage>();
-    const resetData = () => setData({ ...initialData });
+    const resetData = () => {
+        setData({ ...initialData });
+        setFieldErrors({});
+    };
+
+    const [fieldErrors, setFieldErrors] = React.useState<{ [key: string]: string }>({});
 
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
@@ -164,27 +169,57 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
         });
     };
 
-    const onSubmit = async () => {
-        if (!data?.name) {
-            showError('Please enter a name');
-            return;
+    const validateForm = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+
+        if (!data.name || data.name.trim().length === 0) {
+            newErrors.name = 'Name is required';
+        } else if (data.name.trim().length < 3) {
+            newErrors.name = 'Name must be at least 3 characters';
+        }
+
+        if (!data.description || data.description.trim().length === 0) {
+            newErrors.description = 'Description is required';
+        }
+
+        if (data.originalPrice === undefined || data.originalPrice === null || data.originalPrice <= 0) {
+            newErrors.originalPrice = 'Original price must be greater than 0';
+        }
+
+        if (data.discountedPrice !== undefined && data.discountedPrice !== null && data.discountedPrice > data.originalPrice) {
+            newErrors.discountedPrice = 'Discounted price cannot exceed original price';
+        }
+
+        if (!data.category || data.category.trim().length === 0) {
+            newErrors.category = 'Category is required';
+        }
+
+        if (data.order !== undefined && data.order !== null && data.order < 0) {
+            newErrors.order = 'Order must be 0 or greater';
         }
 
         if (!data.testsIncluded || data.testsIncluded.length === 0) {
-            showError('Please add at least one test category');
-            return;
+            newErrors.testsIncluded = 'Please add at least one test category';
+        } else {
+            for (let i = 0; i < data.testsIncluded.length; i++) {
+                const cat = data.testsIncluded[i];
+                if (!cat.categoryName.trim()) {
+                    newErrors[`category_${i}`] = `Please enter a name for test category ${i + 1}`;
+                }
+                if (cat.subTests.length === 0) {
+                    newErrors[`subTests_${i}`] = `Please add at least one sub-test in "${cat.categoryName || `Category ${i + 1}`}"`;
+                }
+            }
         }
 
-        for (let i = 0; i < data.testsIncluded.length; i++) {
-            const cat = data.testsIncluded[i];
-            if (!cat.categoryName.trim()) {
-                showError(`Please enter a name for test category ${i + 1}`);
-                return;
-            }
-            if (cat.subTests.length === 0) {
-                showError(`Please add at least one sub-test in "${cat.categoryName}"`);
-                return;
-            }
+        setFieldErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const onSubmit = async () => {
+        if (!validateForm()) {
+            showError('Please fix the highlighted errors');
+            return;
         }
 
         let imageUrl = existingImageUrl || "";
@@ -288,7 +323,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                             fullWidth
                             variant="outlined"
                             value={data.name}
-                            onChange={(e) => handleChange("name", e.target.value)}
+                            onChange={(e) => {
+                                handleChange("name", e.target.value);
+                                if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                            }}
+                            error={!!fieldErrors.name}
+                            helperText={fieldErrors.name}
                         />
 
                         <TextField
@@ -301,7 +341,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                             rows={3}
                             variant="outlined"
                             value={data.description}
-                            onChange={(e) => handleChange("description", e.target.value)}
+                            onChange={(e) => {
+                                handleChange("description", e.target.value);
+                                if (fieldErrors.description) setFieldErrors(prev => ({ ...prev, description: '' }));
+                            }}
+                            error={!!fieldErrors.description}
+                            helperText={fieldErrors.description}
                         />
 
                         <TextField
@@ -326,7 +371,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 fullWidth
                                 variant="outlined"
                                 value={data.originalPrice}
-                                onChange={(e) => handleChange("originalPrice", Number(e.target.value))}
+                                onChange={(e) => {
+                                    handleChange("originalPrice", Number(e.target.value));
+                                    if (fieldErrors.originalPrice) setFieldErrors(prev => ({ ...prev, originalPrice: '' }));
+                                }}
+                                error={!!fieldErrors.originalPrice}
+                                helperText={fieldErrors.originalPrice}
                             />
                             <TextField
                                 margin="dense"
@@ -336,7 +386,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 fullWidth
                                 variant="outlined"
                                 value={data.discountedPrice}
-                                onChange={(e) => handleChange("discountedPrice", Number(e.target.value))}
+                                onChange={(e) => {
+                                    handleChange("discountedPrice", Number(e.target.value));
+                                    if (fieldErrors.discountedPrice) setFieldErrors(prev => ({ ...prev, discountedPrice: '' }));
+                                }}
+                                error={!!fieldErrors.discountedPrice}
+                                helperText={fieldErrors.discountedPrice}
                             />
                         </Stack>
 
@@ -359,7 +414,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 fullWidth
                                 variant="outlined"
                                 value={data.category}
-                                onChange={(e) => handleChange("category", e.target.value)}
+                                onChange={(e) => {
+                                    handleChange("category", e.target.value);
+                                    if (fieldErrors.category) setFieldErrors(prev => ({ ...prev, category: '' }));
+                                }}
+                                error={!!fieldErrors.category}
+                                helperText={fieldErrors.category}
                             />
                         </Stack>
 
@@ -372,7 +432,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 fullWidth
                                 variant="outlined"
                                 value={data.order}
-                                onChange={(e) => handleChange("order", Number(e.target.value))}
+                                onChange={(e) => {
+                                    handleChange("order", Number(e.target.value));
+                                    if (fieldErrors.order) setFieldErrors(prev => ({ ...prev, order: '' }));
+                                }}
+                                error={!!fieldErrors.order}
+                                helperText={fieldErrors.order}
                             />
                         </Stack>
 
@@ -391,6 +456,11 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                 Add Category
                             </Button>
                         </Stack>
+                        {fieldErrors.testsIncluded && (
+                            <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                                {fieldErrors.testsIncluded}
+                            </Typography>
+                        )}
 
                         {data.testsIncluded.map((category: TestCategory, catIndex: number) => (
                             <Box
@@ -412,7 +482,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                         variant="outlined"
                                         size="small"
                                         value={category.categoryName}
-                                        onChange={(e) => updateCategoryName(catIndex, e.target.value)}
+                                        onChange={(e) => {
+                                            updateCategoryName(catIndex, e.target.value);
+                                            if (fieldErrors[`category_${catIndex}`]) setFieldErrors(prev => ({ ...prev, [`category_${catIndex}`]: '' }));
+                                        }}
+                                        error={!!fieldErrors[`category_${catIndex}`]}
+                                        helperText={fieldErrors[`category_${catIndex}`]}
                                         placeholder="e.g. Blood Tests, Imaging"
                                     />
                                     <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
@@ -426,6 +501,11 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
                                         <DeleteIcon />
                                     </IconButton>
                                 </Stack>
+                                {fieldErrors[`subTests_${catIndex}`] && (
+                                    <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                                        {fieldErrors[`subTests_${catIndex}`]}
+                                    </Typography>
+                                )}
 
                                 {/* Sub-tests chips */}
                                 <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 0.5 }}>

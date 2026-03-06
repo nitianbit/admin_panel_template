@@ -10,10 +10,35 @@ import SearchInput from "../../components/SearchInput";
 import { useForm, Controller } from "react-hook-form";
 import { useBookingStore } from "../../services/bookings";
 import { useSlotStore } from "../../services/slots";
-import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest, IBooking } from "../../types/bookings";
+import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest, IBooking, IDocument, IServiceAddress } from "../../types/bookings";
 import { ISlot } from "../../types/slots";
 import { BOOKING_TYPES, SERVICE_MODES, CONSULTATION_MODES, BOOKING_STATUSES, PAYMENT_STATUSES } from "./constants";
 import dayjs from "dayjs";
+
+interface BookingFormValues {
+    bookingType: 'package' | 'consultation';
+    bookingDate: string;
+    bookingTime: string;
+    serviceMode: string;
+    status: string;
+    paymentStatus: string;
+    price: number;
+    documents: IDocument[];
+    slotId: string;
+    userId?: string;
+    dependentId?: string;
+    corporateId?: string;
+    wellnessPackageId?: string;
+    specialistId?: string;
+    primaryConcern?: string;
+    consultationMode?: string;
+    contactNo?: string;
+    alternateContactNo?: string;
+    serviceAddress?: IServiceAddress;
+    notes?: string;
+    cancellationReason?: string;
+    [key: string]: any;
+}
 
 export default function AddBookingDialog({
     isModalOpen,
@@ -26,7 +51,7 @@ export default function AddBookingDialog({
     const [availableSlots, setAvailableSlots] = React.useState<ISlot[]>([]);
     const [loadingSlots, setLoadingSlots] = React.useState(false);
 
-    const defaultValues = {
+    const defaultValues: BookingFormValues = {
         bookingType: 'package',
         bookingDate: dayjs().format('YYYY-MM-DD'),
         bookingTime: "09:00",
@@ -45,7 +70,7 @@ export default function AddBookingDialog({
         watch,
         setValue,
         formState: { errors }
-    } = useForm<any>({
+    } = useForm<BookingFormValues>({
         defaultValues: defaultValues
     });
 

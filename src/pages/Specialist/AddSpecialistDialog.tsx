@@ -107,16 +107,6 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     };
 
     const onSubmit = async (formValues: Specialist) => {
-        if (!formValues?.name) {
-            showError('Please enter a name');
-            return;
-        }
-
-        if (!formValues?.specialization) {
-            showError('Please enter a specialization');
-            return;
-        }
-
         let profilePictureUrl = existingImageUrl || "";
         if (imageFileRef.current instanceof File) {
             const uploadRes = await uploadFile({ module: MODULES.SPECIALIST }, [imageFileRef.current]);
@@ -211,7 +201,12 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("name")}
+                                {...register("name", {
+                                    required: 'Name is required',
+                                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                                })}
+                                error={!!errors.name}
+                                helperText={errors.name?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                             <TextField
@@ -221,7 +216,11 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("specialization")}
+                                {...register("specialization", {
+                                    required: 'Specialization is required',
+                                })}
+                                error={!!errors.specialization}
+                                helperText={errors.specialization?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
@@ -234,7 +233,11 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("degree")}
+                                {...register("degree", {
+                                    required: 'Degree is required',
+                                })}
+                                error={!!errors.degree}
+                                helperText={errors.degree?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                             <TextField
@@ -244,7 +247,14 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="number"
                                 fullWidth
                                 variant="outlined"
-                                {...register("experienceYears", { valueAsNumber: true })}
+                                {...register("experienceYears", {
+                                    valueAsNumber: true,
+                                    required: 'Experience is required',
+                                    min: { value: 0, message: 'Experience cannot be negative' },
+                                    max: { value: 70, message: 'Experience cannot exceed 70 years' },
+                                })}
+                                error={!!errors.experienceYears}
+                                helperText={errors.experienceYears?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
@@ -270,7 +280,15 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="email"
                                 fullWidth
                                 variant="outlined"
-                                {...register("email")}
+                                {...register("email", {
+                                    required: 'Email is required',
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: 'Please enter a valid email address',
+                                    },
+                                })}
+                                error={!!errors.email}
+                                helperText={errors.email?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                             <TextField
@@ -280,7 +298,15 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("phone")}
+                                {...register("phone", {
+                                    required: 'Phone number is required',
+                                    pattern: {
+                                        value: /^[0-9]{10}$/,
+                                        message: 'Phone must be a 10-digit number',
+                                    },
+                                })}
+                                error={!!errors.phone}
+                                helperText={errors.phone?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
@@ -292,7 +318,13 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="number"
                                 fullWidth
                                 variant="outlined"
-                                {...register("consultationFee", { valueAsNumber: true })}
+                                {...register("consultationFee", {
+                                    valueAsNumber: true,
+                                    required: 'Consultation fee is required',
+                                    min: { value: 0, message: 'Fee cannot be negative' },
+                                })}
+                                error={!!errors.consultationFee}
+                                helperText={errors.consultationFee?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
 
@@ -303,7 +335,13 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="number"
                                 fullWidth
                                 variant="outlined"
-                                {...register("rating", { valueAsNumber: true })}
+                                {...register("rating", {
+                                    valueAsNumber: true,
+                                    min: { value: 0, message: 'Rating must be at least 0' },
+                                    max: { value: 5, message: 'Rating cannot exceed 5' },
+                                })}
+                                error={!!errors.rating}
+                                helperText={errors.rating?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
@@ -315,7 +353,11 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("address")}
+                                {...register("address", {
+                                    required: 'Address is required',
+                                })}
+                                error={!!errors.address}
+                                helperText={errors.address?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                             <TextField
@@ -325,7 +367,11 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("city")}
+                                {...register("city", {
+                                    required: 'City is required',
+                                })}
+                                error={!!errors.city}
+                                helperText={errors.city?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Stack>
@@ -338,7 +384,11 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("state")}
+                                {...register("state", {
+                                    required: 'State is required',
+                                })}
+                                error={!!errors.state}
+                                helperText={errors.state?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                             <TextField
@@ -348,7 +398,15 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 type="text"
                                 fullWidth
                                 variant="outlined"
-                                {...register("pincode")}
+                                {...register("pincode", {
+                                    required: 'Pincode is required',
+                                    pattern: {
+                                        value: /^[0-9]{6}$/,
+                                        message: 'Pincode must be a 6-digit number',
+                                    },
+                                })}
+                                error={!!errors.pincode}
+                                helperText={errors.pincode?.message as string}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </Stack>

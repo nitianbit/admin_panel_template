@@ -51,7 +51,7 @@ const initialData: Banner = {
 const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, setFilters, filters } = useBannerStore();
     const { globalCompanyId } = useCompanyStore();
-    const { register, handleSubmit, reset, watch, setValue, control } = useForm<Banner>({
+    const { register, handleSubmit, reset, watch, setValue, control, formState: { errors } } = useForm<Banner>({
         defaultValues: { ...initialData },
     });
 
@@ -104,11 +104,6 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     };
 
     const onSubmit = async (formValues: Banner) => {
-        if (!formValues?.title) {
-            showError('Please enter a title');
-            return;
-        }
-
         if (!imageFileRef.current && !existingImageUrl) {
             showError('Please select an image');
             return;
@@ -223,7 +218,12 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             type="text"
                             fullWidth
                             variant="outlined"
-                            {...register("title")}
+                            {...register("title", {
+                                required: 'Title is required',
+                                minLength: { value: 3, message: 'Title must be at least 3 characters' },
+                            })}
+                            error={!!errors.title}
+                            helperText={errors.title?.message as string}
                             InputLabelProps={{ shrink: true }}
                         />
 
@@ -236,7 +236,11 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             multiline
                             rows={3}
                             variant="outlined"
-                            {...register("description")}
+                            {...register("description", {
+                                required: 'Description is required',
+                            })}
+                            error={!!errors.description}
+                            helperText={errors.description?.message as string}
                             InputLabelProps={{ shrink: true }}
                         />
 
@@ -247,7 +251,14 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             type="text"
                             fullWidth
                             variant="outlined"
-                            {...register("linkUrl")}
+                            {...register("linkUrl", {
+                                pattern: {
+                                    value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+                                    message: 'Please enter a valid URL',
+                                },
+                            })}
+                            error={!!errors.linkUrl}
+                            helperText={errors.linkUrl?.message as string}
                             InputLabelProps={{ shrink: true }}
                         />
 
@@ -284,7 +295,11 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 fullWidth
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
-                                {...register("startDate")}
+                                {...register("startDate", {
+                                    required: 'Start date is required',
+                                })}
+                                error={!!errors.startDate}
+                                helperText={errors.startDate?.message as string}
                             />
 
                             <TextField
@@ -295,7 +310,18 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 fullWidth
                                 variant="outlined"
                                 InputLabelProps={{ shrink: true }}
-                                {...register("endDate")}
+                                {...register("endDate", {
+                                    required: 'End date is required',
+                                    validate: (value) => {
+                                        const startDate = watch('startDate');
+                                        if (startDate && value && value < startDate) {
+                                            return 'End date must be after start date';
+                                        }
+                                        return true;
+                                    },
+                                })}
+                                error={!!errors.endDate}
+                                helperText={errors.endDate?.message as string}
                             />
                         </Stack>
 
@@ -330,7 +356,12 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 label="Display Order"
                                 type="number"
                                 variant="outlined"
-                                {...register("order", { valueAsNumber: true })}
+                                {...register("order", {
+                                    valueAsNumber: true,
+                                    min: { value: 0, message: 'Order must be 0 or greater' },
+                                })}
+                                error={!!errors.order}
+                                helperText={errors.order?.message as string}
                                 sx={{ width: 200 }}
                                 InputLabelProps={{ shrink: true }}
                             />
