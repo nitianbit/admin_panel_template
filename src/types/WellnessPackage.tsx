@@ -64,5 +64,5 @@ export interface WellnessPackageState {
     onCreate: (...args: any) => Promise<WellnessPackage | null>;
     onUpdate: (...args: any) => Promise<WellnessPackage | null>;
     onDelete: (...args: any) => Promise<void>;
-    detail: (id: string) => Promise<{ data: WellnessPackage }>;
+    detail: (id: string) => Promise<{ data: WellnessPackage } | undefined>;
 }

@@ -226,9 +226,12 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         <TextField
                                             label="Partner Name"
                                             fullWidth
-                                            {...register("name", { required: "Name is required" })}
+                                            {...register("name", {
+                                                required: "Name is required",
+                                                minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                            })}
                                             error={!!errors.name}
-                                            helperText={errors.name?.message}
+                                            helperText={errors.name?.message as string}
                                         />
                                     </Grid>
                                     <Grid item xs={12} md={6}>
@@ -236,7 +239,9 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             select
                                             label="Partner Type"
                                             fullWidth
-                                            {...register("partnerType")}
+                                            {...register("partnerType", { required: "Partner type is required" })}
+                                            error={!!errors.partnerType}
+                                            helperText={errors.partnerType?.message as string}
                                         >
                                             <MenuItem value="hospital">Hospital</MenuItem>
                                             <MenuItem value="lab">Laboratory</MenuItem>
@@ -248,34 +253,121 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         <TextField
                                             label="Website URL"
                                             fullWidth
-                                            {...register("website")}
+                                            {...register("website", {
+                                                pattern: {
+                                                    value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+                                                    message: "Please enter a valid URL",
+                                                },
+                                            })}
+                                            error={!!errors.website}
+                                            helperText={errors.website?.message as string}
                                         />
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                        <TextField label="Email" fullWidth {...register("email")} />
+                                        <TextField
+                                            label="Email"
+                                            fullWidth
+                                            {...register("email", {
+                                                required: "Email is required",
+                                                pattern: {
+                                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                    message: "Please enter a valid email address",
+                                                },
+                                            })}
+                                            error={!!errors.email}
+                                            helperText={errors.email?.message as string}
+                                        />
                                     </Grid>
                                     <Grid item xs={12} md={6}>
-                                        <TextField label="Phone" fullWidth {...register("phone")} />
+                                        <TextField
+                                            label="Phone"
+                                            fullWidth
+                                            {...register("phone", {
+                                                required: "Phone number is required",
+                                                pattern: {
+                                                    value: /^[0-9]{10}$/,
+                                                    message: "Phone must be a 10-digit number",
+                                                },
+                                            })}
+                                            error={!!errors.phone}
+                                            helperText={errors.phone?.message as string}
+                                        />
                                     </Grid>
                                 </Grid>
                             </Grid>
                             <Grid item xs={12}>
-                                <TextField label="Description" fullWidth multiline rows={2} {...register("description")} />
+                                <TextField
+                                    label="Description"
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    {...register("description", {
+                                        required: "Description is required",
+                                    })}
+                                    error={!!errors.description}
+                                    helperText={errors.description?.message as string}
+                                />
                             </Grid>
                             <Grid item xs={12} md={6}>
-                                <TextField label="Address" fullWidth {...register("address")} />
+                                <TextField
+                                    label="Address"
+                                    fullWidth
+                                    {...register("address", {
+                                        required: "Address is required",
+                                    })}
+                                    error={!!errors.address}
+                                    helperText={errors.address?.message as string}
+                                />
                             </Grid>
                             <Grid item xs={12} md={6}>
-                                <TextField label="City" fullWidth {...register("city")} />
+                                <TextField
+                                    label="City"
+                                    fullWidth
+                                    {...register("city", {
+                                        required: "City is required",
+                                    })}
+                                    error={!!errors.city}
+                                    helperText={errors.city?.message as string}
+                                />
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <TextField label="State" fullWidth {...register("state")} />
+                                <TextField
+                                    label="State"
+                                    fullWidth
+                                    {...register("state", {
+                                        required: "State is required",
+                                    })}
+                                    error={!!errors.state}
+                                    helperText={errors.state?.message as string}
+                                />
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <TextField label="Pincode" fullWidth {...register("pincode")} />
+                                <TextField
+                                    label="Pincode"
+                                    fullWidth
+                                    {...register("pincode", {
+                                        required: "Pincode is required",
+                                        pattern: {
+                                            value: /^[0-9]{6}$/,
+                                            message: "Pincode must be a 6-digit number",
+                                        },
+                                    })}
+                                    error={!!errors.pincode}
+                                    helperText={errors.pincode?.message as string}
+                                />
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <TextField label="Order" type="number" fullWidth {...register("order")} />
+                                <TextField
+                                    label="Order"
+                                    type="number"
+                                    fullWidth
+                                    {...register("order", {
+                                        valueAsNumber: true,
+                                        min: { value: 0, message: "Order must be 0 or greater" },
+                                    })}
+                                    error={!!errors.order}
+                                    helperText={errors.order?.message as string}
+                                />
                             </Grid>
                             <Grid item xs={12}>
                                 <Stack direction="row" spacing={3}>

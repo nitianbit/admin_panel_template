@@ -10,7 +10,7 @@ import SearchInput from "../../components/SearchInput";
 import { useForm, Controller } from "react-hook-form";
 import { useBookingStore } from "../../services/bookings";
 import { useSlotStore } from "../../services/slots";
-import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest } from "../../types/bookings";
+import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest, IDocument, IServiceAddress } from "../../types/bookings";
 import { ISlot } from "../../types/slots";
 import { WellnessPackage } from "../../types/WellnessPackage";
 import { Specialist } from "../../types/specialist";
@@ -19,6 +19,31 @@ import dayjs from "dayjs";
 import { doGET } from "../../utils/HttpUtils";
 import { showError } from "../../services/toaster";
 import PaginatedSearchDropdown, { PaginatedOption } from "../../components/PaginatedSearchDropdown";
+
+interface BookingFormValues {
+    bookingType: 'package' | 'consultation';
+    bookingDate: string;
+    bookingTime: string;
+    serviceMode: string;
+    status: string;
+    paymentStatus: string;
+    price: number;
+    documents: IDocument[];
+    slotId: string;
+    userId?: string;
+    dependentId?: string;
+    corporateId?: string;
+    wellnessPackageId?: string;
+    specialistId?: string;
+    primaryConcern?: string;
+    consultationMode?: string;
+    contactNo?: string;
+    alternateContactNo?: string;
+    serviceAddress?: IServiceAddress;
+    notes?: string;
+    cancellationReason?: string;
+    [key: string]: any;
+}
 
 export default function AddBookingDialog({
     isModalOpen,
@@ -34,9 +59,9 @@ export default function AddBookingDialog({
     const corporatePackagesCacheRef = React.useRef<Record<string, WellnessPackage[]>>({});
     const corporateSpecialistsCacheRef = React.useRef<Record<string, Specialist[]>>({});
 
-    const defaultValues = {
+    const defaultValues: BookingFormValues = {
         bookingScope: '',
-        bookingType: 'package',
+        bookingType: 'package' as const,
         bookingDate: dayjs().format('YYYY-MM-DD'),
         bookingTime: "09:00",
         serviceMode: 'in-person',
@@ -54,7 +79,7 @@ export default function AddBookingDialog({
         watch,
         setValue,
         formState: { errors }
-    } = useForm<any>({
+    } = useForm<BookingFormValues>({
         defaultValues: defaultValues
     });
 
@@ -508,127 +533,225 @@ export default function AddBookingDialog({
 
                                 {canOpenCreateForm && (
                                     <>
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="bookingType"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth size="small" disabled={!!selectedId}>
-                                                <InputLabel>Booking Type</InputLabel>
-                                                <Select {...field} label="Booking Type">
-                                                    {BOOKING_TYPES.map((type) => (
-                                                        <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="userId"
-                                        control={control}
-                                        rules={{ required: 'User is required' }}
-                                        render={({ field }) => (
-                                            <PaginatedSearchDropdown
-                                                label="User"
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                fetchOptions={fetchUserOptions}
-                                                resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
-                                                disabled={
-                                                    !!selectedId ||
-                                                    (!bookingScope && !selectedId) ||
-                                                    (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
-                                                }
-                                                error={!!errors.userId}
-                                                helperText={errors.userId?.message as string}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-
-                                {bookingType === 'package' && (
-                                    <Grid item xs={12} sm={6}>
-                                        <Controller
-                                            name="wellnessPackageId"
-                                            control={control}
-                                            rules={{ required: 'Wellness package is required' }}
-                                            render={({ field }) => (
-                                                <PaginatedSearchDropdown
-                                                    label="Wellness Package"
-                                                    value={field.value}
-                                                    onChange={field.onChange}
-                                                    fetchOptions={fetchPackageOptions}
-                                                    resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
-                                                    disabled={
-                                                        !!selectedId ||
-                                                        (!bookingScope && !selectedId) ||
-                                                        (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
-                                                    }
-                                                    error={!!errors.wellnessPackageId}
-                                                    helperText={errors.wellnessPackageId?.message as string}
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-                                )}
-
-                                {bookingType === 'consultation' && (
-                                    <>
                                         <Grid item xs={12} sm={6}>
                                             <Controller
-                                                name="specialistId"
+                                                name="bookingType"
                                                 control={control}
-                                                rules={{ required: 'Specialist is required' }}
+                                                render={({ field }) => (
+                                                    <FormControl fullWidth size="small" disabled={!!selectedId}>
+                                                        <InputLabel>Booking Type</InputLabel>
+                                                        <Select {...field} label="Booking Type">
+                                                            {BOOKING_TYPES.map((type) => (
+                                                                <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                )}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Controller
+                                                name="userId"
+                                                control={control}
+                                                rules={{ required: 'User is required' }}
                                                 render={({ field }) => (
                                                     <PaginatedSearchDropdown
-                                                        label="Specialist"
+                                                        label="User"
                                                         value={field.value}
                                                         onChange={field.onChange}
-                                                        fetchOptions={fetchSpecialistOptions}
+                                                        fetchOptions={fetchUserOptions}
                                                         resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
                                                         disabled={
                                                             !!selectedId ||
                                                             (!bookingScope && !selectedId) ||
                                                             (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
                                                         }
-                                                        error={!!errors.specialistId}
-                                                        helperText={errors.specialistId?.message as string}
+                                                        error={!!errors.userId}
+                                                        helperText={errors.userId?.message as string}
                                                     />
                                                 )}
                                             />
                                         </Grid>
+
+                                        {bookingType === 'package' && (
+                                            <Grid item xs={12} sm={6}>
+                                                <Controller
+                                                    name="wellnessPackageId"
+                                                    control={control}
+                                                    rules={{ required: 'Wellness package is required' }}
+                                                    render={({ field }) => (
+                                                        <PaginatedSearchDropdown
+                                                            label="Wellness Package"
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            fetchOptions={fetchPackageOptions}
+                                                            resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                            disabled={
+                                                                !!selectedId ||
+                                                                (!bookingScope && !selectedId) ||
+                                                                (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                            }
+                                                            error={!!errors.wellnessPackageId}
+                                                            helperText={errors.wellnessPackageId?.message as string}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                        )}
+
+                                        {bookingType === 'consultation' && (
+                                            <>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="specialistId"
+                                                        control={control}
+                                                        rules={{ required: 'Specialist is required' }}
+                                                        render={({ field }) => (
+                                                            <PaginatedSearchDropdown
+                                                                label="Specialist"
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                fetchOptions={fetchSpecialistOptions}
+                                                                resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                                disabled={
+                                                                    !!selectedId ||
+                                                                    (!bookingScope && !selectedId) ||
+                                                                    (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                                }
+                                                                error={!!errors.specialistId}
+                                                                helperText={errors.specialistId?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Controller
+                                                        name="primaryConcern"
+                                                        control={control}
+                                                        rules={{ required: 'Primary Concern is required' }}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Primary Concern"
+                                                                fullWidth
+                                                                multiline
+                                                                rows={2}
+                                                                size="small"
+                                                                error={!!errors.primaryConcern}
+                                                                helperText={errors.primaryConcern?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="consultationMode"
+                                                        control={control}
+                                                        rules={{ required: 'Consultation Mode is required' }}
+                                                        render={({ field }) => (
+                                                            <FormControl fullWidth size="small">
+                                                                <InputLabel>Consultation Mode</InputLabel>
+                                                                <Select {...field} label="Consultation Mode">
+                                                                    {CONSULTATION_MODES.map((mode) => (
+                                                                        <MenuItem key={mode.value} value={mode.value}>{mode.label}</MenuItem>
+                                                                    ))}
+                                                                </Select>
+                                                            </FormControl>
+                                                        )}
+                                                    />
+                                                </Grid>
+                                            </>
+                                        )}
+
+                                        {/* Slot Selection */}
+                                        {!selectedId && (
+                                            <Grid item xs={12} sm={6}>
+                                                <Controller
+                                                    name="slotId"
+                                                    control={control}
+                                                    rules={{ required: 'Slot is required' }}
+                                                    render={({ field }) => (
+                                                        <PaginatedSearchDropdown
+                                                            label="Select Slot"
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            fetchOptions={fetchSlotOptions}
+                                                            resetKey={`${bookingType}-${watchedSpecialistId || ''}-${watchedWellnessPackageId || ''}`}
+                                                            disabled={loadingSlots || !isSlotPrerequisiteSelected || availableSlots.length === 0}
+                                                            error={!!errors.slotId}
+                                                            helperText={errors.slotId?.message as string}
+                                                        />
+                                                    )}
+                                                />
+                                                {!isSlotPrerequisiteSelected && (
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {bookingType === 'consultation' ? 'Select specialist first.' : 'Select package first.'}
+                                                    </Typography>
+                                                )}
+                                                {!loadingSlots && isSlotPrerequisiteSelected && availableSlots.length === 0 && (
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        No available slots found. Create a slot first.
+                                                    </Typography>
+                                                )}
+                                            </Grid>
+                                        )}
+
+                                        {/* Schedule */}
                                         <Grid item xs={12}>
+                                            <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>Schedule & Service</Typography>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
                                             <Controller
-                                                name="primaryConcern"
+                                                name="bookingDate"
                                                 control={control}
-                                                rules={{ required: 'Primary Concern is required' }}
+                                                rules={{ required: 'Date is required' }}
                                                 render={({ field }) => (
                                                     <TextField
                                                         {...field}
-                                                        label="Primary Concern"
+                                                        type="date"
+                                                        label="Booking Date"
                                                         fullWidth
-                                                        multiline
-                                                        rows={2}
                                                         size="small"
-                                                        error={!!errors.primaryConcern}
-                                                        helperText={errors.primaryConcern?.message as string}
+                                                        InputLabelProps={{ shrink: true }}
+                                                        error={!!errors.bookingDate}
+                                                        helperText={errors.bookingDate?.message as string}
                                                     />
                                                 )}
                                             />
                                         </Grid>
+
                                         <Grid item xs={12} sm={6}>
                                             <Controller
-                                                name="consultationMode"
+                                                name="bookingTime"
                                                 control={control}
-                                                rules={{ required: 'Consultation Mode is required' }}
+                                                rules={{ required: 'Time is required' }}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        type="time"
+                                                        label="Booking Time"
+                                                        fullWidth
+                                                        size="small"
+                                                        InputLabelProps={{ shrink: true }}
+                                                        error={!!errors.bookingTime}
+                                                        helperText={errors.bookingTime?.message as string}
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Controller
+                                                name="serviceMode"
+                                                control={control}
+                                                rules={{ required: 'Service Mode is required' }}
                                                 render={({ field }) => (
                                                     <FormControl fullWidth size="small">
-                                                        <InputLabel>Consultation Mode</InputLabel>
-                                                        <Select {...field} label="Consultation Mode">
-                                                            {CONSULTATION_MODES.map((mode) => (
+                                                        <InputLabel>Service Mode</InputLabel>
+                                                        <Select {...field} label="Service Mode">
+                                                            {SERVICE_MODES.map((mode) => (
                                                                 <MenuItem key={mode.value} value={mode.value}>{mode.label}</MenuItem>
                                                             ))}
                                                         </Select>
@@ -636,275 +759,177 @@ export default function AddBookingDialog({
                                                 )}
                                             />
                                         </Grid>
-                                    </>
-                                )}
 
-                                {/* Slot Selection */}
-                                {!selectedId && (
-                                    <Grid item xs={12} sm={6}>
-                                        <Controller
-                                            name="slotId"
-                                            control={control}
-                                            rules={{ required: 'Slot is required' }}
-                                            render={({ field }) => (
-                                                <PaginatedSearchDropdown
-                                                    label="Select Slot"
-                                                    value={field.value}
-                                                    onChange={field.onChange}
-                                                    fetchOptions={fetchSlotOptions}
-                                                    resetKey={`${bookingType}-${watchedSpecialistId || ''}-${watchedWellnessPackageId || ''}`}
-                                                    disabled={loadingSlots || !isSlotPrerequisiteSelected || availableSlots.length === 0}
-                                                    error={!!errors.slotId}
-                                                    helperText={errors.slotId?.message as string}
+                                        {/* Contact Info */}
+                                        <Grid item xs={12}>
+                                            <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>Contact Information</Typography>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Controller
+                                                name="contactNo"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Contact No"
+                                                        fullWidth
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Controller
+                                                name="alternateContactNo"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Alt Contact No"
+                                                        fullWidth
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+
+                                        {/* Address - Only if relevant modes */}
+                                        <Grid item xs={12}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1, mt: 1 }}>Service Address</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Controller
+                                                name="serviceAddress.addressLine"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Address Line"
+                                                        fullWidth
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6} sm={4}>
+                                            <Controller
+                                                name="serviceAddress.city"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="City"
+                                                        fullWidth
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6} sm={4}>
+                                            <Controller
+                                                name="serviceAddress.state"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="State"
+                                                        fullWidth
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={4}>
+                                            <Controller
+                                                name="serviceAddress.pincode"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Pincode"
+                                                        fullWidth
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+
+
+                                        {/* Status & Meta */}
+                                        <Grid item xs={12}>
+                                            <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>Status & Payment</Typography>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Controller
+                                                name="status"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>Booking Status</InputLabel>
+                                                        <Select {...field} label="Booking Status">
+                                                            {BOOKING_STATUSES.map((status) => (
+                                                                <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                )}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6}>
+                                            <Controller
+                                                name="paymentStatus"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>Payment Status</InputLabel>
+                                                        <Select {...field} label="Payment Status">
+                                                            {PAYMENT_STATUSES.map((status) => (
+                                                                <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                )}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12}>
+                                            <Controller
+                                                name="notes"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Notes"
+                                                        fullWidth
+                                                        multiline
+                                                        rows={2}
+                                                        size="small"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+                                        {selectedId && (
+                                            <Grid item xs={12}>
+                                                <Controller
+                                                    name="cancellationReason"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TextField
+                                                            {...field}
+                                                            label="Cancellation Reason"
+                                                            fullWidth
+                                                            multiline
+                                                            rows={2}
+                                                            size="small"
+                                                        />
+                                                    )}
                                                 />
-                                            )}
-                                        />
-                                        {!isSlotPrerequisiteSelected && (
-                                            <Typography variant="caption" color="text.secondary">
-                                                {bookingType === 'consultation' ? 'Select specialist first.' : 'Select package first.'}
-                                            </Typography>
+                                            </Grid>
                                         )}
-                                        {!loadingSlots && isSlotPrerequisiteSelected && availableSlots.length === 0 && (
-                                            <Typography variant="caption" color="text.secondary">
-                                                No available slots found. Create a slot first.
-                                            </Typography>
-                                        )}
-                                    </Grid>
-                                )}
-
-                                {/* Schedule */}
-                                <Grid item xs={12}>
-                                    <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>Schedule & Service</Typography>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="bookingDate"
-                                        control={control}
-                                        rules={{ required: 'Date is required' }}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                type="date"
-                                                label="Booking Date"
-                                                fullWidth
-                                                size="small"
-                                                InputLabelProps={{ shrink: true }}
-                                                error={!!errors.bookingDate}
-                                                helperText={errors.bookingDate?.message as string}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="bookingTime"
-                                        control={control}
-                                        rules={{ required: 'Time is required' }}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                type="time"
-                                                label="Booking Time"
-                                                fullWidth
-                                                size="small"
-                                                InputLabelProps={{ shrink: true }}
-                                                error={!!errors.bookingTime}
-                                                helperText={errors.bookingTime?.message as string}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="serviceMode"
-                                        control={control}
-                                        rules={{ required: 'Service Mode is required' }}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth size="small">
-                                                <InputLabel>Service Mode</InputLabel>
-                                                <Select {...field} label="Service Mode">
-                                                    {SERVICE_MODES.map((mode) => (
-                                                        <MenuItem key={mode.value} value={mode.value}>{mode.label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                </Grid>
-
-                                {/* Contact Info */}
-                                <Grid item xs={12}>
-                                    <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>Contact Information</Typography>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="contactNo"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Contact No"
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="alternateContactNo"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Alt Contact No"
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-
-                                {/* Address - Only if relevant modes */}
-                                <Grid item xs={12}>
-                                    <Typography variant="subtitle2" sx={{ mb: 1, mt: 1 }}>Service Address</Typography>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Controller
-                                        name="serviceAddress.addressLine"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Address Line"
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={6} sm={4}>
-                                    <Controller
-                                        name="serviceAddress.city"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="City"
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={6} sm={4}>
-                                    <Controller
-                                        name="serviceAddress.state"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="State"
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <Controller
-                                        name="serviceAddress.pincode"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Pincode"
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-
-
-                                {/* Status & Meta */}
-                                <Grid item xs={12}>
-                                    <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 2, fontWeight: 'bold' }}>Status & Payment</Typography>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="status"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth size="small">
-                                                <InputLabel>Booking Status</InputLabel>
-                                                <Select {...field} label="Booking Status">
-                                                    {BOOKING_STATUSES.map((status) => (
-                                                        <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name="paymentStatus"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth size="small">
-                                                <InputLabel>Payment Status</InputLabel>
-                                                <Select {...field} label="Payment Status">
-                                                    {PAYMENT_STATUSES.map((status) => (
-                                                        <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12}>
-                                    <Controller
-                                        name="notes"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Notes"
-                                                fullWidth
-                                                multiline
-                                                rows={2}
-                                                size="small"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                {selectedId && (
-                                    <Grid item xs={12}>
-                                        <Controller
-                                            name="cancellationReason"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    label="Cancellation Reason"
-                                                    fullWidth
-                                                    multiline
-                                                    rows={2}
-                                                    size="small"
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-                                )}
                                     </>
                                 )}
                             </Grid>

@@ -13,6 +13,7 @@ import { ISlot, CreateSlotRequest } from "../../types/slots";
 import { useSpecialistStore } from "../../services/specialist";
 import { useWellnessPackageStore } from "../../services/wellnessPackages";
 import { SLOT_TYPES, RECURRING_PATTERNS } from "./constants";
+import { showError } from "../../services/toaster";
 import dayjs from "dayjs";
 
 export default function AddSlotsDialog({
@@ -44,7 +45,10 @@ export default function AddSlotsDialog({
 
     const handleChange = (key: keyof ISlot, value: any) => {
         setSlotData(prev => ({ ...prev, [key]: value }));
+        if (fieldErrors[key]) setFieldErrors(prev => ({ ...prev, [key]: '' }));
     }
+
+    const [fieldErrors, setFieldErrors] = React.useState<{ [key: string]: string }>({});
 
     const {
         register,
@@ -68,7 +72,51 @@ export default function AddSlotsDialog({
         setSlotData(defaultData);
     };
 
+    const validateForm = (): boolean => {
+        const errs: { [key: string]: string } = {};
+
+        if (!slotData.date) {
+            errs.date = 'Date is required';
+        }
+
+        if (!slotData.startTime) {
+            errs.startTime = 'Start time is required';
+        }
+
+        if (!slotData.endTime) {
+            errs.endTime = 'End time is required';
+        } else if (slotData.startTime && slotData.endTime && slotData.endTime <= slotData.startTime) {
+            errs.endTime = 'End time must be after start time';
+        }
+
+        if (!slotData.duration || slotData.duration <= 0) {
+            errs.duration = 'Duration must be greater than 0';
+        } else if (slotData.duration > 480) {
+            errs.duration = 'Duration cannot exceed 480 minutes';
+        }
+
+        if (!slotData.maxBookings || slotData.maxBookings < 1) {
+            errs.maxBookings = 'Max bookings must be at least 1';
+        }
+
+        if (slotData.slotType === 'consultation' && !slotData.specialistId) {
+            errs.specialistId = 'Please select a specialist';
+        }
+
+        if (slotData.slotType === 'wellnessPackage' && !slotData.wellnessPackageId) {
+            errs.wellnessPackageId = 'Please select a wellness package';
+        }
+
+        setFieldErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const onSubmit = () => {
+        if (!validateForm()) {
+            showError('Please fix the highlighted errors');
+            return;
+        }
+
         // Format date if needed (YYYY-MM-DD to YYYYMMDD)
         const formattedDate = slotData.date ? slotData.date.replace(/-/g, '') : '';
 
@@ -174,7 +222,7 @@ export default function AddSlotsDialog({
                                 {/* Conditional Fields based on Slot Type */}
                                 {slotData.slotType === 'consultation' && (
                                     <Grid item xs={12}>
-                                        <FormControl fullWidth margin="dense" size="small">
+                                        <FormControl fullWidth margin="dense" size="small" error={!!fieldErrors.specialistId}>
                                             <InputLabel id="specialist-label">Specialist</InputLabel>
                                             <Select
                                                 labelId="specialist-label"
@@ -189,13 +237,16 @@ export default function AddSlotsDialog({
                                                     </MenuItem>
                                                 ))}
                                             </Select>
+                                            {fieldErrors.specialistId && (
+                                                <FormHelperText>{fieldErrors.specialistId}</FormHelperText>
+                                            )}
                                         </FormControl>
                                     </Grid>
                                 )}
 
                                 {slotData.slotType === 'wellnessPackage' && (
                                     <Grid item xs={12}>
-                                        <FormControl fullWidth margin="dense" size="small">
+                                        <FormControl fullWidth margin="dense" size="small" error={!!fieldErrors.wellnessPackageId}>
                                             <InputLabel id="wellness-package-label">Wellness Package</InputLabel>
                                             <Select
                                                 labelId="wellness-package-label"
@@ -210,6 +261,9 @@ export default function AddSlotsDialog({
                                                     </MenuItem>
                                                 ))}
                                             </Select>
+                                            {fieldErrors.wellnessPackageId && (
+                                                <FormHelperText>{fieldErrors.wellnessPackageId}</FormHelperText>
+                                            )}
                                         </FormControl>
                                     </Grid>
                                 )}
@@ -232,6 +286,8 @@ export default function AddSlotsDialog({
                                         InputLabelProps={{ shrink: true }}
                                         value={slotData.date}
                                         onChange={(e) => handleChange("date", e.target.value)}
+                                        error={!!fieldErrors.date}
+                                        helperText={fieldErrors.date}
                                     />
                                 </Grid>
 
@@ -247,6 +303,8 @@ export default function AddSlotsDialog({
                                         variant="outlined"
                                         value={slotData.duration}
                                         onChange={(e) => handleChange("duration", Number(e.target.value))}
+                                        error={!!fieldErrors.duration}
+                                        helperText={fieldErrors.duration}
                                     />
                                 </Grid>
 
@@ -263,6 +321,8 @@ export default function AddSlotsDialog({
                                         InputLabelProps={{ shrink: true }}
                                         value={slotData.startTime}
                                         onChange={(e) => handleChange("startTime", e.target.value)}
+                                        error={!!fieldErrors.startTime}
+                                        helperText={fieldErrors.startTime}
                                     />
                                 </Grid>
 
@@ -279,6 +339,8 @@ export default function AddSlotsDialog({
                                         InputLabelProps={{ shrink: true }}
                                         value={slotData.endTime}
                                         onChange={(e) => handleChange("endTime", e.target.value)}
+                                        error={!!fieldErrors.endTime}
+                                        helperText={fieldErrors.endTime}
                                     />
                                 </Grid>
 
@@ -299,6 +361,8 @@ export default function AddSlotsDialog({
                                         variant="outlined"
                                         value={slotData.maxBookings}
                                         onChange={(e) => handleChange("maxBookings", Number(e.target.value))}
+                                        error={!!fieldErrors.maxBookings}
+                                        helperText={fieldErrors.maxBookings}
                                     />
                                 </Grid>
 

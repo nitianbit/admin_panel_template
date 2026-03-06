@@ -234,7 +234,10 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="name"
                                         control={control}
-                                        rules={{ required: 'Name is required' }}
+                                        rules={{
+                                            required: 'Name is required',
+                                            minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -242,7 +245,7 @@ export default function AddCorporateDialog({
                                                 fullWidth
                                                 size="small"
                                                 error={!!errors.name}
-                                                helperText={errors.name?.message}
+                                                helperText={errors.name?.message as string}
                                             />
                                         )}
                                     />
@@ -252,12 +255,15 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="companyName"
                                         control={control}
+                                        rules={{ required: 'Company name is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Company Name"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.companyName}
+                                                helperText={errors.companyName?.message as string}
                                             />
                                         )}
                                     />
@@ -284,6 +290,9 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="employeeCount"
                                         control={control}
+                                        rules={{
+                                            min: { value: 0, message: 'Employee count cannot be negative' },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -291,6 +300,8 @@ export default function AddCorporateDialog({
                                                 label="Employee Count"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.employeeCount}
+                                                helperText={errors.employeeCount?.message as string}
                                             />
                                         )}
                                     />
@@ -306,12 +317,21 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="email"
                                         control={control}
+                                        rules={{
+                                            required: 'Email is required',
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: 'Please enter a valid email address',
+                                            },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Email"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.email}
+                                                helperText={errors.email?.message as string}
                                             />
                                         )}
                                     />
@@ -321,12 +341,21 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="phone"
                                         control={control}
+                                        rules={{
+                                            required: 'Phone number is required',
+                                            pattern: {
+                                                value: /^[0-9]{10}$/,
+                                                message: 'Phone must be a 10-digit number',
+                                            },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Phone"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.phone}
+                                                helperText={errors.phone?.message as string}
                                             />
                                         )}
                                     />
@@ -336,12 +365,15 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="contactPerson"
                                         control={control}
+                                        rules={{ required: 'Contact person is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Contact Person"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.contactPerson}
+                                                helperText={errors.contactPerson?.message as string}
                                             />
                                         )}
                                     />
@@ -351,12 +383,20 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="website"
                                         control={control}
+                                        rules={{
+                                            pattern: {
+                                                value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+                                                message: 'Please enter a valid URL',
+                                            },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Website"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.website}
+                                                helperText={errors.website?.message as string}
                                             />
                                         )}
                                     />
@@ -366,6 +406,12 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="domain"
                                         control={control}
+                                        rules={{
+                                            pattern: {
+                                                value: /^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}$/,
+                                                message: 'Please enter a valid domain (e.g. company.com)',
+                                            },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -373,6 +419,8 @@ export default function AddCorporateDialog({
                                                 fullWidth
                                                 size="small"
                                                 placeholder="e.g. company.com"
+                                                error={!!errors.domain}
+                                                helperText={errors.domain?.message as string}
                                             />
                                         )}
                                     />
@@ -388,12 +436,15 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="address"
                                         control={control}
+                                        rules={{ required: 'Address is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Address"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.address}
+                                                helperText={errors.address?.message as string}
                                             />
                                         )}
                                     />
@@ -403,12 +454,15 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="city"
                                         control={control}
+                                        rules={{ required: 'City is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="City"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.city}
+                                                helperText={errors.city?.message as string}
                                             />
                                         )}
                                     />
@@ -418,12 +472,15 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="state"
                                         control={control}
+                                        rules={{ required: 'State is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="State"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.state}
+                                                helperText={errors.state?.message as string}
                                             />
                                         )}
                                     />
@@ -433,12 +490,21 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="pincode"
                                         control={control}
+                                        rules={{
+                                            required: 'Pincode is required',
+                                            pattern: {
+                                                value: /^[0-9]{6}$/,
+                                                message: 'Pincode must be a 6-digit number',
+                                            },
+                                        }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
                                                 label="Pincode"
                                                 fullWidth
                                                 size="small"
+                                                error={!!errors.pincode}
+                                                helperText={errors.pincode?.message as string}
                                             />
                                         )}
                                     />
