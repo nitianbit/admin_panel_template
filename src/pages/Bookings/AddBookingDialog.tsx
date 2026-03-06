@@ -3,17 +3,22 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Drawer from "@mui/material/Drawer";
-import { Stack, Box, Typography, Grid, IconButton, MenuItem, FormControl, InputLabel, Select, FormHelperText, CircularProgress } from "@mui/material";
+import { Stack, Box, Typography, Grid, IconButton, MenuItem, FormControl, InputLabel, Select, FormHelperText } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchInput from "../../components/SearchInput";
 import { useForm, Controller } from "react-hook-form";
 import { useBookingStore } from "../../services/bookings";
 import { useSlotStore } from "../../services/slots";
-import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest, IBooking } from "../../types/bookings";
+import { CreateWellnessPackageBookingRequest, CreateSpecialistBookingRequest, UpdateBookingRequest } from "../../types/bookings";
 import { ISlot } from "../../types/slots";
+import { WellnessPackage } from "../../types/WellnessPackage";
+import { Specialist } from "../../types/specialist";
 import { BOOKING_TYPES, SERVICE_MODES, CONSULTATION_MODES, BOOKING_STATUSES, PAYMENT_STATUSES } from "./constants";
 import dayjs from "dayjs";
+import { doGET } from "../../utils/HttpUtils";
+import { showError } from "../../services/toaster";
+import PaginatedSearchDropdown, { PaginatedOption } from "../../components/PaginatedSearchDropdown";
 
 export default function AddBookingDialog({
     isModalOpen,
@@ -25,8 +30,12 @@ export default function AddBookingDialog({
     const [bookingType, setBookingType] = React.useState<'package' | 'consultation'>('package');
     const [availableSlots, setAvailableSlots] = React.useState<ISlot[]>([]);
     const [loadingSlots, setLoadingSlots] = React.useState(false);
+    const [bookingScope, setBookingScope] = React.useState<'general' | 'corporate' | ''>('');
+    const corporatePackagesCacheRef = React.useRef<Record<string, WellnessPackage[]>>({});
+    const corporateSpecialistsCacheRef = React.useRef<Record<string, Specialist[]>>({});
 
     const defaultValues = {
+        bookingScope: '',
         bookingType: 'package',
         bookingDate: dayjs().format('YYYY-MM-DD'),
         bookingTime: "09:00",
@@ -50,8 +59,160 @@ export default function AddBookingDialog({
     });
 
     const watchedBookingType = watch('bookingType');
+    const watchedCorporateId = watch('corporateId');
     const watchedSpecialistId = watch('specialistId');
     const watchedWellnessPackageId = watch('wellnessPackageId');
+    const canOpenCreateForm = Boolean(selectedId) || bookingScope === 'general' || (bookingScope === 'corporate' && Boolean(watchedCorporateId));
+    const isSlotPrerequisiteSelected =
+        bookingType === 'consultation'
+            ? Boolean(watchedSpecialistId)
+            : Boolean(watchedWellnessPackageId);
+    const mapToOption = (value?: string, label?: string): PaginatedOption | null => {
+        if (!value) return null;
+        return {
+            value,
+            label: label || value,
+        };
+    };
+
+    const fetchCorporatePackages = React.useCallback(async (corporateId: string) => {
+        if (!corporateId) return [];
+        if (corporatePackagesCacheRef.current[corporateId]) {
+            return corporatePackagesCacheRef.current[corporateId];
+        }
+        const response = await doGET(`/corporates/${corporateId}/wellness-packages`);
+        const rows = response?.data?.data;
+        const packages = Array.isArray(rows) ? rows : [];
+        corporatePackagesCacheRef.current[corporateId] = packages;
+        return packages;
+    }, []);
+
+    const fetchCorporateSpecialists = React.useCallback(async (corporateId: string) => {
+        if (!corporateId) return [];
+        if (corporateSpecialistsCacheRef.current[corporateId]) {
+            return corporateSpecialistsCacheRef.current[corporateId];
+        }
+        const response = await doGET(`/corporates/${corporateId}/specialists`);
+        const rows = response?.data?.data;
+        const specialists = Array.isArray(rows) ? rows : [];
+        corporateSpecialistsCacheRef.current[corporateId] = specialists;
+        return specialists;
+    }, []);
+
+    const fetchCorporateOptions = React.useCallback(async ({ page, limit, search }: { page: number; limit: number; search: string; }) => {
+        const params = new URLSearchParams();
+        params.append("page", String(page));
+        params.append("limit", String(limit));
+        if (search) params.append("search", search);
+
+        const response = await doGET(`/corporates?${params.toString()}`);
+        const rows = response?.data?.data;
+        const pagination = response?.data?.pagination;
+        const corporates = Array.isArray(rows) ? rows : [];
+        const options = corporates
+            .map((item: any) => mapToOption(item?._id, item?.name))
+            .filter(Boolean) as PaginatedOption[];
+        const hasMore = pagination?.totalPages ? page < pagination.totalPages : corporates.length === limit;
+        return { options, hasMore };
+    }, []);
+
+    const fetchUserOptions = React.useCallback(async ({ page, limit, search }: { page: number; limit: number; search: string; }) => {
+        const params = new URLSearchParams();
+        params.append("page", String(page));
+        params.append("limit", String(limit));
+        params.append("userType", "user");
+        if (search) params.append("name", search);
+        if (bookingScope === "corporate" && watchedCorporateId) {
+            params.append("corporateId", watchedCorporateId);
+        }
+
+        const response = await doGET(`/users?${params.toString()}`);
+        const rows = response?.data?.data?.users ?? response?.data?.data ?? [];
+        const users = Array.isArray(rows) ? rows : [];
+        const options = users
+            .map((item: any) => mapToOption(item?._id, item?.name || item?.email || item?.phone))
+            .filter(Boolean) as PaginatedOption[];
+        const hasMore = users.length === limit;
+        return { options, hasMore };
+    }, [bookingScope, watchedCorporateId]);
+
+    const fetchPackageOptions = React.useCallback(async ({ page, limit, search }: { page: number; limit: number; search: string; }) => {
+        if (bookingScope === "corporate" && watchedCorporateId) {
+            const corporatePackages = await fetchCorporatePackages(watchedCorporateId);
+            const filtered = corporatePackages.filter((item) =>
+                (item.name || "").toLowerCase().includes(search.toLowerCase())
+            );
+            const start = (page - 1) * limit;
+            const paginated = filtered.slice(start, start + limit);
+            const options = paginated
+                .map((item) => mapToOption(item?._id, item?.name))
+                .filter(Boolean) as PaginatedOption[];
+            return { options, hasMore: start + limit < filtered.length };
+        }
+
+        const params = new URLSearchParams();
+        params.append("page", String(page));
+        params.append("limit", String(limit));
+        if (search) params.append("search", search);
+
+        const response = await doGET(`/wellness-packages?${params.toString()}`);
+        const rows = response?.data?.data;
+        const pagination = response?.data?.pagination;
+        const packages = Array.isArray(rows) ? rows : [];
+        const options = packages
+            .map((item: any) => mapToOption(item?._id, item?.name))
+            .filter(Boolean) as PaginatedOption[];
+        const hasMore = pagination?.totalPages ? page < pagination.totalPages : packages.length === limit;
+        return { options, hasMore };
+    }, [bookingScope, watchedCorporateId, fetchCorporatePackages]);
+
+    const fetchSpecialistOptions = React.useCallback(async ({ page, limit, search }: { page: number; limit: number; search: string; }) => {
+        if (bookingScope === "corporate" && watchedCorporateId) {
+            const corporateSpecialists = await fetchCorporateSpecialists(watchedCorporateId);
+            const filtered = corporateSpecialists.filter((item) => {
+                const title = `${item.name || ""} ${item.specialization || ""}`.toLowerCase();
+                return title.includes(search.toLowerCase());
+            });
+            const start = (page - 1) * limit;
+            const paginated = filtered.slice(start, start + limit);
+            const options = paginated
+                .map((item) => mapToOption(item?._id, `${item?.name || "Unknown"}${item?.specialization ? ` (${item.specialization})` : ""}`))
+                .filter(Boolean) as PaginatedOption[];
+            return { options, hasMore: start + limit < filtered.length };
+        }
+
+        const params = new URLSearchParams();
+        params.append("page", String(page));
+        params.append("limit", String(limit));
+        if (search) params.append("search", search);
+
+        const response = await doGET(`/specialists?${params.toString()}`);
+        const rows = response?.data?.data;
+        const pagination = response?.data?.pagination;
+        const specialists = Array.isArray(rows) ? rows : [];
+        const options = specialists
+            .map((item: any) => mapToOption(item?._id, `${item?.name || "Unknown"}${item?.specialization ? ` (${item.specialization})` : ""}`))
+            .filter(Boolean) as PaginatedOption[];
+        const hasMore = pagination?.totalPages ? page < pagination.totalPages : specialists.length === limit;
+        return { options, hasMore };
+    }, [bookingScope, watchedCorporateId, fetchCorporateSpecialists]);
+
+    const fetchSlotOptions = React.useCallback(async ({ page, limit, search }: { page: number; limit: number; search: string; }) => {
+        const filteredSlots = availableSlots.filter((slot) => {
+            const label = formatSlotLabel(slot).toLowerCase();
+            return label.includes(search.toLowerCase());
+        });
+        const start = (page - 1) * limit;
+        const paginated = filteredSlots.slice(start, start + limit);
+        const options = paginated.map((slot) => ({
+            value: slot._id || "",
+            label: formatSlotLabel(slot),
+        }));
+        return {
+            options,
+            hasMore: start + limit < filteredSlots.length,
+        };
+    }, [availableSlots]);
 
     React.useEffect(() => {
         setBookingType(watchedBookingType);
@@ -59,6 +220,20 @@ export default function AddBookingDialog({
         setAvailableSlots([]);
         setValue('slotId', '');
     }, [watchedBookingType]);
+
+    React.useEffect(() => {
+        if (!isModalOpen || selectedId) return;
+
+        setValue('userId', '');
+        setValue('wellnessPackageId', '');
+        setValue('specialistId', '');
+        setValue('slotId', '');
+        setAvailableSlots([]);
+
+        if (bookingScope === 'general') {
+            setValue('corporateId', undefined);
+        }
+    }, [bookingScope, watchedCorporateId, isModalOpen, selectedId, setValue]);
 
     // Fetch available slots when specialistId changes (for consultation type)
     React.useEffect(() => {
@@ -122,6 +297,7 @@ export default function AddBookingDialog({
 
     const handleClickOpen = () => {
         reset(defaultValues);
+        setBookingScope('');
         setAvailableSlots([]);
         toggleModal(true);
     };
@@ -129,10 +305,21 @@ export default function AddBookingDialog({
     const handleClose = () => {
         toggleModal(false);
         reset(defaultValues);
+        setBookingScope('');
         setAvailableSlots([]);
     };
 
     const onSubmit = (data: any) => {
+        if (!selectedId && !bookingScope) {
+            showError('Please select booking scope');
+            return;
+        }
+
+        if (!selectedId && bookingScope === 'corporate' && !data.corporateId) {
+            showError('Please select corporate for corporate booking');
+            return;
+        }
+
         const formattedDate = data.bookingDate ? data.bookingDate.replace(/-/g, '') : '';
 
         const payload: any = {
@@ -140,6 +327,15 @@ export default function AddBookingDialog({
             bookingDate: formattedDate,
             price: Number(data.price),
         };
+        delete payload.bookingScope;
+
+        if (selectedId) {
+            delete payload.userId;
+            delete payload.wellnessPackageId;
+            delete payload.specialistId;
+        } else if (bookingScope === 'general') {
+            delete payload.corporateId;
+        }
 
         if (selectedId) {
             const updatePayload: UpdateBookingRequest = {
@@ -195,8 +391,9 @@ export default function AddBookingDialog({
             fetchDetail(selectedId);
         } else if (!selectedId && isModalOpen) {
             reset(defaultValues);
+            setBookingScope('');
         }
-    }, [selectedId, isModalOpen]);
+    }, [selectedId, isModalOpen, reset]);
 
     // Helper to format slot display label
     const formatSlotLabel = (slot: ISlot) => {
@@ -246,6 +443,71 @@ export default function AddBookingDialog({
                                     <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 'bold' }}>Booking Details</Typography>
                                 </Grid>
 
+                                {!selectedId && (
+                                    <Grid item xs={12} sm={6}>
+                                        <Controller
+                                            name="bookingScope"
+                                            control={control}
+                                            rules={{ required: 'Booking scope is required' }}
+                                            render={({ field }) => (
+                                                <FormControl fullWidth size="small" error={!bookingScope && !!errors.bookingScope}>
+                                                    <InputLabel>Booking Scope</InputLabel>
+                                                    <Select
+                                                        {...field}
+                                                        value={bookingScope}
+                                                        label="Booking Scope"
+                                                        onChange={(e) => {
+                                                            const nextScope = e.target.value as 'general' | 'corporate';
+                                                            setBookingScope(nextScope);
+                                                            field.onChange(nextScope);
+                                                            if (nextScope === 'general') {
+                                                                setValue('corporateId', undefined);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <MenuItem value="general">General</MenuItem>
+                                                        <MenuItem value="corporate">Corporate</MenuItem>
+                                                    </Select>
+                                                    {errors.bookingScope && (
+                                                        <FormHelperText>{errors.bookingScope?.message as string}</FormHelperText>
+                                                    )}
+                                                </FormControl>
+                                            )}
+                                        />
+                                    </Grid>
+                                )}
+
+                                {!selectedId && bookingScope === 'corporate' && (
+                                    <Grid item xs={12} sm={6}>
+                                        <Controller
+                                            name="corporateId"
+                                            control={control}
+                                            rules={{ required: 'Corporate is required for corporate booking' }}
+                                            render={({ field }) => (
+                                                <PaginatedSearchDropdown
+                                                    label="Corporate"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    fetchOptions={fetchCorporateOptions}
+                                                    resetKey={`${bookingScope}`}
+                                                    error={!!errors.corporateId}
+                                                    helperText={errors.corporateId?.message as string}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                )}
+
+                                {!canOpenCreateForm && !selectedId && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Select booking scope first to open the booking form.
+                                        </Typography>
+                                    </Grid>
+                                )}
+
+                                {canOpenCreateForm && (
+                                    <>
                                 <Grid item xs={12} sm={6}>
                                     <Controller
                                         name="bookingType"
@@ -267,16 +529,21 @@ export default function AddBookingDialog({
                                     <Controller
                                         name="userId"
                                         control={control}
-                                        rules={{ required: 'User ID is required' }}
+                                        rules={{ required: 'User is required' }}
                                         render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="User ID"
-                                                fullWidth
-                                                size="small"
+                                            <PaginatedSearchDropdown
+                                                label="User"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                fetchOptions={fetchUserOptions}
+                                                resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                disabled={
+                                                    !!selectedId ||
+                                                    (!bookingScope && !selectedId) ||
+                                                    (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                }
                                                 error={!!errors.userId}
                                                 helperText={errors.userId?.message as string}
-                                                disabled={!!selectedId}
                                             />
                                         )}
                                     />
@@ -287,16 +554,21 @@ export default function AddBookingDialog({
                                         <Controller
                                             name="wellnessPackageId"
                                             control={control}
-                                            rules={{ required: 'Package ID is required' }}
+                                            rules={{ required: 'Wellness package is required' }}
                                             render={({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    label="Wellness Package ID"
-                                                    fullWidth
-                                                    size="small"
+                                                <PaginatedSearchDropdown
+                                                    label="Wellness Package"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    fetchOptions={fetchPackageOptions}
+                                                    resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                    disabled={
+                                                        !!selectedId ||
+                                                        (!bookingScope && !selectedId) ||
+                                                        (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                    }
                                                     error={!!errors.wellnessPackageId}
                                                     helperText={errors.wellnessPackageId?.message as string}
-                                                    disabled={!!selectedId}
                                                 />
                                             )}
                                         />
@@ -309,16 +581,21 @@ export default function AddBookingDialog({
                                             <Controller
                                                 name="specialistId"
                                                 control={control}
-                                                rules={{ required: 'Specialist ID is required' }}
+                                                rules={{ required: 'Specialist is required' }}
                                                 render={({ field }) => (
-                                                    <TextField
-                                                        {...field}
-                                                        label="Specialist ID"
-                                                        fullWidth
-                                                        size="small"
+                                                    <PaginatedSearchDropdown
+                                                        label="Specialist"
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        fetchOptions={fetchSpecialistOptions}
+                                                        resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                        disabled={
+                                                            !!selectedId ||
+                                                            (!bookingScope && !selectedId) ||
+                                                            (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                        }
                                                         error={!!errors.specialistId}
                                                         helperText={errors.specialistId?.message as string}
-                                                        disabled={!!selectedId}
                                                     />
                                                 )}
                                             />
@@ -370,43 +647,28 @@ export default function AddBookingDialog({
                                             control={control}
                                             rules={{ required: 'Slot is required' }}
                                             render={({ field }) => (
-                                                <FormControl fullWidth size="small" error={!!errors.slotId}>
-                                                    <InputLabel>Select Slot</InputLabel>
-                                                    <Select
-                                                        {...field}
-                                                        label="Select Slot"
-                                                        disabled={loadingSlots || availableSlots.length === 0}
-                                                        endAdornment={loadingSlots ? <CircularProgress size={20} sx={{ mr: 2 }} /> : null}
-                                                    >
-                                                        {availableSlots.length === 0 && !loadingSlots && (
-                                                            <MenuItem disabled value="">
-                                                                {(bookingType === 'consultation' && !watchedSpecialistId) || (bookingType === 'package' && !watchedWellnessPackageId)
-                                                                    ? `Enter ${bookingType === 'consultation' ? 'Specialist' : 'Package'} ID first`
-                                                                    : 'No slots available'}
-                                                            </MenuItem>
-                                                        )}
-                                                        {availableSlots.map((slot) => (
-                                                            <MenuItem
-                                                                key={slot._id}
-                                                                value={slot._id}
-                                                                disabled={slot.isAvailable === false}
-                                                            >
-                                                                {formatSlotLabel(slot)}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                    {errors.slotId && (
-                                                        <FormHelperText>{errors.slotId?.message as string}</FormHelperText>
-                                                    )}
-                                                    {!loadingSlots && availableSlots.length === 0 && (
-                                                        (bookingType === 'consultation' && watchedSpecialistId) ||
-                                                        (bookingType === 'package' && watchedWellnessPackageId)
-                                                    ) && (
-                                                            <FormHelperText>No available slots found. Create a slot first.</FormHelperText>
-                                                        )}
-                                                </FormControl>
+                                                <PaginatedSearchDropdown
+                                                    label="Select Slot"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    fetchOptions={fetchSlotOptions}
+                                                    resetKey={`${bookingType}-${watchedSpecialistId || ''}-${watchedWellnessPackageId || ''}`}
+                                                    disabled={loadingSlots || !isSlotPrerequisiteSelected || availableSlots.length === 0}
+                                                    error={!!errors.slotId}
+                                                    helperText={errors.slotId?.message as string}
+                                                />
                                             )}
                                         />
+                                        {!isSlotPrerequisiteSelected && (
+                                            <Typography variant="caption" color="text.secondary">
+                                                {bookingType === 'consultation' ? 'Select specialist first.' : 'Select package first.'}
+                                            </Typography>
+                                        )}
+                                        {!loadingSlots && isSlotPrerequisiteSelected && availableSlots.length === 0 && (
+                                            <Typography variant="caption" color="text.secondary">
+                                                No available slots found. Create a slot first.
+                                            </Typography>
+                                        )}
                                     </Grid>
                                 )}
 
@@ -643,7 +905,8 @@ export default function AddBookingDialog({
                                         />
                                     </Grid>
                                 )}
-
+                                    </>
+                                )}
                             </Grid>
                         </form>
                     </Box>
