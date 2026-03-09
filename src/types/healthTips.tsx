@@ -1,5 +1,6 @@
 export interface HealthTip {
     _id?: string;
+    corporateId?: string;
     title: string;
     description: string;
     shortDescription?: string;

@@ -31,6 +31,7 @@ import { Specialist } from "../../types/specialist";
 import { MODULES } from "../../utils/constants";
 import { uploadFile } from "../../utils/helper";
 import { useSpecialistStore } from "../../services/specialist";
+import { useCompanyStore } from "../../services/company";
 import { useCorporateStore } from "../../services/corporates";
 
 const Transition = React.forwardRef(function Transition(
@@ -65,11 +66,14 @@ const initialData: Specialist = {
 
 const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, filters, setFilters } = useSpecialistStore();
+    const { globalCompanyId } = useCompanyStore();
     const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
     const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<Specialist>({
         defaultValues: { ...initialData },
     });
     const [targetType, setTargetType] = React.useState<'all' | 'corporate' | ''>('');
+
+    const isGlobalCorporateSelected = globalCompanyId && globalCompanyId !== "general";
 
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
@@ -150,8 +154,12 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
         if (formValues?._id) {
             delete payload.corporate_id;
-        } else if (targetType === 'corporate' && formValues.corporate_id) {
-            payload.corporate_id = formValues.corporate_id;
+        } else if (targetType === 'corporate') {
+            // Use the manually selected corporate_id, or fall back to globalCompanyId
+            payload.corporate_id = formValues.corporate_id || (isGlobalCorporateSelected ? globalCompanyId : undefined);
+            if (!payload.corporate_id) {
+                delete payload.corporate_id;
+            }
         } else {
             delete payload.corporate_id;
         }
@@ -163,12 +171,11 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             response = await onCreate(payload);
         }
 
-        if (response) {
-            reset({ ...initialData });
-            imageFileRef.current = null;
-            setExistingImageUrl("");
-            handleClose();
-        }
+        reset({ ...initialData });
+        setTargetType('');
+        imageFileRef.current = null;
+        setExistingImageUrl("");
+        handleClose();
     };
 
     const fetchDetail = async (selectedId: string) => {
@@ -191,8 +198,16 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         setExistingImageUrl("");
         if (selectedId) {
             fetchDetail(selectedId);
+        } else {
+            // For new specialists, auto-set based on global company selection
+            if (isGlobalCorporateSelected) {
+                setTargetType('corporate');
+                setValue("corporate_id", globalCompanyId);
+            } else if (globalCompanyId === "general") {
+                setTargetType('all');
+            }
         }
-    }, [selectedId]);
+    }, [selectedId, globalCompanyId]);
 
     React.useEffect(() => {
         if (isModalOpen) {
@@ -276,264 +291,264 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                         {canShowMainForm && (
                             <>
 
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="name"
-                                label="Name"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("name", {
-                                    required: 'Name is required',
-                                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
-                                })}
-                                error={!!errors.name}
-                                helperText={errors.name?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="specialization"
-                                label="Specialization"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("specialization", {
-                                    required: 'Specialization is required',
-                                })}
-                                error={!!errors.specialization}
-                                helperText={errors.specialization?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
-
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="degree"
-                                label="Degree"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("degree", {
-                                    required: 'Degree is required',
-                                })}
-                                error={!!errors.degree}
-                                helperText={errors.degree?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="experienceYears"
-                                label="Experience (Years)"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                {...register("experienceYears", {
-                                    valueAsNumber: true,
-                                    required: 'Experience is required',
-                                    min: { value: 0, message: 'Experience cannot be negative' },
-                                    max: { value: 70, message: 'Experience cannot exceed 70 years' },
-                                })}
-                                error={!!errors.experienceYears}
-                                helperText={errors.experienceYears?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
-
-                        <TextField
-                            margin="dense"
-                            id="bio"
-                            label="Bio"
-                            type="text"
-                            fullWidth
-                            multiline
-                            rows={3}
-                            variant="outlined"
-                            {...register("bio")}
-                            InputLabelProps={{ shrink: true }}
-                        />
-
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="email"
-                                label="Email"
-                                type="email"
-                                fullWidth
-                                variant="outlined"
-                                {...register("email", {
-                                    required: 'Email is required',
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: 'Please enter a valid email address',
-                                    },
-                                })}
-                                error={!!errors.email}
-                                helperText={errors.email?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="phone"
-                                label="Phone"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("phone", {
-                                    required: 'Phone number is required',
-                                    pattern: {
-                                        value: /^[0-9]{10}$/,
-                                        message: 'Phone must be a 10-digit number',
-                                    },
-                                })}
-                                error={!!errors.phone}
-                                helperText={errors.phone?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="consultationFee"
-                                label="Consultation Fee"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                {...register("consultationFee", {
-                                    valueAsNumber: true,
-                                    required: 'Consultation fee is required',
-                                    min: { value: 0, message: 'Fee cannot be negative' },
-                                })}
-                                error={!!errors.consultationFee}
-                                helperText={errors.consultationFee?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-
-                            <TextField
-                                margin="dense"
-                                id="rating"
-                                label="Rating"
-                                type="number"
-                                fullWidth
-                                variant="outlined"
-                                {...register("rating", {
-                                    valueAsNumber: true,
-                                    min: { value: 0, message: 'Rating must be at least 0' },
-                                    max: { value: 5, message: 'Rating cannot exceed 5' },
-                                })}
-                                error={!!errors.rating}
-                                helperText={errors.rating?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="address"
-                                label="Address"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("address", {
-                                    required: 'Address is required',
-                                })}
-                                error={!!errors.address}
-                                helperText={errors.address?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="city"
-                                label="City"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("city", {
-                                    required: 'City is required',
-                                })}
-                                error={!!errors.city}
-                                helperText={errors.city?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
-
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="state"
-                                label="State"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("state", {
-                                    required: 'State is required',
-                                })}
-                                error={!!errors.state}
-                                helperText={errors.state?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                margin="dense"
-                                id="pincode"
-                                label="Pincode"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("pincode", {
-                                    required: 'Pincode is required',
-                                    pattern: {
-                                        value: /^[0-9]{6}$/,
-                                        message: 'Pincode must be a 6-digit number',
-                                    },
-                                })}
-                                error={!!errors.pincode}
-                                helperText={errors.pincode?.message as string}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
-
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={watchedIsConsultationFree ?? false}
-                                        onChange={(e) => setValue("isConsultationFree", e.target.checked)}
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="name"
+                                        label="Name"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("name", {
+                                            required: 'Name is required',
+                                            minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                                        })}
+                                        error={!!errors.name}
+                                        helperText={errors.name?.message as string}
+                                        InputLabelProps={{ shrink: true }}
                                     />
-                                }
-                                label="Free Consultation"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={watchedIsActive ?? true}
-                                        onChange={(e) => setValue("isActive", e.target.checked)}
+                                    <TextField
+                                        margin="dense"
+                                        id="specialization"
+                                        label="Specialization"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("specialization", {
+                                            required: 'Specialization is required',
+                                        })}
+                                        error={!!errors.specialization}
+                                        helperText={errors.specialization?.message as string}
+                                        InputLabelProps={{ shrink: true }}
                                     />
-                                }
-                                label="Active"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={watchedIsVerified ?? false}
-                                        onChange={(e) => setValue("isVerified", e.target.checked)}
-                                    />
-                                }
-                                label="Verified"
-                            />
-                        </Stack>
+                                </Stack>
 
-                        {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
-                        <ImageUpload
-                            onChange={(files: any) => {
-                                imageFileRef.current = files?.length ? files[0] : null;
-                                if (files?.length) {
-                                    setExistingImageUrl("");
-                                }
-                            }}
-                            allow="image/*"
-                        />
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="degree"
+                                        label="Degree"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("degree", {
+                                            required: 'Degree is required',
+                                        })}
+                                        error={!!errors.degree}
+                                        helperText={errors.degree?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <TextField
+                                        margin="dense"
+                                        id="experienceYears"
+                                        label="Experience (Years)"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("experienceYears", {
+                                            valueAsNumber: true,
+                                            required: 'Experience is required',
+                                            min: { value: 0, message: 'Experience cannot be negative' },
+                                            max: { value: 70, message: 'Experience cannot exceed 70 years' },
+                                        })}
+                                        error={!!errors.experienceYears}
+                                        helperText={errors.experienceYears?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Stack>
+
+                                <TextField
+                                    margin="dense"
+                                    id="bio"
+                                    label="Bio"
+                                    type="text"
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    variant="outlined"
+                                    {...register("bio")}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="email"
+                                        label="Email"
+                                        type="email"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("email", {
+                                            required: 'Email is required',
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: 'Please enter a valid email address',
+                                            },
+                                        })}
+                                        error={!!errors.email}
+                                        helperText={errors.email?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <TextField
+                                        margin="dense"
+                                        id="phone"
+                                        label="Phone"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("phone", {
+                                            required: 'Phone number is required',
+                                            pattern: {
+                                                value: /^[0-9]{10}$/,
+                                                message: 'Phone must be a 10-digit number',
+                                            },
+                                        })}
+                                        error={!!errors.phone}
+                                        helperText={errors.phone?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Stack>
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="consultationFee"
+                                        label="Consultation Fee"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("consultationFee", {
+                                            valueAsNumber: true,
+                                            required: 'Consultation fee is required',
+                                            min: { value: 0, message: 'Fee cannot be negative' },
+                                        })}
+                                        error={!!errors.consultationFee}
+                                        helperText={errors.consultationFee?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+
+                                    <TextField
+                                        margin="dense"
+                                        id="rating"
+                                        label="Rating"
+                                        type="number"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("rating", {
+                                            valueAsNumber: true,
+                                            min: { value: 0, message: 'Rating must be at least 0' },
+                                            max: { value: 5, message: 'Rating cannot exceed 5' },
+                                        })}
+                                        error={!!errors.rating}
+                                        helperText={errors.rating?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Stack>
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="address"
+                                        label="Address"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("address", {
+                                            required: 'Address is required',
+                                        })}
+                                        error={!!errors.address}
+                                        helperText={errors.address?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <TextField
+                                        margin="dense"
+                                        id="city"
+                                        label="City"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("city", {
+                                            required: 'City is required',
+                                        })}
+                                        error={!!errors.city}
+                                        helperText={errors.city?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Stack>
+
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="state"
+                                        label="State"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("state", {
+                                            required: 'State is required',
+                                        })}
+                                        error={!!errors.state}
+                                        helperText={errors.state?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <TextField
+                                        margin="dense"
+                                        id="pincode"
+                                        label="Pincode"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("pincode", {
+                                            required: 'Pincode is required',
+                                            pattern: {
+                                                value: /^[0-9]{6}$/,
+                                                message: 'Pincode must be a 6-digit number',
+                                            },
+                                        })}
+                                        error={!!errors.pincode}
+                                        helperText={errors.pincode?.message as string}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Stack>
+
+                                <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={watchedIsConsultationFree ?? false}
+                                                onChange={(e) => setValue("isConsultationFree", e.target.checked)}
+                                            />
+                                        }
+                                        label="Free Consultation"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={watchedIsActive ?? true}
+                                                onChange={(e) => setValue("isActive", e.target.checked)}
+                                            />
+                                        }
+                                        label="Active"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={watchedIsVerified ?? false}
+                                                onChange={(e) => setValue("isVerified", e.target.checked)}
+                                            />
+                                        }
+                                        label="Verified"
+                                    />
+                                </Stack>
+
+                                {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
+                                <ImageUpload
+                                    onChange={(files: any) => {
+                                        imageFileRef.current = files?.length ? files[0] : null;
+                                        if (files?.length) {
+                                            setExistingImageUrl("");
+                                        }
+                                    }}
+                                    allow="image/*"
+                                />
                             </>
                         )}
 

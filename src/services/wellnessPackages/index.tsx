@@ -24,11 +24,12 @@ const store = create<WellnessPackageState>((set, get) => ({
             set({ isLoading: true });
 
             const queryParams = new URLSearchParams();
-            // Add filter params: isActive, isPopular, etc.
+            // Add filter params: isActive, isPopular, corporateId, etc.
             if (filters.isActive !== undefined) queryParams.append('isActive', String(filters.isActive));
             if (filters.isPopular !== undefined) queryParams.append('isPopular', String(filters.isPopular));
             if (filters.category) queryParams.append('category', filters.category);
             if (filters.search) queryParams.append('search', filters.search);
+            if (filters.corporateId) queryParams.append('corporateId', filters.corporateId);
             queryParams.append('page', String(currentPage));
             queryParams.append('limit', String(rows));
 

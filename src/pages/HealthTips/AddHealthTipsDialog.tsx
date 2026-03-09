@@ -11,7 +11,13 @@ import {
     Grid,
     TextField,
     Stack,
+    FormControl,
     FormControlLabel,
+    InputLabel,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
     Switch,
     Typography,
     Box,
@@ -25,6 +31,7 @@ import { MODULES } from "../../utils/constants";
 import { showError } from "../../services/toaster";
 import { useHealthTipStore } from "../../services/healthTips";
 import { useCompanyStore } from "../../services/company";
+import { useCorporateStore } from "../../services/corporates";
 import { HealthTip } from "../../types/healthTips";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -39,6 +46,10 @@ const Transition = React.forwardRef(function Transition(
 const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, onUpdate, detail, fetchGrid, filters, setFilters } = useHealthTipStore();
     const { globalCompanyId } = useCompanyStore();
+    const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
+
+    const [targetType, setTargetType] = React.useState<'all' | 'corporate' | ''>('');
+    const isGlobalCorporateSelected = globalCompanyId && globalCompanyId !== "general";
 
     // Image file refs and existing URL states
     const imageFileRef = React.useRef<File | null>(null);
@@ -58,11 +69,14 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         }
     });
 
+    const watchedCorporateId = watch("corporateId");
+
     const formData = watch();
 
     const handleClose = () => {
         toggleModal(false);
         reset();
+        setTargetType('');
         imageFileRef.current = null;
         setExistingImageUrl("");
         iconFileRef.current = null;
@@ -155,8 +169,19 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 category: data.category || "",
                 isActive: data.isActive ?? true,
                 order: data.order ?? 0,
-                corporateId: globalCompanyId,
             };
+
+            // Handle corporateId based on scope
+            if (selectedId) {
+                // On edit, don't change corporateId
+            } else if (targetType === 'corporate') {
+                payload.corporateId = data.corporateId || (isGlobalCorporateSelected ? globalCompanyId : undefined);
+                if (!payload.corporateId) {
+                    delete payload.corporateId;
+                }
+            } else {
+                delete payload.corporateId;
+            }
 
             // Only include imageUrl and icon if they are non-empty
             if (imageUrl) {
@@ -218,9 +243,22 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 setExistingImageUrl("");
                 iconFileRef.current = null;
                 setExistingIconUrl("");
+                // Auto-set scope based on global company selection
+                if (isGlobalCorporateSelected) {
+                    setTargetType('corporate');
+                    setValue("corporateId", globalCompanyId);
+                } else if (globalCompanyId === "general") {
+                    setTargetType('all');
+                }
             }
         }
-    }, [selectedId, isModalOpen]);
+    }, [selectedId, isModalOpen, globalCompanyId]);
+
+    React.useEffect(() => {
+        if (isModalOpen) {
+            fetchCorporates();
+        }
+    }, [isModalOpen, fetchCorporates]);
 
     const handleClickOpen = () => toggleModal(true);
 
@@ -245,155 +283,199 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 <form onSubmit={handleSubmit(onSubmit)} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
                     <DialogTitle>{selectedId ? "Edit Health Tip" : "Add Health Tip"}</DialogTitle>
                     <DialogContent dividers style={{ flex: 1, overflowY: "auto" }}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={8}>
-                                <Stack spacing={3}>
-                                    <TextField
-                                        label="Title"
-                                        fullWidth
-                                        {...register("title", {
-                                            required: "Title is required",
-                                            minLength: { value: 3, message: "Title must be at least 3 characters" },
-                                        })}
-                                        error={!!errors.title}
-                                        helperText={errors.title?.message as string}
-                                    />
+                        {!selectedId && (
+                            <Box sx={{ mb: 3 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                                    Health Tip Scope
+                                </Typography>
+                                <FormControl>
+                                    <RadioGroup
+                                        row
+                                        value={targetType}
+                                        onChange={(e) => {
+                                            const nextTarget = e.target.value as 'all' | 'corporate';
+                                            setTargetType(nextTarget);
+                                            if (nextTarget === 'all') {
+                                                setValue("corporateId", undefined);
+                                            }
+                                        }}
+                                    >
+                                        <FormControlLabel value="all" control={<Radio />} label="For All" />
+                                        <FormControlLabel value="corporate" control={<Radio />} label="For Corporate" />
+                                    </RadioGroup>
+                                </FormControl>
 
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
-                                                label="Category"
-                                                fullWidth
-                                                {...register("category", {
-                                                    required: "Category is required",
-                                                })}
-                                                error={!!errors.category}
-                                                helperText={errors.category?.message as string}
-                                            />
+                                {targetType === 'corporate' && (
+                                    <FormControl fullWidth margin="dense">
+                                        <InputLabel id="healthtip-corporate-select-label">Select Corporate</InputLabel>
+                                        <Select
+                                            labelId="healthtip-corporate-select-label"
+                                            label="Select Corporate"
+                                            value={watchedCorporateId ?? ''}
+                                            onChange={(e) => setValue("corporateId", e.target.value)}
+                                        >
+                                            {corporates.map((corporate) => (
+                                                <MenuItem key={corporate._id} value={corporate._id}>
+                                                    {corporate.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </Box>
+                        )}
+
+                        {(selectedId || targetType === 'all' || (targetType === 'corporate' && Boolean(watchedCorporateId))) && (
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={8}>
+                                    <Stack spacing={3}>
+                                        <TextField
+                                            label="Title"
+                                            fullWidth
+                                            {...register("title", {
+                                                required: "Title is required",
+                                                minLength: { value: 3, message: "Title must be at least 3 characters" },
+                                            })}
+                                            error={!!errors.title}
+                                            helperText={errors.title?.message as string}
+                                        />
+
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    label="Category"
+                                                    fullWidth
+                                                    {...register("category", {
+                                                        required: "Category is required",
+                                                    })}
+                                                    error={!!errors.category}
+                                                    helperText={errors.category?.message as string}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    label="Order"
+                                                    type="number"
+                                                    fullWidth
+                                                    {...register("order", {
+                                                        valueAsNumber: true,
+                                                        min: { value: 0, message: "Order must be 0 or greater" },
+                                                    })}
+                                                    error={!!errors.order}
+                                                    helperText={errors.order?.message as string}
+                                                />
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
-                                                label="Order"
-                                                type="number"
-                                                fullWidth
-                                                {...register("order", {
-                                                    valueAsNumber: true,
-                                                    min: { value: 0, message: "Order must be 0 or greater" },
-                                                })}
-                                                error={!!errors.order}
-                                                helperText={errors.order?.message as string}
-                                            />
-                                        </Grid>
-                                    </Grid>
 
-                                    <TextField
-                                        label="Short Description"
-                                        fullWidth
-                                        multiline
-                                        rows={2}
-                                        {...register("shortDescription", {
-                                            required: "Short description is required",
-                                            minLength: { value: 10, message: "Short description must be at least 10 characters" },
-                                        })}
-                                        error={!!errors.shortDescription}
-                                        helperText={errors.shortDescription?.message as string}
-                                    />
+                                        <TextField
+                                            label="Short Description"
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            {...register("shortDescription", {
+                                                required: "Short description is required",
+                                                minLength: { value: 10, message: "Short description must be at least 10 characters" },
+                                            })}
+                                            error={!!errors.shortDescription}
+                                            helperText={errors.shortDescription?.message as string}
+                                        />
 
-                                    <Box>
-                                        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                                            Full Description
-                                        </Typography>
-                                        <Box sx={{ height: 400, mb: 8 }}>
-                                            <Controller
-                                                name="description"
-                                                control={control}
-                                                rules={{ required: "Description is required" }}
-                                                render={({ field }) => (
-                                                    <ReactQuill
-                                                        theme="snow"
-                                                        value={field.value || ""}
-                                                        onChange={field.onChange}
-                                                        style={{ height: "350px" }}
-                                                    />
-                                                )}
-                                            />
-                                            {errors.description && (
-                                                <Typography color="error" variant="caption">
-                                                    {errors.description.message}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                    </Box>
-                                </Stack>
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Stack spacing={3}>
-                                    <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1, bgcolor: 'background.paper' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 2 }}>Status</Typography>
-                                        <FormControlLabel
-                                            control={
+                                        <Box>
+                                            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+                                                Full Description
+                                            </Typography>
+                                            <Box sx={{ height: 400, mb: 8 }}>
                                                 <Controller
-                                                    name="isActive"
+                                                    name="description"
                                                     control={control}
+                                                    rules={{ required: "Description is required" }}
                                                     render={({ field }) => (
-                                                        <Switch
-                                                            checked={field.value}
-                                                            onChange={(e) => field.onChange(e.target.checked)}
+                                                        <ReactQuill
+                                                            theme="snow"
+                                                            value={field.value || ""}
+                                                            onChange={field.onChange}
+                                                            style={{ height: "350px" }}
                                                         />
                                                     )}
                                                 />
-                                            }
-                                            label={formData.isActive ? "Active" : "Inactive"}
-                                        />
-                                    </Box>
-
-                                    <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 2 }}>Main Image</Typography>
-                                        {existingImageUrl && (
-                                            <Box sx={{ mb: 2, textAlign: 'center' }}>
-                                                <CustomImage
-                                                    src={existingImageUrl}
-                                                    style={{ width: "100%", maxHeight: 200, objectFit: "contain", borderRadius: 4 }}
-                                                />
+                                                {errors.description && (
+                                                    <Typography color="error" variant="caption">
+                                                        {errors.description.message}
+                                                    </Typography>
+                                                )}
                                             </Box>
-                                        )}
-                                        <ImageUpload
-                                            onChange={(files: any) => {
-                                                if (files?.length) {
-                                                    imageFileRef.current = files[0];
-                                                    setExistingImageUrl(URL.createObjectURL(files[0]));
-                                                }
-                                            }}
-                                            allow="image/*"
-                                            multiple={false}
-                                        />
-                                    </Box>
+                                        </Box>
+                                    </Stack>
+                                </Grid>
 
-                                    <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 2 }}>Icon Image</Typography>
-                                        {existingIconUrl && (
-                                            <Box sx={{ mb: 2, textAlign: 'center' }}>
-                                                <CustomImage
-                                                    src={existingIconUrl}
-                                                    style={{ width: 80, height: 80, objectFit: "contain", borderRadius: 4 }}
-                                                />
-                                            </Box>
-                                        )}
-                                        <ImageUpload
-                                            onChange={(files: any) => {
-                                                if (files?.length) {
-                                                    iconFileRef.current = files[0];
-                                                    setExistingIconUrl(URL.createObjectURL(files[0]));
+                                <Grid item xs={12} md={4}>
+                                    <Stack spacing={3}>
+                                        <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1, bgcolor: 'background.paper' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 2 }}>Status</Typography>
+                                            <FormControlLabel
+                                                control={
+                                                    <Controller
+                                                        name="isActive"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <Switch
+                                                                checked={field.value}
+                                                                onChange={(e) => field.onChange(e.target.checked)}
+                                                            />
+                                                        )}
+                                                    />
                                                 }
-                                            }}
-                                            allow="image/*"
-                                            multiple={false}
-                                        />
-                                    </Box>
-                                </Stack>
+                                                label={formData.isActive ? "Active" : "Inactive"}
+                                            />
+                                        </Box>
+
+                                        <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 2 }}>Main Image</Typography>
+                                            {existingImageUrl && (
+                                                <Box sx={{ mb: 2, textAlign: 'center' }}>
+                                                    <CustomImage
+                                                        src={existingImageUrl}
+                                                        style={{ width: "100%", maxHeight: 200, objectFit: "contain", borderRadius: 4 }}
+                                                    />
+                                                </Box>
+                                            )}
+                                            <ImageUpload
+                                                onChange={(files: any) => {
+                                                    if (files?.length) {
+                                                        imageFileRef.current = files[0];
+                                                        setExistingImageUrl(URL.createObjectURL(files[0]));
+                                                    }
+                                                }}
+                                                allow="image/*"
+                                                multiple={false}
+                                            />
+                                        </Box>
+
+                                        <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 2 }}>Icon Image</Typography>
+                                            {existingIconUrl && (
+                                                <Box sx={{ mb: 2, textAlign: 'center' }}>
+                                                    <CustomImage
+                                                        src={existingIconUrl}
+                                                        style={{ width: 80, height: 80, objectFit: "contain", borderRadius: 4 }}
+                                                    />
+                                                </Box>
+                                            )}
+                                            <ImageUpload
+                                                onChange={(files: any) => {
+                                                    if (files?.length) {
+                                                        iconFileRef.current = files[0];
+                                                        setExistingIconUrl(URL.createObjectURL(files[0]));
+                                                    }
+                                                }}
+                                                allow="image/*"
+                                                multiple={false}
+                                            />
+                                        </Box>
+                                    </Stack>
+                                </Grid>
                             </Grid>
-                        </Grid>
+                        )}
                     </DialogContent>
 
                     <DialogActions sx={{ p: 3 }}>

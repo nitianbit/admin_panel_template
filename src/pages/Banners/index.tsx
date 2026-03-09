@@ -14,7 +14,12 @@ const Banners = () => {
 
     React.useEffect(() => {
         if (globalCompanyId) {
-            setFilters({ corporateId: globalCompanyId });
+            if (globalCompanyId === "general") {
+                // No corporateId filter — fetches all non-corporate (general) data
+                setFilters({});
+            } else {
+                setFilters({ corporateId: globalCompanyId });
+            }
         } else {
             fetchGrid();
         }

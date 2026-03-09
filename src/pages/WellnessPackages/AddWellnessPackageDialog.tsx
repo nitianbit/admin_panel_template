@@ -35,6 +35,7 @@ import { TestCategory, WellnessPackage } from "../../types/WellnessPackage";
 import { MODULES } from "../../utils/constants";
 import { uploadFile } from "../../utils/helper";
 import { useWellnessPackageStore } from "../../services/wellnessPackages";
+import { useCompanyStore } from "../../services/company";
 import { useCorporateStore } from "../../services/corporates";
 
 const Transition = React.forwardRef(function Transition(
@@ -64,6 +65,7 @@ const initialData: WellnessPackage = {
 
 const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, filters, setFilters } = useWellnessPackageStore();
+    const { globalCompanyId } = useCompanyStore();
     const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
     const [data, setData] = React.useState<WellnessPackage>({ ...initialData });
     const { handleSubmit } = useForm<WellnessPackage>();
@@ -78,6 +80,8 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
     const [newSubTestInput, setNewSubTestInput] = React.useState<{ [key: number]: string }>({});
     const [targetType, setTargetType] = React.useState<string>('');
+
+    const isGlobalCorporateSelected = globalCompanyId && globalCompanyId !== "general";
 
     const handleChange = (key: any, value: any) => setData(prev => ({ ...prev, [key]: value }));
     const handleClickOpen = () => toggleModal(true);
@@ -275,8 +279,12 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             ...(imageUrl && { imageUrl }),
         };
 
-        if (!data?._id && targetType === 'corporate' && data.corporate_id) {
-            payload.corporate_id = data.corporate_id;
+        if (!data?._id && targetType === 'corporate') {
+            // Use the manually selected corporate_id, or fall back to globalCompanyId
+            payload.corporate_id = data.corporate_id || (isGlobalCorporateSelected ? globalCompanyId : undefined);
+            if (!payload.corporate_id) {
+                delete payload.corporate_id;
+            }
         }
 
         let response = null;
@@ -319,8 +327,16 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
         setNewSubTestInput({});
         if (selectedId) {
             fetchDetail(selectedId);
+        } else {
+            // For new packages, auto-set based on global company selection
+            if (isGlobalCorporateSelected) {
+                setTargetType('corporate');
+                setData(prev => ({ ...prev, corporate_id: globalCompanyId }));
+            } else if (globalCompanyId === "general") {
+                setTargetType('all');
+            }
         }
-    }, [selectedId]);
+    }, [selectedId, globalCompanyId]);
 
     React.useEffect(() => {
         if (isModalOpen) {

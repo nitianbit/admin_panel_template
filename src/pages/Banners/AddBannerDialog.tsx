@@ -1,5 +1,23 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Stack, Switch, TextField } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormControlLabel,
+    InputLabel,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    Stack,
+    Switch,
+    TextField,
+    Typography
+} from "@mui/material";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import React from 'react';
@@ -10,6 +28,7 @@ import CustomImage from "../../components/CustomImage";
 import ImageUpload from "../../components/ImageUploader";
 import { useBannerStore } from "../../services/banners";
 import { useCompanyStore } from "../../services/company";
+import { useCorporateStore } from "../../services/corporates";
 import { showError } from "../../services/toaster";
 import { Banner, BannerType } from "../../types/banners";
 import { MODULES } from "../../utils/constants";
@@ -51,10 +70,13 @@ const initialData: Banner = {
 const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const { onCreate, detail, onUpdate, setFilters, filters } = useBannerStore();
     const { globalCompanyId } = useCompanyStore();
+    const { data: corporates, fetchGrid: fetchCorporates } = useCorporateStore();
     const { register, handleSubmit, reset, watch, setValue, control, formState: { errors } } = useForm<Banner>({
         defaultValues: { ...initialData },
     });
+    const [targetType, setTargetType] = React.useState<'all' | 'corporate' | ''>('');
 
+    const isGlobalCorporateSelected = globalCompanyId && globalCompanyId !== "general";
     const imageFileRef = React.useRef<File | null>(null);
     const [existingImageUrl, setExistingImageUrl] = React.useState<string>("");
 
@@ -144,8 +166,19 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
             isActive: formValues.isActive ?? true,
             order: formValues.order ?? 0,
             imageUrl: imageUrl,
-            corporateId: globalCompanyId,
         };
+
+        if (formValues?._id) {
+            // On edit, don't change corporateId
+        } else if (targetType === 'corporate') {
+            // Use the manually selected corporateId, or fall back to globalCompanyId
+            payload.corporateId = formValues.corporateId || (isGlobalCorporateSelected ? globalCompanyId : undefined);
+            if (!payload.corporateId) {
+                delete payload.corporateId;
+            }
+        } else {
+            delete payload.corporateId;
+        }
 
         let response = null;
 
@@ -157,17 +190,42 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         }
 
         reset({ ...initialData });
+        setTargetType('');
         imageFileRef.current = null;
         setExistingImageUrl("");
         handleClose();
     };
 
+    // Convert date from backend format (YYYYMMDD or ISO string) to YYYY-MM-DD for date input
+    const parseDate = (dateStr: string | undefined): string => {
+        if (!dateStr) return "";
+        // If already in YYYY-MM-DD format, return as-is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+        // If in compact YYYYMMDD format, insert hyphens
+        if (/^\d{8}$/.test(dateStr)) {
+            return `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
+        }
+        // If ISO string (e.g., "2026-03-08T00:00:00.000Z"), extract the date part
+        if (dateStr.includes('T')) {
+            return dateStr.split('T')[0];
+        }
+        return dateStr;
+    };
+
     const fetchDetail = async (selectedId: string) => {
         try {
             const data = await detail(selectedId);
-            reset(data?.data);
-            if (data?.data?.imageUrl && typeof data.data.imageUrl === 'string') {
-                setExistingImageUrl(data.data.imageUrl);
+            const bannerData = data?.data;
+            if (bannerData) {
+                reset({
+                    ...bannerData,
+                    startDate: parseDate(bannerData.startDate),
+                    endDate: parseDate(bannerData.endDate),
+                });
+                setTargetType(bannerData.corporateId ? 'corporate' : 'all');
+                if (bannerData.imageUrl && typeof bannerData.imageUrl === 'string') {
+                    setExistingImageUrl(bannerData.imageUrl);
+                }
             }
         } catch (error) {
 
@@ -176,15 +234,32 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
     React.useEffect(() => {
         reset({ ...initialData });
+        setTargetType('');
         imageFileRef.current = null;
         setExistingImageUrl("");
         if (selectedId) {
             fetchDetail(selectedId);
+        } else {
+            // For new banners, auto-set based on global company selection
+            if (isGlobalCorporateSelected) {
+                setTargetType('corporate');
+                setValue("corporateId", globalCompanyId);
+            } else if (globalCompanyId === "general") {
+                setTargetType('all');
+            }
         }
-    }, [selectedId]);
+    }, [selectedId, globalCompanyId]);
+
+    React.useEffect(() => {
+        if (isModalOpen) {
+            fetchCorporates();
+        }
+    }, [isModalOpen, fetchCorporates]);
 
     const watchedId = watch("_id");
+    const watchedCorporateId = watch("corporateId");
     const watchedIsActive = watch("isActive");
+    const canShowMainForm = Boolean(watchedId) || targetType === 'all' || (targetType === 'corporate' && Boolean(watchedCorporateId));
 
     return (
         <>
@@ -210,185 +285,231 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogTitle>{watchedId ? 'Edit Banner' : 'Add Banner'}</DialogTitle>
                     <DialogContent dividers>
-
-                        <TextField
-                            margin="dense"
-                            id="title"
-                            label="Banner Title"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            {...register("title", {
-                                required: 'Title is required',
-                                minLength: { value: 3, message: 'Title must be at least 3 characters' },
-                            })}
-                            error={!!errors.title}
-                            helperText={errors.title?.message as string}
-                            InputLabelProps={{ shrink: true }}
-                        />
-
-                        <TextField
-                            margin="dense"
-                            id="description"
-                            label="Description"
-                            type="text"
-                            fullWidth
-                            multiline
-                            rows={3}
-                            variant="outlined"
-                            {...register("description", {
-                                required: 'Description is required',
-                            })}
-                            error={!!errors.description}
-                            helperText={errors.description?.message as string}
-                            InputLabelProps={{ shrink: true }}
-                        />
-
-                        <TextField
-                            margin="dense"
-                            id="linkUrl"
-                            label="Link URL"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            {...register("linkUrl", {
-                                pattern: {
-                                    value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
-                                    message: 'Please enter a valid URL',
-                                },
-                            })}
-                            error={!!errors.linkUrl}
-                            helperText={errors.linkUrl?.message as string}
-                            InputLabelProps={{ shrink: true }}
-                        />
-
-                        <Controller
-                            name="bannerType"
-                            control={control}
-                            defaultValue="home"
-                            render={({ field }) => (
-                                <FormControl fullWidth margin="dense">
-                                    <InputLabel id="bannerType-label">Banner Type</InputLabel>
-                                    <Select
-                                        labelId="bannerType-label"
-                                        id="bannerType"
-                                        label="Banner Type"
-                                        {...field}
-                                        value={field.value || 'home'}
+                        {!watchedId && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                                    Banner Scope
+                                </Typography>
+                                <FormControl>
+                                    <RadioGroup
+                                        row
+                                        value={targetType}
+                                        onChange={(e) => {
+                                            const nextTarget = e.target.value as 'all' | 'corporate';
+                                            setTargetType(nextTarget);
+                                            if (nextTarget === 'all') {
+                                                setValue("corporateId", undefined);
+                                            }
+                                        }}
                                     >
-                                        {BANNER_TYPES.map((type) => (
-                                            <MenuItem key={type.value} value={type.value}>
-                                                {type.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
+                                        <FormControlLabel value="all" control={<Radio />} label="For All" />
+                                        <FormControlLabel value="corporate" control={<Radio />} label="For Corporate" />
+                                    </RadioGroup>
                                 </FormControl>
-                            )}
-                        />
 
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="startDate"
-                                label="Start Date"
-                                type="date"
-                                fullWidth
-                                variant="outlined"
-                                InputLabelProps={{ shrink: true }}
-                                {...register("startDate", {
-                                    required: 'Start date is required',
-                                })}
-                                error={!!errors.startDate}
-                                helperText={errors.startDate?.message as string}
-                            />
+                                {targetType === 'corporate' && (
+                                    <FormControl fullWidth margin="dense">
+                                        <InputLabel id="banner-corporate-select-label">Select Corporate</InputLabel>
+                                        <Select
+                                            labelId="banner-corporate-select-label"
+                                            label="Select Corporate"
+                                            value={watchedCorporateId ?? ''}
+                                            onChange={(e) => setValue("corporateId", e.target.value)}
+                                        >
+                                            {corporates.map((corporate) => (
+                                                <MenuItem key={corporate._id} value={corporate._id}>
+                                                    {corporate.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </Box>
+                        )}
 
-                            <TextField
-                                margin="dense"
-                                id="endDate"
-                                label="End Date"
-                                type="date"
-                                fullWidth
-                                variant="outlined"
-                                InputLabelProps={{ shrink: true }}
-                                {...register("endDate", {
-                                    required: 'End date is required',
-                                    validate: (value) => {
-                                        const startDate = watch('startDate');
-                                        if (startDate && value && value < startDate) {
-                                            return 'End date must be after start date';
-                                        }
-                                        return true;
-                                    },
-                                })}
-                                error={!!errors.endDate}
-                                helperText={errors.endDate?.message as string}
-                            />
-                        </Stack>
+                        {canShowMainForm && (
+                            <>
 
-                        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="target"
-                                label="Target"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("target")}
-                                InputLabelProps={{ shrink: true }}
-                            />
+                                <TextField
+                                    margin="dense"
+                                    id="title"
+                                    label="Banner Title"
+                                    type="text"
+                                    fullWidth
+                                    variant="outlined"
+                                    {...register("title", {
+                                        required: 'Title is required',
+                                        minLength: { value: 3, message: 'Title must be at least 3 characters' },
+                                    })}
+                                    error={!!errors.title}
+                                    helperText={errors.title?.message as string}
+                                    InputLabelProps={{ shrink: true }}
+                                />
 
-                            <TextField
-                                margin="dense"
-                                id="targetId"
-                                label="Target ID"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                                {...register("targetId")}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </Stack>
+                                <TextField
+                                    margin="dense"
+                                    id="description"
+                                    label="Description"
+                                    type="text"
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    variant="outlined"
+                                    {...register("description", {
+                                        required: 'Description is required',
+                                    })}
+                                    error={!!errors.description}
+                                    helperText={errors.description?.message as string}
+                                    InputLabelProps={{ shrink: true }}
+                                />
 
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
-                            <TextField
-                                margin="dense"
-                                id="order"
-                                label="Display Order"
-                                type="number"
-                                variant="outlined"
-                                {...register("order", {
-                                    valueAsNumber: true,
-                                    min: { value: 0, message: 'Order must be 0 or greater' },
-                                })}
-                                error={!!errors.order}
-                                helperText={errors.order?.message as string}
-                                sx={{ width: 200 }}
-                                InputLabelProps={{ shrink: true }}
-                            />
+                                <TextField
+                                    margin="dense"
+                                    id="linkUrl"
+                                    label="Link URL"
+                                    type="text"
+                                    fullWidth
+                                    variant="outlined"
+                                    {...register("linkUrl", {
+                                        pattern: {
+                                            value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+                                            message: 'Please enter a valid URL',
+                                        },
+                                    })}
+                                    error={!!errors.linkUrl}
+                                    helperText={errors.linkUrl?.message as string}
+                                    InputLabelProps={{ shrink: true }}
+                                />
 
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={watchedIsActive ?? true}
-                                        onChange={(e) => setValue("isActive", e.target.checked)}
+                                <Controller
+                                    name="bannerType"
+                                    control={control}
+                                    defaultValue="home"
+                                    render={({ field }) => (
+                                        <FormControl fullWidth margin="dense">
+                                            <InputLabel id="bannerType-label">Banner Type</InputLabel>
+                                            <Select
+                                                labelId="bannerType-label"
+                                                id="bannerType"
+                                                label="Banner Type"
+                                                {...field}
+                                                value={field.value || 'home'}
+                                            >
+                                                {BANNER_TYPES.map((type) => (
+                                                    <MenuItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    )}
+                                />
+
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="startDate"
+                                        label="Start Date"
+                                        type="date"
+                                        fullWidth
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                        {...register("startDate", {
+                                            required: 'Start date is required',
+                                        })}
+                                        error={!!errors.startDate}
+                                        helperText={errors.startDate?.message as string}
                                     />
-                                }
-                                label="Active"
-                            />
-                        </Stack>
 
-                        {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
-                        <ImageUpload
-                            onChange={(files: any) => {
-                                imageFileRef.current = files?.length ? files[0] : null;
-                                if (files?.length) {
-                                    setExistingImageUrl("");
+                                    <TextField
+                                        margin="dense"
+                                        id="endDate"
+                                        label="End Date"
+                                        type="date"
+                                        fullWidth
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                        {...register("endDate", {
+                                            required: 'End date is required',
+                                            validate: (value) => {
+                                                const startDate = watch('startDate');
+                                                if (startDate && value && value < startDate) {
+                                                    return 'End date must be after start date';
+                                                }
+                                                return true;
+                                            },
+                                        })}
+                                        error={!!errors.endDate}
+                                        helperText={errors.endDate?.message as string}
+                                    />
+                                </Stack>
 
-                                }
-                                console.log(imageFileRef.current);
-                            }}
-                            allow="image/*"
-                        />
+                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="target"
+                                        label="Target"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("target")}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+
+                                    <TextField
+                                        margin="dense"
+                                        id="targetId"
+                                        label="Target ID"
+                                        type="text"
+                                        fullWidth
+                                        variant="outlined"
+                                        {...register("targetId")}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Stack>
+
+                                <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                                    <TextField
+                                        margin="dense"
+                                        id="order"
+                                        label="Display Order"
+                                        type="number"
+                                        variant="outlined"
+                                        {...register("order", {
+                                            valueAsNumber: true,
+                                            min: { value: 0, message: 'Order must be 0 or greater' },
+                                        })}
+                                        error={!!errors.order}
+                                        helperText={errors.order?.message as string}
+                                        sx={{ width: 200 }}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={watchedIsActive ?? true}
+                                                onChange={(e) => setValue("isActive", e.target.checked)}
+                                            />
+                                        }
+                                        label="Active"
+                                    />
+                                </Stack>
+
+                                {existingImageUrl ? <CustomImage src={existingImageUrl} style={{ width: '50%', height: 200, objectFit: 'contain', marginTop: 16 }} /> : null}
+                                <ImageUpload
+                                    onChange={(files: any) => {
+                                        imageFileRef.current = files?.length ? files[0] : null;
+                                        if (files?.length) {
+                                            setExistingImageUrl("");
+
+                                        }
+                                        console.log(imageFileRef.current);
+                                    }}
+                                    allow="image/*"
+                                />
+                            </>
+                        )}
 
                     </DialogContent>
                     <DialogActions>

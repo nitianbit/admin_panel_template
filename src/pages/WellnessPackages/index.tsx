@@ -5,13 +5,25 @@ import { getColumns } from './constants';
 import { MODULES } from '../../utils/constants';
 import AddWellnessPackageDialog from './AddWellnessPackageDialog';
 import { useWellnessPackageStore } from '../../services/wellnessPackages';
+import { useCompanyStore } from '../../services/company';
 
 
 const WellnessPackages = () => {
     const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useWellnessPackageStore();
+    const { globalCompanyId } = useCompanyStore();
+
     React.useEffect(() => {
-        fetchGrid()
-    }, [])
+        if (globalCompanyId) {
+            if (globalCompanyId === "general") {
+                // No corporateId filter — fetches all non-corporate (general) data
+                setFilters({});
+            } else {
+                setFilters({ corporateId: globalCompanyId });
+            }
+        } else {
+            fetchGrid();
+        }
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Wellness Packages">
