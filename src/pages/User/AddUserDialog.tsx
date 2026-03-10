@@ -171,11 +171,13 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
 
     const fetchDetail = async (id: string) => {
         try {
-            const res = await detail(id);
-            if (res.data) {
-                reset(res.data);
-                if (res.data.profilePictureUrl) {
-                    setPreviewImage(res.data.profilePictureUrl);
+            const res: any = await detail(id);
+            // API returns: { data: { user: { ... } } }
+            const userData = res?.data?.user || res?.data || res;
+            if (userData && userData._id) {
+                reset(userData);
+                if (userData.profilePictureUrl) {
+                    setPreviewImage(userData.profilePictureUrl);
                 }
             }
         } catch (error) {
@@ -295,15 +297,25 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
-                                            <TextField
-                                                select
-                                                label="User Type"
-                                                fullWidth
-                                                {...register("userType", { required: "User type is required" })}
-                                            >
-                                                <MenuItem value="user">Standard User</MenuItem>
-                                                <MenuItem value="admin">Administrator</MenuItem>
-                                            </TextField>
+                                            <Controller
+                                                name="userType"
+                                                control={control}
+                                                rules={{ required: "User type is required" }}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        select
+                                                        label="User Type"
+                                                        fullWidth
+                                                        value={field.value || 'user'}
+                                                        onChange={field.onChange}
+                                                        onBlur={field.onBlur}
+                                                        inputRef={field.ref}
+                                                    >
+                                                        <MenuItem value="user">Standard User</MenuItem>
+                                                        <MenuItem value="admin">Administrator</MenuItem>
+                                                    </TextField>
+                                                )}
+                                            />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <Stack direction="row" spacing={4} sx={{ mt: 1 }}>
@@ -337,28 +349,47 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={4}>
-                                    <TextField
-                                        select
-                                        label="Gender"
-                                        fullWidth
-                                        {...register("gender")}
-                                    >
-                                        <MenuItem value="Male">Male</MenuItem>
-                                        <MenuItem value="Female">Female</MenuItem>
-                                        <MenuItem value="Other">Other</MenuItem>
-                                    </TextField>
+                                    <Controller
+                                        name="gender"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                select
+                                                label="Gender"
+                                                fullWidth
+                                                value={field.value || 'Male'}
+                                                onChange={field.onChange}
+                                                onBlur={field.onBlur}
+                                                inputRef={field.ref}
+                                            >
+                                                <MenuItem value="Male">Male</MenuItem>
+                                                <MenuItem value="Female">Female</MenuItem>
+                                                <MenuItem value="Other">Other</MenuItem>
+                                            </TextField>
+                                        )}
+                                    />
                                 </Grid>
                                 <Grid item xs={12} md={4}>
-                                    <TextField
-                                        select
-                                        label="Blood Group"
-                                        fullWidth
-                                        {...register("bloodGroup")}
-                                    >
-                                        {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
-                                            <MenuItem key={group} value={group}>{group}</MenuItem>
-                                        ))}
-                                    </TextField>
+                                    <Controller
+                                        name="bloodGroup"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                select
+                                                label="Blood Group"
+                                                fullWidth
+                                                value={field.value || ''}
+                                                onChange={field.onChange}
+                                                onBlur={field.onBlur}
+                                                inputRef={field.ref}
+                                            >
+                                                <MenuItem value=""><em>None</em></MenuItem>
+                                                {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
+                                                    <MenuItem key={group} value={group}>{group}</MenuItem>
+                                                ))}
+                                            </TextField>
+                                        )}
+                                    />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <TextField
@@ -393,13 +424,13 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         {...register("emergencyContact.phone")}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                {/* <Grid item xs={12} md={4}>
                                     <TextField
                                         label="Relationship"
                                         fullWidth
                                         {...register("emergencyContact.relationship")}
                                     />
-                                </Grid>
+                                </Grid> */}
                             </Grid>
                         </CustomTabPanel>
 
