@@ -345,9 +345,7 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                                 <TextField
                                                     label="Category"
                                                     fullWidth
-                                                    {...register("category", {
-                                                        required: "Category is required",
-                                                    })}
+                                                    {...register("category")}
                                                     error={!!errors.category}
                                                     helperText={errors.category?.message as string}
                                                 />
@@ -372,10 +370,7 @@ const AddHealthTipsDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             fullWidth
                                             multiline
                                             rows={2}
-                                            {...register("shortDescription", {
-                                                required: "Short description is required",
-                                                minLength: { value: 10, message: "Short description must be at least 10 characters" },
-                                            })}
+                                            {...register("shortDescription")}
                                             error={!!errors.shortDescription}
                                             helperText={errors.shortDescription?.message as string}
                                         />

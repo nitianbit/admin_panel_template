@@ -629,7 +629,6 @@ export default function AddBookingDialog({
                                                     <Controller
                                                         name="primaryConcern"
                                                         control={control}
-                                                        rules={{ required: 'Primary Concern is required' }}
                                                         render={({ field }) => (
                                                             <TextField
                                                                 {...field}
@@ -648,15 +647,17 @@ export default function AddBookingDialog({
                                                     <Controller
                                                         name="consultationMode"
                                                         control={control}
-                                                        rules={{ required: 'Consultation Mode is required' }}
                                                         render={({ field }) => (
-                                                            <FormControl fullWidth size="small">
+                                                            <FormControl fullWidth size="small" error={!!errors.consultationMode}>
                                                                 <InputLabel>Consultation Mode</InputLabel>
                                                                 <Select {...field} label="Consultation Mode">
                                                                     {CONSULTATION_MODES.map((mode) => (
                                                                         <MenuItem key={mode.value} value={mode.value}>{mode.label}</MenuItem>
                                                                     ))}
                                                                 </Select>
+                                                                {errors.consultationMode && (
+                                                                    <FormHelperText>{errors.consultationMode?.message as string}</FormHelperText>
+                                                                )}
                                                             </FormControl>
                                                         )}
                                                     />

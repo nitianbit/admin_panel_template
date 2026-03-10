@@ -206,36 +206,25 @@ const AddWellnessPackageDialog = ({ isModalOpen, toggleModal, selectedId }: any)
             newErrors.name = 'Name must be at least 3 characters';
         }
 
-        if (!data.description || data.description.trim().length === 0) {
-            newErrors.description = 'Description is required';
+        if (data.originalPrice === undefined || data.originalPrice === null || data.originalPrice < 0 || String(data.originalPrice).trim() === '') {
+            newErrors.originalPrice = 'Original price is required and must be 0 or greater';
         }
 
-        if (data.originalPrice === undefined || data.originalPrice === null || data.originalPrice <= 0) {
-            newErrors.originalPrice = 'Original price must be greater than 0';
-        }
-
-        if (data.discountedPrice !== undefined && data.discountedPrice !== null && data.discountedPrice > data.originalPrice) {
+        if (data.discountedPrice === undefined || data.discountedPrice === null || data.discountedPrice < 0 || String(data.discountedPrice).trim() === '') {
+            newErrors.discountedPrice = 'Discounted price is required and must be 0 or greater';
+        } else if (data.originalPrice !== undefined && data.originalPrice !== null && data.discountedPrice > data.originalPrice) {
             newErrors.discountedPrice = 'Discounted price cannot exceed original price';
-        }
-
-        if (!data.category || data.category.trim().length === 0) {
-            newErrors.category = 'Category is required';
         }
 
         if (data.order !== undefined && data.order !== null && data.order < 0) {
             newErrors.order = 'Order must be 0 or greater';
         }
 
-        if (!data.testsIncluded || data.testsIncluded.length === 0) {
-            newErrors.testsIncluded = 'Please add at least one test category';
-        } else {
+        if (data.testsIncluded && data.testsIncluded.length > 0) {
             for (let i = 0; i < data.testsIncluded.length; i++) {
                 const cat = data.testsIncluded[i];
-                if (!cat.categoryName.trim()) {
+                if (!cat.categoryName || !cat.categoryName.trim()) {
                     newErrors[`category_${i}`] = `Please enter a name for test category ${i + 1}`;
-                }
-                if (cat.subTests.length === 0) {
-                    newErrors[`subTests_${i}`] = `Please add at least one sub-test in "${cat.categoryName || `Category ${i + 1}`}"`;
                 }
             }
         }

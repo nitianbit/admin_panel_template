@@ -128,9 +128,6 @@ export default function AddCouponDialog({
             errs.code = 'Coupon code must contain only uppercase letters and numbers';
         }
 
-        if (!couponData.title || couponData.title.trim().length === 0) {
-            errs.title = 'Title is required';
-        }
 
         if (!couponData.discountValue || Number(couponData.discountValue) <= 0) {
             errs.discountValue = 'Discount value must be greater than 0';
@@ -138,11 +135,11 @@ export default function AddCouponDialog({
             errs.discountValue = 'Percentage discount cannot exceed 100%';
         }
 
-        if (couponData.discountType === 'percentage' && couponData.maximumDiscountAmount !== undefined && Number(couponData.maximumDiscountAmount) < 0) {
+        if (couponData.discountType === 'percentage' && couponData.maximumDiscountAmount !== undefined && String(couponData.maximumDiscountAmount) !== '' && Number(couponData.maximumDiscountAmount) < 0) {
             errs.maximumDiscountAmount = 'Max discount amount cannot be negative';
         }
 
-        if (couponData.minimumPurchaseAmount !== undefined && Number(couponData.minimumPurchaseAmount) < 0) {
+        if (couponData.minimumPurchaseAmount !== undefined && String(couponData.minimumPurchaseAmount) !== '' && Number(couponData.minimumPurchaseAmount) < 0) {
             errs.minimumPurchaseAmount = 'Min purchase amount cannot be negative';
         }
 
@@ -156,11 +153,11 @@ export default function AddCouponDialog({
             errs.endDate = 'End date must be after start date';
         }
 
-        if (!couponData.usageLimitPerUser || Number(couponData.usageLimitPerUser) < 1) {
+        if (couponData.usageLimitPerUser !== undefined && String(couponData.usageLimitPerUser) !== '' && Number(couponData.usageLimitPerUser) < 1) {
             errs.usageLimitPerUser = 'Limit per user must be at least 1';
         }
 
-        if (!couponData.totalUsageLimit || Number(couponData.totalUsageLimit) < 1) {
+        if (couponData.totalUsageLimit !== undefined && String(couponData.totalUsageLimit) !== '' && Number(couponData.totalUsageLimit) < 1) {
             errs.totalUsageLimit = 'Total usage limit must be at least 1';
         }
 
@@ -184,12 +181,32 @@ export default function AddCouponDialog({
             endDate: formattedEndDate,
             // Ensure numerical values are numbers
             discountValue: Number(couponData.discountValue),
-            minimumPurchaseAmount: Number(couponData.minimumPurchaseAmount),
-            maximumDiscountAmount: Number(couponData.maximumDiscountAmount),
-            usageLimitPerUser: Number(couponData.usageLimitPerUser),
-            totalUsageLimit: Number(couponData.totalUsageLimit),
             corporateId: globalCompanyId,
         };
+
+        if (couponData.minimumPurchaseAmount !== undefined && String(couponData.minimumPurchaseAmount) !== '') {
+            payload.minimumPurchaseAmount = Number(couponData.minimumPurchaseAmount);
+        } else {
+            delete payload.minimumPurchaseAmount;
+        }
+
+        if (couponData.maximumDiscountAmount !== undefined && String(couponData.maximumDiscountAmount) !== '') {
+            payload.maximumDiscountAmount = Number(couponData.maximumDiscountAmount);
+        } else {
+            delete payload.maximumDiscountAmount;
+        }
+
+        if (couponData.usageLimitPerUser !== undefined && String(couponData.usageLimitPerUser) !== '') {
+            payload.usageLimitPerUser = Number(couponData.usageLimitPerUser);
+        } else {
+            delete payload.usageLimitPerUser;
+        }
+
+        if (couponData.totalUsageLimit !== undefined && String(couponData.totalUsageLimit) !== '') {
+            payload.totalUsageLimit = Number(couponData.totalUsageLimit);
+        } else {
+            delete payload.totalUsageLimit;
+        }
 
         if (selectedId) {
             onUpdate({ _id: selectedId, ...payload } as ICoupon);
@@ -360,7 +377,7 @@ export default function AddCouponDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={couponData.discountValue}
+                                        value={couponData.discountValue ?? ''}
                                         onChange={(e) => handleChange("discountValue", e.target.value)}
                                         error={!!fieldErrors.discountValue}
                                         helperText={fieldErrors.discountValue}
@@ -376,7 +393,7 @@ export default function AddCouponDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={couponData.maximumDiscountAmount}
+                                        value={couponData.maximumDiscountAmount ?? ''}
                                         onChange={(e) => handleChange("maximumDiscountAmount", e.target.value)}
                                         disabled={couponData.discountType === 'fixed'}
                                         error={!!fieldErrors.maximumDiscountAmount}
@@ -393,7 +410,7 @@ export default function AddCouponDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={couponData.minimumPurchaseAmount}
+                                        value={couponData.minimumPurchaseAmount ?? ''}
                                         onChange={(e) => handleChange("minimumPurchaseAmount", e.target.value)}
                                         error={!!fieldErrors.minimumPurchaseAmount}
                                         helperText={fieldErrors.minimumPurchaseAmount}
@@ -468,7 +485,7 @@ export default function AddCouponDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={couponData.usageLimitPerUser}
+                                        value={couponData.usageLimitPerUser ?? ''}
                                         onChange={(e) => handleChange("usageLimitPerUser", e.target.value)}
                                         error={!!fieldErrors.usageLimitPerUser}
                                         helperText={fieldErrors.usageLimitPerUser}
@@ -484,7 +501,7 @@ export default function AddCouponDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={couponData.totalUsageLimit}
+                                        value={couponData.totalUsageLimit ?? ''}
                                         onChange={(e) => handleChange("totalUsageLimit", e.target.value)}
                                         error={!!fieldErrors.totalUsageLimit}
                                         helperText={fieldErrors.totalUsageLimit}

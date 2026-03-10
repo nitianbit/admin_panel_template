@@ -255,7 +255,6 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="companyName"
                                         control={control}
-                                        rules={{ required: 'Company name is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -318,9 +317,8 @@ export default function AddCorporateDialog({
                                         name="email"
                                         control={control}
                                         rules={{
-                                            required: 'Email is required',
                                             pattern: {
-                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                value: /^$|^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                                 message: 'Please enter a valid email address',
                                             },
                                         }}
@@ -342,9 +340,8 @@ export default function AddCorporateDialog({
                                         name="phone"
                                         control={control}
                                         rules={{
-                                            required: 'Phone number is required',
                                             pattern: {
-                                                value: /^[0-9]{10}$/,
+                                                value: /^$|^[0-9]{10}$/,
                                                 message: 'Phone must be a 10-digit number',
                                             },
                                         }}
@@ -365,7 +362,6 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="contactPerson"
                                         control={control}
-                                        rules={{ required: 'Contact person is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -385,7 +381,7 @@ export default function AddCorporateDialog({
                                         control={control}
                                         rules={{
                                             pattern: {
-                                                value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+                                                value: /^$|^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
                                                 message: 'Please enter a valid URL',
                                             },
                                         }}
@@ -408,7 +404,7 @@ export default function AddCorporateDialog({
                                         control={control}
                                         rules={{
                                             pattern: {
-                                                value: /^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}$/,
+                                                value: /^$|^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}$/,
                                                 message: 'Please enter a valid domain (e.g. company.com)',
                                             },
                                         }}
@@ -436,7 +432,6 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="address"
                                         control={control}
-                                        rules={{ required: 'Address is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -454,7 +449,6 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="city"
                                         control={control}
-                                        rules={{ required: 'City is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -472,7 +466,6 @@ export default function AddCorporateDialog({
                                     <Controller
                                         name="state"
                                         control={control}
-                                        rules={{ required: 'State is required' }}
                                         render={({ field }) => (
                                             <TextField
                                                 {...field}
@@ -491,9 +484,8 @@ export default function AddCorporateDialog({
                                         name="pincode"
                                         control={control}
                                         rules={{
-                                            required: 'Pincode is required',
                                             pattern: {
-                                                value: /^[0-9]{6}$/,
+                                                value: /^$|^[0-9]{6}$/,
                                                 message: 'Pincode must be a 6-digit number',
                                             },
                                         }}

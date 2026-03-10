@@ -239,7 +239,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             select
                                             label="Partner Type"
                                             fullWidth
-                                            {...register("partnerType", { required: "Partner type is required" })}
+                                            {...register("partnerType")}
                                             error={!!errors.partnerType}
                                             helperText={errors.partnerType?.message as string}
                                         >
@@ -255,7 +255,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             fullWidth
                                             {...register("website", {
                                                 pattern: {
-                                                    value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+                                                    value: /^$|^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
                                                     message: "Please enter a valid URL",
                                                 },
                                             })}
@@ -268,9 +268,8 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             label="Email"
                                             fullWidth
                                             {...register("email", {
-                                                required: "Email is required",
                                                 pattern: {
-                                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                    value: /^$|^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                                     message: "Please enter a valid email address",
                                                 },
                                             })}
@@ -283,9 +282,8 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                             label="Phone"
                                             fullWidth
                                             {...register("phone", {
-                                                required: "Phone number is required",
                                                 pattern: {
-                                                    value: /^[0-9]{10}$/,
+                                                    value: /^$|^[0-9]{10}$/,
                                                     message: "Phone must be a 10-digit number",
                                                 },
                                             })}
@@ -301,9 +299,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                     fullWidth
                                     multiline
                                     rows={2}
-                                    {...register("description", {
-                                        required: "Description is required",
-                                    })}
+                                    {...register("description")}
                                     error={!!errors.description}
                                     helperText={errors.description?.message as string}
                                 />
@@ -312,9 +308,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 <TextField
                                     label="Address"
                                     fullWidth
-                                    {...register("address", {
-                                        required: "Address is required",
-                                    })}
+                                    {...register("address")}
                                     error={!!errors.address}
                                     helperText={errors.address?.message as string}
                                 />
@@ -323,9 +317,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 <TextField
                                     label="City"
                                     fullWidth
-                                    {...register("city", {
-                                        required: "City is required",
-                                    })}
+                                    {...register("city")}
                                     error={!!errors.city}
                                     helperText={errors.city?.message as string}
                                 />
@@ -334,9 +326,7 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 <TextField
                                     label="State"
                                     fullWidth
-                                    {...register("state", {
-                                        required: "State is required",
-                                    })}
+                                    {...register("state")}
                                     error={!!errors.state}
                                     helperText={errors.state?.message as string}
                                 />
@@ -346,9 +336,8 @@ const AddPartnerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                     label="Pincode"
                                     fullWidth
                                     {...register("pincode", {
-                                        required: "Pincode is required",
                                         pattern: {
-                                            value: /^[0-9]{6}$/,
+                                            value: /^$|^[0-9]{6}$/,
                                             message: "Pincode must be a 6-digit number",
                                         },
                                     })}

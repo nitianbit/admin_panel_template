@@ -331,9 +331,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         type="text"
                                         fullWidth
                                         variant="outlined"
-                                        {...register("degree", {
-                                            required: 'Degree is required',
-                                        })}
+                                        {...register("degree")}
                                         error={!!errors.degree}
                                         helperText={errors.degree?.message as string}
                                         InputLabelProps={{ shrink: true }}
@@ -347,9 +345,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         variant="outlined"
                                         {...register("experienceYears", {
                                             valueAsNumber: true,
-                                            required: 'Experience is required',
                                             min: { value: 0, message: 'Experience cannot be negative' },
-                                            max: { value: 70, message: 'Experience cannot exceed 70 years' },
+                                            max: { value: 100, message: 'Experience cannot exceed 100 years' },
                                         })}
                                         error={!!errors.experienceYears}
                                         helperText={errors.experienceYears?.message as string}
@@ -379,9 +376,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         fullWidth
                                         variant="outlined"
                                         {...register("email", {
-                                            required: 'Email is required',
                                             pattern: {
-                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                value: /^$|^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                                 message: 'Please enter a valid email address',
                                             },
                                         })}
@@ -397,9 +393,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         fullWidth
                                         variant="outlined"
                                         {...register("phone", {
-                                            required: 'Phone number is required',
                                             pattern: {
-                                                value: /^[0-9]{10}$/,
+                                                value: /^$|^[0-9]{10}$/,
                                                 message: 'Phone must be a 10-digit number',
                                             },
                                         })}
@@ -418,7 +413,6 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         variant="outlined"
                                         {...register("consultationFee", {
                                             valueAsNumber: true,
-                                            required: 'Consultation fee is required',
                                             min: { value: 0, message: 'Fee cannot be negative' },
                                         })}
                                         error={!!errors.consultationFee}
@@ -451,9 +445,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         type="text"
                                         fullWidth
                                         variant="outlined"
-                                        {...register("address", {
-                                            required: 'Address is required',
-                                        })}
+                                        {...register("address")}
                                         error={!!errors.address}
                                         helperText={errors.address?.message as string}
                                         InputLabelProps={{ shrink: true }}
@@ -465,9 +457,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         type="text"
                                         fullWidth
                                         variant="outlined"
-                                        {...register("city", {
-                                            required: 'City is required',
-                                        })}
+                                        {...register("city")}
                                         error={!!errors.city}
                                         helperText={errors.city?.message as string}
                                         InputLabelProps={{ shrink: true }}
@@ -482,9 +472,7 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         type="text"
                                         fullWidth
                                         variant="outlined"
-                                        {...register("state", {
-                                            required: 'State is required',
-                                        })}
+                                        {...register("state")}
                                         error={!!errors.state}
                                         helperText={errors.state?.message as string}
                                         InputLabelProps={{ shrink: true }}
@@ -497,9 +485,8 @@ const AddSpecialistDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         fullWidth
                                         variant="outlined"
                                         {...register("pincode", {
-                                            required: 'Pincode is required',
                                             pattern: {
-                                                value: /^[0-9]{6}$/,
+                                                value: /^$|^[0-9]{6}$/,
                                                 message: 'Pincode must be a 6-digit number',
                                             },
                                         })}

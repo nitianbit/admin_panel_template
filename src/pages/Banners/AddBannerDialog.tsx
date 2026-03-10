@@ -355,9 +355,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                     multiline
                                     rows={3}
                                     variant="outlined"
-                                    {...register("description", {
-                                        required: 'Description is required',
-                                    })}
+                                    {...register("description")}
                                     error={!!errors.description}
                                     helperText={errors.description?.message as string}
                                     InputLabelProps={{ shrink: true }}
@@ -414,9 +412,7 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         fullWidth
                                         variant="outlined"
                                         InputLabelProps={{ shrink: true }}
-                                        {...register("startDate", {
-                                            required: 'Start date is required',
-                                        })}
+                                        {...register("startDate")}
                                         error={!!errors.startDate}
                                         helperText={errors.startDate?.message as string}
                                     />
@@ -430,7 +426,6 @@ const AddBannerDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                         variant="outlined"
                                         InputLabelProps={{ shrink: true }}
                                         {...register("endDate", {
-                                            required: 'End date is required',
                                             validate: (value) => {
                                                 const startDate = watch('startDate');
                                                 if (startDate && value && value < startDate) {
