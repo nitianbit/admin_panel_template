@@ -5,13 +5,17 @@ import { getColumns } from './constants';
 import { MODULES } from '../../utils/constants';
 import AddSpecialistDialog from './AddSpecialistDialog';
 import { useSpecialistStore } from '../../services/specialist';
+import { useCompanyStore } from '../../services/company';
 
 
 const Specialists = () => {
     const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useSpecialistStore();
+    const { globalCompanyId } = useCompanyStore();
+
     React.useEffect(() => {
-        fetchGrid()
-    }, [])
+        // Clear any stale filters (like corporateId) and refetch clean data
+        setFilters({});
+    }, [globalCompanyId]);
 
     return (
         <Layout appBarTitle="Specialist">

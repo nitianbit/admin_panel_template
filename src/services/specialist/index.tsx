@@ -122,9 +122,12 @@ const store = create<SpecialistState>((set, get) => ({
             console.log(response);
             if (response.status >= 200 && response.status < 400) {
                 get().fetchGrid();
+            } else {
+                showError(response.message || 'Failed to create specialist');
             }
             return response?.data?.data
         } catch (error) {
+            showError('Failed to create specialist');
             return null
         }
     },

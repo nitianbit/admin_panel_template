@@ -89,14 +89,20 @@ export default function AddSlotsDialog({
             errs.endTime = 'End time must be after start time';
         }
 
-        if (!slotData.duration || slotData.duration <= 0) {
-            errs.duration = 'Duration must be greater than 0';
-        } else if (slotData.duration > 480) {
-            errs.duration = 'Duration cannot exceed 480 minutes';
+        if (slotData.duration !== undefined && slotData.duration !== null && String(slotData.duration) !== '') {
+            const parsedDuration = Number(slotData.duration);
+            if (parsedDuration < 1) {
+                errs.duration = 'Duration must be at least 1 minute';
+            } else if (parsedDuration > 480) {
+                errs.duration = 'Duration cannot exceed 480 minutes';
+            }
         }
 
-        if (!slotData.maxBookings || slotData.maxBookings < 1) {
-            errs.maxBookings = 'Max bookings must be at least 1';
+        if (slotData.maxBookings !== undefined && slotData.maxBookings !== null && String(slotData.maxBookings) !== '') {
+            const parsedMax = Number(slotData.maxBookings);
+            if (parsedMax < 1) {
+                errs.maxBookings = 'Max bookings must be at least 1';
+            }
         }
 
         if (slotData.slotType === 'consultation' && !slotData.specialistId) {
@@ -301,8 +307,8 @@ export default function AddSlotsDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={slotData.duration}
-                                        onChange={(e) => handleChange("duration", Number(e.target.value))}
+                                        value={slotData.duration ?? ''}
+                                        onChange={(e) => handleChange("duration", e.target.value === '' ? undefined : Number(e.target.value))}
                                         error={!!fieldErrors.duration}
                                         helperText={fieldErrors.duration}
                                     />
@@ -359,8 +365,8 @@ export default function AddSlotsDialog({
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        value={slotData.maxBookings}
-                                        onChange={(e) => handleChange("maxBookings", Number(e.target.value))}
+                                        value={slotData.maxBookings ?? ''}
+                                        onChange={(e) => handleChange("maxBookings", e.target.value === '' ? undefined : Number(e.target.value))}
                                         error={!!fieldErrors.maxBookings}
                                         helperText={fieldErrors.maxBookings}
                                     />

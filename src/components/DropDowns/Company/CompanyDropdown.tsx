@@ -1,4 +1,4 @@
-import { MenuItem, Select, FormControl, InputLabel, ListItemText, Typography } from "@mui/material";
+import { MenuItem, Select, FormControl, InputLabel, ListItemText, Typography, Divider } from "@mui/material";
 import { useCompanyStore } from "../../../services/company";
 import { useCorporateStore } from "../../../services/corporates";
 import { useAppContext } from "../../../services/context/AppContext";
@@ -25,10 +25,10 @@ const CompanyDropDown = () => {
         }
     }, []);
 
-    // Auto-select first corporate if no globalCompanyId is set and data is available
+    // Auto-select "general" if no globalCompanyId is set
     useEffect(() => {
-        if (!globalCompanyId && corporateData.length > 0) {
-            setGlobalCompanyId(corporateData[0]._id ?? "");
+        if (!globalCompanyId) {
+            setGlobalCompanyId("general");
         }
     }, [corporateData, globalCompanyId]);
 
@@ -74,11 +74,32 @@ const CompanyDropDown = () => {
                         },
                     }}
                     renderValue={(selectedId) => {
+                        if (selectedId === "general") return "General (Non-Corporate)";
                         const selected = corporateData.find((c: any) => c._id === selectedId);
                         if (!selected) return "";
                         return `${selected.name} — ${selected.companyName}`;
                     }}
                 >
+                    <MenuItem
+                        key="general"
+                        value="general"
+                        sx={{
+                            color: "black",
+                            fontWeight: "bold",
+                            "&:hover": {
+                                backgroundColor: "rgba(255, 255, 255, 0.3)",
+                            },
+                        }}
+                    >
+                        <ListItemText
+                            primary="General"
+                            secondary="Non-Corporate Data"
+                            secondaryTypographyProps={{
+                                sx: { fontSize: "0.75rem", color: "text.secondary" },
+                            }}
+                        />
+                    </MenuItem>
+                    <Divider />
                     {corporateData.map((corporate: any) => (
                         <MenuItem
                             key={corporate._id}
