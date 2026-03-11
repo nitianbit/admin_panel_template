@@ -6,6 +6,8 @@ import Drawer from "@mui/material/Drawer";
 import { Stack, Box, Typography, Grid, IconButton, MenuItem, FormControl, InputLabel, Select, FormHelperText, Divider, Checkbox, FormControlLabel } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SearchInput from "../../components/SearchInput";
 import { useForm } from "react-hook-form";
 import { useSlotStore } from "../../services/slots";
@@ -37,7 +39,7 @@ export default function AddSlotsDialog({
         wellnessPackageId: ''
     }
 
-    const { onCreate, detail, onUpdate } = useSlotStore();
+    const { onCreate, detail, onUpdate, filters, setFilters } = useSlotStore();
     const { data: specialists, fetchGrid: fetchSpecialists } = useSpecialistStore();
     const { data: wellnessPackages, fetchGrid: fetchWellnessPackages } = useWellnessPackageStore();
 
@@ -70,6 +72,15 @@ export default function AddSlotsDialog({
     const handleClose = () => {
         toggleModal(false);
         setSlotData(defaultData);
+    };
+
+    const handleFilterChange = (key: string, value: any) => {
+        setFilters({ ...filters, [key]: value || undefined });
+    };
+
+    const toggleSortOrder = () => {
+        const currentOrder = filters.sortOrder || 'asc';
+        setFilters({ ...filters, sortOrder: currentOrder === 'asc' ? 'desc' : 'asc' });
     };
 
     const validateForm = (): boolean => {
@@ -173,21 +184,84 @@ export default function AddSlotsDialog({
 
     return (
         <div>
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                spacing={2}
-            >
-                <SearchInput />
-                <Button
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={handleClickOpen}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
                 >
-                    Add Slot
-                </Button>
-            </Stack>
+                    <SearchInput />
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={handleClickOpen}
+                    >
+                        Add Slot
+                    </Button>
+                </Stack>
+
+                <Stack direction="row" spacing={2} flexWrap="wrap" alignItems="center">
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel id="filter-slot-type">Slot Type</InputLabel>
+                        <Select
+                            labelId="filter-slot-type"
+                            label="Slot Type"
+                            value={filters.slotType || ''}
+                            onChange={(e) => handleFilterChange('slotType', e.target.value)}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {SLOT_TYPES.map((type) => (
+                                <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 200 }}>
+                        <InputLabel id="filter-specialist">Specialist</InputLabel>
+                        <Select
+                            labelId="filter-specialist"
+                            label="Specialist"
+                            value={filters.specialistId || ''}
+                            onChange={(e) => handleFilterChange('specialistId', e.target.value)}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {specialists.map(s => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 200 }}>
+                        <InputLabel id="filter-package">Wellness Package</InputLabel>
+                        <Select
+                            labelId="filter-package"
+                            label="Wellness Package"
+                            value={filters.wellnessPackageId || ''}
+                            onChange={(e) => handleFilterChange('wellnessPackageId', e.target.value)}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {wellnessPackages.map(w => <MenuItem key={w._id} value={w._id}>{w.name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <InputLabel id="filter-sort">Sort By</InputLabel>
+                        <Select
+                            labelId="filter-sort"
+                            label="Sort By"
+                            value={filters.sortBy || ''}
+                            onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                        >
+                            <MenuItem value="">None</MenuItem>
+                            <MenuItem value="date">Date</MenuItem>
+                            <MenuItem value="startTime">Time</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <IconButton onClick={toggleSortOrder} color="primary" title={`Current sort order: ${filters.sortOrder || 'asc'}`}>
+                        {filters.sortOrder === 'desc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
+                    </IconButton>
+                </Stack>
+            </Box>
 
             <Drawer
                 anchor="right"

@@ -19,9 +19,11 @@ import dayjs from "dayjs";
 import { doGET } from "../../utils/HttpUtils";
 import { showError } from "../../services/toaster";
 import PaginatedSearchDropdown, { PaginatedOption } from "../../components/PaginatedSearchDropdown";
+import { useSurgeryStore } from "../../services/surgery";
+import { useSecondOpinionStore } from "../../services/secondOpinion";
 
 interface BookingFormValues {
-    bookingType: 'package' | 'consultation';
+    bookingType: 'package' | 'consultation' | 'surgery' | 'second-opinion';
     bookingDate: string;
     bookingTime: string;
     serviceMode: string;
@@ -52,7 +54,9 @@ export default function AddBookingDialog({
 }: any) {
     const { onCreateSpecialist, onCreateWellnessPackage, detail, onUpdate } = useBookingStore();
     const { fetchBySpecialist, fetchByWellnessPackage } = useSlotStore();
-    const [bookingType, setBookingType] = React.useState<'package' | 'consultation'>('package');
+    const { onCreate: onCreateSurgery } = useSurgeryStore();
+    const { onCreate: onCreateSecondOpinion } = useSecondOpinionStore();
+    const [bookingType, setBookingType] = React.useState<'package' | 'consultation' | 'surgery' | 'second-opinion'>('package');
     const [availableSlots, setAvailableSlots] = React.useState<ISlot[]>([]);
     const [loadingSlots, setLoadingSlots] = React.useState(false);
     const [bookingScope, setBookingScope] = React.useState<'general' | 'corporate' | ''>('');
@@ -91,7 +95,9 @@ export default function AddBookingDialog({
     const isSlotPrerequisiteSelected =
         bookingType === 'consultation'
             ? Boolean(watchedSpecialistId)
-            : Boolean(watchedWellnessPackageId);
+            : bookingType === 'package'
+                ? Boolean(watchedWellnessPackageId)
+                : true; // surgery and second-opinion don't need slots
     const mapToOption = (value?: string, label?: string): PaginatedOption | null => {
         if (!value) return null;
         return {
@@ -383,8 +389,25 @@ export default function AddBookingDialog({
         } else {
             if (bookingType === 'package') {
                 onCreateWellnessPackage(payload as CreateWellnessPackageBookingRequest);
-            } else {
+            } else if (bookingType === 'consultation') {
                 onCreateSpecialist(payload as CreateSpecialistBookingRequest);
+            } else if (bookingType === 'surgery') {
+                const surgeryPayload = {
+                    full_name: payload.full_name || '',
+                    email: payload.email || '',
+                    concern: payload.primaryConcern || payload.concern || '',
+                    speciality: payload.speciality || '',
+                    medical_record: payload.medical_record || [],
+                };
+                onCreateSurgery(surgeryPayload);
+            } else if (bookingType === 'second-opinion') {
+                const secondOpinionPayload = {
+                    full_name: payload.full_name || '',
+                    email: payload.email || '',
+                    concern: payload.primaryConcern || payload.concern || '',
+                    medical_record: payload.medical_record || [],
+                };
+                onCreateSecondOpinion(secondOpinionPayload);
             }
         }
         handleClose();
@@ -665,8 +688,139 @@ export default function AddBookingDialog({
                                             </>
                                         )}
 
-                                        {/* Slot Selection */}
-                                        {!selectedId && (
+                                        {/* Surgery fields */}
+                                        {bookingType === 'surgery' && (
+                                            <>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="full_name"
+                                                        control={control}
+                                                        rules={{ required: 'Full name is required' }}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Full Name"
+                                                                fullWidth
+                                                                size="small"
+                                                                error={!!errors.full_name}
+                                                                helperText={errors.full_name?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="email"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Email"
+                                                                type="email"
+                                                                fullWidth
+                                                                size="small"
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="speciality"
+                                                        control={control}
+                                                        rules={{ required: 'Speciality is required' }}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Speciality"
+                                                                fullWidth
+                                                                size="small"
+                                                                error={!!errors.speciality}
+                                                                helperText={errors.speciality?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Controller
+                                                        name="concern"
+                                                        control={control}
+                                                        rules={{ required: 'Concern is required' }}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Concern"
+                                                                fullWidth
+                                                                multiline
+                                                                rows={2}
+                                                                size="small"
+                                                                error={!!errors.concern}
+                                                                helperText={errors.concern?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                            </>
+                                        )}
+
+                                        {/* Second Opinion fields */}
+                                        {bookingType === 'second-opinion' && (
+                                            <>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="full_name"
+                                                        control={control}
+                                                        rules={{ required: 'Full name is required' }}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Full Name"
+                                                                fullWidth
+                                                                size="small"
+                                                                error={!!errors.full_name}
+                                                                helperText={errors.full_name?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Controller
+                                                        name="email"
+                                                        control={control}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Email"
+                                                                type="email"
+                                                                fullWidth
+                                                                size="small"
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Controller
+                                                        name="concern"
+                                                        control={control}
+                                                        rules={{ required: 'Concern is required' }}
+                                                        render={({ field }) => (
+                                                            <TextField
+                                                                {...field}
+                                                                label="Concern"
+                                                                fullWidth
+                                                                multiline
+                                                                rows={2}
+                                                                size="small"
+                                                                error={!!errors.concern}
+                                                                helperText={errors.concern?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                </Grid>
+                                            </>
+                                        )}
+
+                                        {/* Slot Selection - only for package and consultation */}
+                                        {!selectedId && (bookingType === 'package' || bookingType === 'consultation') && (
                                             <Grid item xs={12} sm={6}>
                                                 <Controller
                                                     name="slotId"

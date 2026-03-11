@@ -32,6 +32,9 @@ const store = create<SlotState>((set, get) => ({
             queryParams.append('page', String(currentPage));
             queryParams.append('limit', String(limit));
 
+            if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+            if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
+
             const apiUrl = `${BASE}?${queryParams.toString()}`;
             const response = await doGET(apiUrl);
 
