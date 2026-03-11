@@ -4,6 +4,8 @@ import { Chip, Typography } from "@mui/material";
 export const BOOKING_TYPES = [
     { value: 'package', label: 'Wellness Package' },
     { value: 'consultation', label: 'Specialist Consultation' },
+    { value: 'surgery', label: 'Surgery' },
+    { value: 'second-opinion', label: 'Second Opinion' },
 ];
 
 export const SERVICE_MODES = [
