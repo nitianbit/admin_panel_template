@@ -31,7 +31,7 @@ const apiHandler = async (endPoint: any, method: string, data = null) => {
         const response = await api({
             method: method,
             url: cleanEndPoint,
-            ...(![API_METHODS.GET].includes(method) && { data: data }),
+            ...(![API_METHODS.GET,API_METHODS.DELETE].includes(method) && { data: data }),
             headers,
         });
 
