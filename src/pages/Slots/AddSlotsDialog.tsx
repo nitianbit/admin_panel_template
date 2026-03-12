@@ -39,7 +39,64 @@ export default function AddSlotsDialog({
         wellnessPackageId: ''
     }
 
-    const { onCreate, detail, onUpdate, filters, setFilters } = useSlotStore();
+    const { onCreate, detail, onUpdate, filters, setFilters, data: slotsList, fetchSuggestions } = useSlotStore();
+
+    const [optionPool, setOptionPool] = React.useState<any[]>([]);
+
+
+    React.useEffect(() => {
+        const loadPool = async () => {
+            console.log(`[SlotsFilter] Context changed. Fetching fresh options for SlotType: ${filters.slotType}, Specialist: ${filters.specialistId}`);
+            setOptionPool([]); // Reset immediately on context change
+            
+            const data = await fetchSuggestions({
+                specialistId: filters.specialistId,
+                wellnessPackageId: filters.wellnessPackageId,
+                slotType: filters.slotType
+            });
+            
+            if (data && data.length > 0) {
+                console.log(`[SlotsFilter] Pool populated with ${data.length} comprehensive items`);
+                setOptionPool(data);
+            }
+        };
+        loadPool();
+    }, [filters.specialistId, filters.wellnessPackageId, filters.slotType, fetchSuggestions]);
+
+    React.useEffect(() => {
+        if (slotsList.length > 0) {
+            setOptionPool(prev => {
+                const existingIds = new Set(prev.map(p => p._id));
+                const newItems = slotsList.filter(s => !existingIds.has(s._id));
+                if (newItems.length === 0) return prev;
+                return [...prev, ...newItems];
+            });
+        }
+    }, [slotsList]);
+
+    // DERIVED DROPDOWN DATA
+    const uniqueDates = React.useMemo(() => {
+        const dateSet = new Set<string>();
+        const source = optionPool.length > 0 ? optionPool : slotsList;
+        source.forEach((s: any) => { if (s.date) dateSet.add(s.date); });
+        if (filters.date) dateSet.add(filters.date);
+        return Array.from(dateSet).sort();
+    }, [optionPool, slotsList, filters.date]);
+
+    const uniqueTimes = React.useMemo(() => {
+        // Narrow down pool by selected date before extracting times
+        const sourceData = optionPool.length > 0 ? optionPool : slotsList;
+        const filteredByDate = filters.date 
+            ? sourceData.filter((s: any) => s.date === filters.date)
+            : sourceData;
+
+        const timeSet = new Set<string>();
+        filteredByDate.forEach((s: any) => { if (s.startTime) timeSet.add(s.startTime); });
+        // Always ensure selected time is in the list
+        const currentStartTime = (filters as any).startTime;
+        if (currentStartTime) timeSet.add(currentStartTime);
+        return Array.from(timeSet).sort();
+    }, [optionPool, slotsList, filters.date, (filters as any).startTime]);
     const { data: specialists, fetchGrid: fetchSpecialists } = useSpecialistStore();
     const { data: wellnessPackages, fetchGrid: fetchWellnessPackages } = useWellnessPackageStore();
 
@@ -201,14 +258,27 @@ export default function AddSlotsDialog({
                     </Button>
                 </Stack>
 
-                <Stack direction="row" spacing={2} flexWrap="wrap" alignItems="center">
-                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                {/* All Filters: Slot Type + Specialist + Wellness Package + Sort By + Date + Time */}
+                <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
+                    {/* Slot Type Filter */}
+                    <FormControl size="small" sx={{ minWidth: 130 }}>
                         <InputLabel id="filter-slot-type">Slot Type</InputLabel>
                         <Select
                             labelId="filter-slot-type"
                             label="Slot Type"
                             value={filters.slotType || ''}
-                            onChange={(e) => handleFilterChange('slotType', e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                const updatedFilters: any = { ...filters, slotType: val || undefined };
+                                if (val !== 'consultation') updatedFilters.specialistId = undefined;
+                                if (val !== 'wellnessPackage') updatedFilters.wellnessPackageId = undefined;
+                                setFilters(updatedFilters);
+                            }}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = SLOT_TYPES.find(t => t.value === selected);
+                                return found ? found.label : selected;
+                            }}
                         >
                             <MenuItem value="">All</MenuItem>
                             {SLOT_TYPES.map((type) => (
@@ -217,49 +287,103 @@ export default function AddSlotsDialog({
                         </Select>
                     </FormControl>
 
-                    <FormControl size="small" sx={{ minWidth: 200 }}>
+                    {/* Specialist Filter — enabled only when slotType = consultation */}
+                    <FormControl size="small" sx={{ minWidth: 150 }} disabled={filters.slotType !== 'consultation'}>
                         <InputLabel id="filter-specialist">Specialist</InputLabel>
                         <Select
                             labelId="filter-specialist"
                             label="Specialist"
                             value={filters.specialistId || ''}
                             onChange={(e) => handleFilterChange('specialistId', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = specialists.find(s => s._id === selected);
+                                return found ? found.name : selected;
+                            }}
                         >
                             <MenuItem value="">All</MenuItem>
                             {specialists.map(s => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
                         </Select>
                     </FormControl>
 
-                    <FormControl size="small" sx={{ minWidth: 200 }}>
+                    {/* Wellness Package Filter — enabled only when slotType = wellnessPackage */}
+                    <FormControl size="small" sx={{ minWidth: 150 }} disabled={filters.slotType !== 'wellnessPackage'}>
                         <InputLabel id="filter-package">Wellness Package</InputLabel>
                         <Select
                             labelId="filter-package"
                             label="Wellness Package"
                             value={filters.wellnessPackageId || ''}
                             onChange={(e) => handleFilterChange('wellnessPackageId', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = wellnessPackages.find(w => w._id === selected);
+                                return found ? found.name : selected;
+                            }}
                         >
                             <MenuItem value="">All</MenuItem>
                             {wellnessPackages.map(w => <MenuItem key={w._id} value={w._id}>{w.name}</MenuItem>)}
                         </Select>
                     </FormControl>
-
+                    {/* Sort By */}
                     <FormControl size="small" sx={{ minWidth: 120 }}>
-                        <InputLabel id="filter-sort">Sort By</InputLabel>
+                        <InputLabel>Sort By</InputLabel>
                         <Select
-                            labelId="filter-sort"
-                            label="Sort By"
                             value={filters.sortBy || ''}
-                            onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                            label="Sort By"
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setFilters({ ...filters, sortBy: val || undefined });
+                            }}
                         >
-                            <MenuItem value="">None</MenuItem>
+                            <MenuItem value="">No Sort</MenuItem>
                             <MenuItem value="date">Date</MenuItem>
                             <MenuItem value="startTime">Time</MenuItem>
+                            {/* <MenuItem value="slotType">Slot Type</MenuItem> */}
+                            {/* <MenuItem value="isAvailable">Availability</MenuItem> */}
                         </Select>
                     </FormControl>
 
                     <IconButton onClick={toggleSortOrder} color="primary" title={`Current sort order: ${filters.sortOrder || 'asc'}`}>
                         {filters.sortOrder === 'desc' ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
                     </IconButton>
+
+                    <FormControl size="small" sx={{ minWidth: 140 }}>
+                        <InputLabel>Filter by Date</InputLabel>
+                        <Select
+                            value={filters.date || ''}
+                            label="Filter by Date"
+                            onChange={(e) => handleFilterChange('date', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All Dates';
+                                return dayjs(selected).format('DD MMM YYYY');
+                            }}
+                        >
+                            <MenuItem value="">All Dates</MenuItem>
+                            {uniqueDates.map(date => (
+                                <MenuItem key={date} value={date}>
+                                    {dayjs(date).format('DD MMM YYYY')}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 140 }}>
+                        <InputLabel>Filter by Time</InputLabel>
+                        <Select
+                            value={filters.startTime || ''}
+                            label="Filter by Time"
+                            onChange={(e) => handleFilterChange('startTime', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All Times';
+                                return selected;
+                            }}
+                        >
+                            <MenuItem value="">All Times</MenuItem>
+                            {uniqueTimes.map(t => (
+                                <MenuItem key={t} value={t}>{t}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </Stack>
             </Box>
 

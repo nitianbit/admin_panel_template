@@ -52,6 +52,7 @@ export interface SlotQueryParams {
     wellnessPackageId?: string;
     slotType?: 'consultation' | 'wellnessPackage';
     date?: string; // YYYYMMDD format
+    startTime?: string; // e.g. "09:00"
     dateFrom?: string; // YYYYMMDD format
     dateTo?: string; // YYYYMMDD format
     isAvailable?: boolean;
@@ -82,4 +83,5 @@ export interface SlotState {
     onUpdate: (data: ISlot) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
     detail: (id: string) => Promise<{ data: ISlot } | null>;
+    fetchSuggestions: (contextFilters: Partial<SlotQueryParams>) => Promise<ISlot[]>;
 }

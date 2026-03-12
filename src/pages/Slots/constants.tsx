@@ -72,7 +72,7 @@ export const getColumns = (currentPage: number, rows: number) => [
 ];
 
 export const SLOT_TYPES = [
-    { label: 'Consultation', value: 'consultation' },
+    { label: 'Specialist', value: 'consultation' },
     { label: 'Wellness Package', value: 'wellnessPackage' },
 ];
 
