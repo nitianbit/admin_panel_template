@@ -4,6 +4,7 @@ import { showError } from '../toaster';
 import { Specialist, SpecialistFilters, SpecialistState } from '../../types/specialist';
 
 const BASE = '/specialists';
+const CORPORATE_BASE = '/corporates';
 
 const store = create<SpecialistState>((set, get) => ({
     data: [],
@@ -15,7 +16,7 @@ const store = create<SpecialistState>((set, get) => ({
     total: 0,
     allData: [],
 
-    // GET /specialists
+    // GET /specialists (paginated, all corporates)
     fetchGrid: async () => {
         try {
             const { filters, currentPage, rows, isLoading } = get();
@@ -45,6 +46,32 @@ const store = create<SpecialistState>((set, get) => ({
             showError('Failed to fetch specialists');
         } finally {
             set({ isLoading: false });
+        }
+    },
+
+    // GET /corporates/:id/specialists (list for one corporate, no pagination)
+    fetchByCorporate: async (corporateId: string) => {
+        try {
+            const response = await doGET(`${CORPORATE_BASE}/${corporateId}/specialists`);
+            if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
+                const normalized = Array.isArray(resData) ? resData : [];
+                set({
+                    data: normalized,
+                    total: normalized.length,
+                    totalPages: 1,
+                    currentPage: 1,
+                });
+                return normalized;
+            } else {
+                showError(response.message || 'Failed to fetch specialists for corporate');
+                set({ data: [], total: 0, totalPages: 1, currentPage: 1 });
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch specialists for corporate');
+            set({ data: [], total: 0, totalPages: 1, currentPage: 1 });
+            return [];
         }
     },
 

@@ -13,15 +13,12 @@ const Banners = () => {
     const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        if (globalCompanyId) {
-            if (globalCompanyId === "general") {
-                // No corporateId filter — fetches all non-corporate (general) data
-                setFilters({});
-            } else {
-                setFilters({ corporateId: globalCompanyId });
-            }
+        if (!globalCompanyId || globalCompanyId === "general") {
+            // General (non-corporate) scope: call /banners?forUser=true
+            setFilters({ forUser: true } as any);
         } else {
-            fetchGrid();
+            // Corporate scope: filter by corporateId (existing behavior)
+            setFilters({ corporateId: globalCompanyId } as any);
         }
     }, [globalCompanyId]);
 

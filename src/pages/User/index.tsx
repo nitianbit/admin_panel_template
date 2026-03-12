@@ -5,6 +5,7 @@ import { MODULES } from '../../utils/constants';
 import AddUserDialog from './AddUserDialog';
 import { getColumns } from './constants';
 import { useUserStore } from '../../services/user';
+import { useCompanyStore } from '../../services/company';
 
 const Users = () => {
     const {
@@ -14,14 +15,21 @@ const Users = () => {
         total,
         rows,
         isLoading,
-        fetchGrid,
         onPageChange,
-        onDelete
+        onDelete,
+        setFilters,
     } = useUserStore();
+    const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        fetchGrid();
-    }, []);
+        if (!globalCompanyId || globalCompanyId === "general") {
+            // General (non-corporate) scope: call /users?forUser=true
+            setFilters({ forUser: true } as any);
+        } else {
+            // Corporate scope: filter users by corporateId
+            setFilters({ corporateId: globalCompanyId } as any);
+        }
+    }, [globalCompanyId, setFilters]);
 
     return (
         <Layout appBarTitle="User Management">

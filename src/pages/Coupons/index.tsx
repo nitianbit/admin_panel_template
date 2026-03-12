@@ -24,10 +24,12 @@ const Coupons = () => {
     const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        if (globalCompanyId) {
-            setFilters({ corporateId: globalCompanyId });
+        if (!globalCompanyId || globalCompanyId === "general") {
+            // General (non-corporate) scope: call /coupons?forUser=true
+            setFilters({ forUser: true } as any);
         } else {
-            fetchGrid();
+            // Corporate scope: filter by corporateId (existing behavior)
+            setFilters({ corporateId: globalCompanyId } as any);
         }
     }, [globalCompanyId]);
 

@@ -9,12 +9,17 @@ import { useCompanyStore } from '../../services/company';
 
 
 const Specialists = () => {
-    const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useSpecialistStore();
+    const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, fetchByCorporate, setFilters, nextPage, prevPage, onPageChange, onDelete } = useSpecialistStore();
     const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        // Clear any stale filters (like corporateId) and refetch clean data
-        setFilters({});
+        if (!globalCompanyId || globalCompanyId === "general") {
+            // General (non-corporate) scope: call /specialists?forUser=true
+            setFilters({ forUser: true } as any);
+        } else {
+            // Corporate scope: hit /corporates/:id/specialists (no change)
+            fetchByCorporate(globalCompanyId);
+        }
     }, [globalCompanyId]);
 
     return (
