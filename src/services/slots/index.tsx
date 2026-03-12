@@ -27,6 +27,13 @@ const store = create<SlotState>((set, get) => ({
             if (filters.wellnessPackageId) queryParams.append('wellnessPackageId', filters.wellnessPackageId);
             if (filters.slotType) queryParams.append('slotType', filters.slotType);
             if (filters.date) queryParams.append('date', filters.date);
+            
+            // Send time filter using both possible keys to ensure compatibility
+            if (filters.startTime) {
+                queryParams.append('startTime', filters.startTime);
+                queryParams.append('time', filters.startTime);
+            }
+            
             if (filters.isAvailable !== undefined) queryParams.append('isAvailable', String(filters.isAvailable));
             if (filters.isActive !== undefined) queryParams.append('isActive', String(filters.isActive));
             queryParams.append('page', String(currentPage));
@@ -36,6 +43,8 @@ const store = create<SlotState>((set, get) => ({
             if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
 
             const apiUrl = `${BASE}?${queryParams.toString()}`;
+            console.log(`[SlotStore] fetchGrid: ${apiUrl}`, filters);
+            
             const response = await doGET(apiUrl);
 
             if (response.status >= 200 && response.status < 400) {
@@ -194,6 +203,25 @@ const store = create<SlotState>((set, get) => ({
         } catch (error) {
             showError('Failed to fetch slot details');
             return null;
+        }
+    },
+
+    // GET /slots for suggestions (context-filtered but not date-filtered)
+    fetchSuggestions: async (contextFilters: Partial<SlotQueryParams>) => {
+        try {
+            const queryParams = new URLSearchParams();
+            if (contextFilters.specialistId) queryParams.append('specialistId', contextFilters.specialistId);
+            if (contextFilters.wellnessPackageId) queryParams.append('wellnessPackageId', contextFilters.wellnessPackageId);
+            if (contextFilters.slotType) queryParams.append('slotType', contextFilters.slotType);
+            queryParams.append('limit', '500'); // Larger limit to capture all potential dates/times
+
+            const response = await doGET(`${BASE}?${queryParams.toString()}`);
+            if (response.status >= 200 && response.status < 400) {
+                return response.data?.data || [];
+            }
+            return [];
+        } catch (err) {
+            return [];
         }
     }
 }));

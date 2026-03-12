@@ -181,7 +181,7 @@ export default function AddCouponDialog({
             endDate: formattedEndDate,
             // Ensure numerical values are numbers
             discountValue: Number(couponData.discountValue),
-            corporateId: globalCompanyId,
+            ...(globalCompanyId && globalCompanyId !== 'general' && { corporateId: globalCompanyId }),
         };
 
         if (couponData.minimumPurchaseAmount !== undefined && String(couponData.minimumPurchaseAmount) !== '') {
