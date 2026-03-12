@@ -16,6 +16,8 @@ import ImageUpload from "../../components/ImageUploader";
 import { showError } from "../../services/toaster";
 import { MODULES } from "../../utils/constants";
 import { uploadFile } from "../../utils/helper";
+import { useSpecialistStore } from "../../services/specialist";
+import { useWellnessPackageStore } from "../../services/wellnessPackages";
 
 export default function AddCorporateDialog({
     isModalOpen,
@@ -23,6 +25,14 @@ export default function AddCorporateDialog({
     selectedId
 }: any) {
     const { onCreate, detail, onUpdate, filters, setFilters } = useCorporateStore();
+    const {
+        data: specialists,
+        fetchGrid: fetchSpecialists,
+    } = useSpecialistStore();
+    const {
+        data: wellnessPackages,
+        fetchGrid: fetchWellnessPackages,
+    } = useWellnessPackageStore();
 
     const imageFileRef = React.useRef<File | null>(null);
     const [existingLogoUrl, setExistingLogoUrl] = React.useState<string>("");
@@ -181,14 +191,20 @@ export default function AddCorporateDialog({
     }
 
     React.useEffect(() => {
-        if (selectedId && isModalOpen) {
-            fetchDetail(selectedId);
-        } else if (!selectedId && isModalOpen) {
-            reset(defaultValues);
-            imageFileRef.current = null;
-            setExistingLogoUrl("");
+        if (isModalOpen) {
+            // Always load specialists and wellness packages when drawer opens
+            fetchSpecialists();
+            fetchWellnessPackages();
+
+            if (selectedId) {
+                fetchDetail(selectedId);
+            } else {
+                reset(defaultValues);
+                imageFileRef.current = null;
+                setExistingLogoUrl("");
+            }
         }
-    }, [selectedId, isModalOpen]);
+    }, [isModalOpen, selectedId]);
 
     return (
         <div>
@@ -522,6 +538,52 @@ export default function AddCorporateDialog({
                                             />
                                         )}
                                     />
+                                </Grid>
+
+                                {/* Specialists & Wellness Packages */}
+                                <Grid item xs={12}>
+                                    <Divider sx={{ my: 1 }} />
+                                    <Typography variant="subtitle2" color="primary" sx={{ mb: 1, mt: 1, fontWeight: 'bold' }}>
+                                        Corporate Mappings
+                                    </Typography>
+                                </Grid>
+
+                                <Grid item xs={12} sm={6}>
+                                    <FormControl fullWidth size="small">
+                                        <InputLabel id="corporate-specialists-label">Specialists</InputLabel>
+                                        <Select
+                                            labelId="corporate-specialists-label"
+                                            label="Specialists"
+                                            multiple
+                                            value={[]}
+                                            renderValue={() => 'Select specialists for reference'}
+                                        >
+                                            {specialists.map((spec: any) => (
+                                                <MenuItem key={spec._id} value={spec._id}>
+                                                    {spec.name} {spec.specialization ? `- ${spec.specialization}` : ''}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                <Grid item xs={12} sm={6}>
+                                    <FormControl fullWidth size="small">
+                                        <InputLabel id="corporate-wellness-label">Wellness Packages</InputLabel>
+                                        <Select
+                                            labelId="corporate-wellness-label"
+                                            label="Wellness Packages"
+                                            multiple
+                                            value={[]}
+                                            renderValue={() => 'Select wellness packages for reference'}
+                                        >
+                                            {wellnessPackages.map((pkg: any) => (
+                                                <MenuItem key={pkg._id} value={pkg._id}>
+                                                    {pkg.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
 
                                 {/* Logo Upload */}

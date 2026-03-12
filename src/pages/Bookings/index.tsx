@@ -8,6 +8,7 @@ import AddBookingDialog from './AddBookingDialog';
 import { COLUMNS, BOOKING_TYPES } from './constants';
 import { useBookingStore } from '../../services/bookings';
 import { BookingQueryParams } from '../../types/bookings';
+import { useCompanyStore } from '../../services/company';
 
 const Bookings = () => {
     const {
@@ -23,20 +24,31 @@ const Bookings = () => {
         setFilters,
         filters
     } = useBookingStore();
+    const { globalCompanyId } = useCompanyStore();
 
     const [tabValue, setTabValue] = useState('all');
 
+    // Recompute filters whenever tab or corporate scope changes
     useEffect(() => {
-        fetchGrid();
-    }, []);
+        const newFilters: BookingQueryParams = {};
+
+        if (tabValue !== 'all') {
+            newFilters.bookingType = tabValue as any;
+        }
+
+        if (!globalCompanyId || globalCompanyId === 'general') {
+            // General (non-corporate) scope: call /bookings?forUser=true
+            (newFilters as any).forUser = true;
+        } else {
+            // Corporate scope: pass corporateId in query
+            newFilters.corporateId = globalCompanyId;
+        }
+
+        setFilters(newFilters);
+    }, [tabValue, globalCompanyId, setFilters]);
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
         setTabValue(newValue);
-        const newFilters: BookingQueryParams = {};
-        if (newValue !== 'all') {
-            newFilters.bookingType = newValue as any;
-        }
-        setFilters(newFilters);
     };
 
     return (

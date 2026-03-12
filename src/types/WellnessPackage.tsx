@@ -57,6 +57,7 @@ export interface WellnessPackageState {
     rows: number;
     allData: WellnessPackage[];
     fetchGrid: (page?: number, filters?: WellnessPackageFilters) => Promise<void>;
+    fetchByCorporate: (corporateId: string) => Promise<WellnessPackage[]>;
     setFilters: (newFilters: WellnessPackageFilters) => void;
     nextPage: () => void;
     prevPage: () => void;

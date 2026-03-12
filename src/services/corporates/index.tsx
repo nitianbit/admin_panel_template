@@ -14,6 +14,7 @@ const BASE_URL = '/corporates';
 
 const store = create<CorporateState>((set, get) => ({
     data: [],
+    allData: [],
     totalPages: 0,
     total: 0,
     currentPage: 1,
@@ -52,6 +53,27 @@ const store = create<CorporateState>((set, get) => ({
             showError('Failed to fetch corporates');
         } finally {
             set({ isLoading: false });
+        }
+    },
+
+    // GET /corporates without pagination (fetch all)
+    fetchAll: async () => {
+        try {
+            const response = await doGET(BASE_URL);
+            if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
+                const normalized = Array.isArray(resData) ? resData : [];
+                set({ allData: normalized });
+                return normalized;
+            } else {
+                showError(response.message || 'Failed to fetch corporates');
+                set({ allData: [] });
+                return [];
+            }
+        } catch (error) {
+            showError('Failed to fetch corporates');
+            set({ allData: [] });
+            return [];
         }
     },
 

@@ -59,6 +59,7 @@ export interface SpecialistState {
     rows: number;
     allData: Specialist[];
     fetchGrid: (page?: number, filters?: SpecialistFilters) => Promise<void>;
+    fetchByCorporate: (corporateId: string) => Promise<Specialist[]>;
     fetchVerified: () => Promise<Specialist[]>;
     fetchBySpecialization: (specialization: string) => Promise<Specialist[]>;
     setFilters: (newFilters: SpecialistFilters) => void;

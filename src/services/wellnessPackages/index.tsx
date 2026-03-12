@@ -4,6 +4,7 @@ import { showError } from '../toaster';
 import { WellnessPackage, WellnessPackageFilters, WellnessPackageState } from '../../types/WellnessPackage';
 
 const BASE = '/wellness-packages';
+const CORPORATE_BASE = '/corporates';
 
 const store = create<WellnessPackageState>((set, get) => ({
     data: [],
@@ -15,7 +16,7 @@ const store = create<WellnessPackageState>((set, get) => ({
     total: 0,
     allData: [],
 
-    // GET /wellness-packages?isActive=true&isPopular=true&page=1&limit=10
+    // GET /wellness-packages?isActive=true&isPopular=true&page=1&limit=10 (global or filtered)
     fetchGrid: async () => {
         try {
             const { filters, currentPage, rows, isLoading } = get();
@@ -58,6 +59,32 @@ const store = create<WellnessPackageState>((set, get) => ({
     setFilters: (newFilters: WellnessPackageFilters) => {
         set({ filters: newFilters, currentPage: 1 });
         get().fetchGrid();
+    },
+
+    // GET /corporates/:id/wellness-packages (list for one corporate, no pagination)
+    fetchByCorporate: async (corporateId: string) => {
+        try {
+            const response = await doGET(`${CORPORATE_BASE}/${corporateId}/wellness-packages`);
+            if (response.status >= 200 && response.status < 400) {
+                const resData = response.data?.data;
+                const normalized = Array.isArray(resData) ? resData : [];
+                set({
+                    data: normalized,
+                    total: normalized.length,
+                    totalPages: 1,
+                    currentPage: 1,
+                });
+                return normalized;
+            } else {
+                showError(response.message || 'Failed to fetch wellness packages for corporate');
+                set({ data: [], total: 0, totalPages: 1, currentPage: 1 });
+                return [];
+            }
+        } catch (err) {
+            showError('Failed to fetch wellness packages for corporate');
+            set({ data: [], total: 0, totalPages: 1, currentPage: 1 });
+            return [];
+        }
     },
 
     nextPage: () => {

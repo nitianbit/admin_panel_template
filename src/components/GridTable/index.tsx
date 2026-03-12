@@ -22,6 +22,7 @@ import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import { MODULES } from "../../utils/constants";
 import { useAppContext } from "../../services/context/AppContext";
 import { isAdminOrSuperVisorOrHR } from "../../utils/helper";
+import CorporateScopeSelector from "../CorporateScopeSelector";
 
 const GridTable: React.FC<GridTableProps> = ({
   data,
@@ -87,6 +88,13 @@ const GridTable: React.FC<GridTableProps> = ({
   return (
     <>
       <Grid container spacing={spacing} sx={{ marginLeft: "10px", marginTop: "40px", ...styles }}>
+        {/* Corporate / General scope selector at top of table.
+            Hidden for modules where corporate scoping is not applicable (e.g. Health Tips, Slots). */}
+        {module !== MODULES.HEALTH_TIP && module !== MODULES.SLOTS && (
+          <Grid item xs={12}>
+            <CorporateScopeSelector />
+          </Grid>
+        )}
         <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
           <Table sx={{ minWidth: 650, position: "relative" }} aria-label="general table">
             <TableHead>

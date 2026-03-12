@@ -80,6 +80,7 @@ export interface CorporateQueryParams {
 
 export interface CorporateState {
     data: ICorporate[];
+    allData: ICorporate[];
     totalPages: number;
     total: number;
     currentPage: number;
@@ -87,6 +88,7 @@ export interface CorporateState {
     isLoading: boolean;
     limit: number;
     fetchGrid: () => Promise<void>;
+    fetchAll: () => Promise<ICorporate[]>;
     setFilters: (newFilters: CorporateQueryParams) => void;
     nextPage: () => void;
     prevPage: () => void;

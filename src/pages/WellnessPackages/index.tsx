@@ -9,19 +9,16 @@ import { useCompanyStore } from '../../services/company';
 
 
 const WellnessPackages = () => {
-    const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, setFilters, nextPage, prevPage, onPageChange, onDelete } = useWellnessPackageStore();
+    const { data, totalPages, currentPage, total, rows, filters, isLoading, detail, fetchGrid, fetchByCorporate, setFilters, nextPage, prevPage, onPageChange, onDelete } = useWellnessPackageStore();
     const { globalCompanyId } = useCompanyStore();
 
     React.useEffect(() => {
-        if (globalCompanyId) {
-            if (globalCompanyId === "general") {
-                // No corporateId filter — fetches all non-corporate (general) data
-                setFilters({});
-            } else {
-                setFilters({ corporateId: globalCompanyId });
-            }
+        if (!globalCompanyId || globalCompanyId === "general") {
+            // General (non-corporate) scope: call /wellness-packages?forUser=true
+            setFilters({ forUser: true } as any);
         } else {
-            fetchGrid();
+            // Corporate scope: hit /corporates/:id/wellness-packages
+            fetchByCorporate(globalCompanyId);
         }
     }, [globalCompanyId]);
 

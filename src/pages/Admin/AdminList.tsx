@@ -14,12 +14,14 @@ export default function AdminList() {
   const { globalCompanyId } = useCompanyStore();
 
   React.useEffect(() => {
-    if (globalCompanyId) {
-      setFilters({ company: globalCompanyId })
+    // When General is selected in CorporateScopeSelector, send forUser=true.
+    // When a specific corporate is selected, filter by company id.
+    if (!globalCompanyId || globalCompanyId === "general") {
+      setFilters({ forUser: true } as any);
     } else {
-      fetchGrid()
+      setFilters({ company: globalCompanyId } as any);
     }
-  }, [globalCompanyId])
+  }, [globalCompanyId]);
 
   const handleClickOpen = () => {
     setOpen(true);
