@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Box, Tabs, Tab } from '@mui/material';
+import { Box, Tabs, Tab, Stack, TextField } from '@mui/material';
 import GridTable from '../../components/GridTable';
 import Layout from '../../components/Layout';
 import { MODULES } from '../../utils/constants';
@@ -27,8 +27,10 @@ const Bookings = () => {
     const { globalCompanyId } = useCompanyStore();
 
     const [tabValue, setTabValue] = useState('all');
+    const [fromDate, setFromDate] = useState<string>('');
+    const [toDate, setToDate] = useState<string>('');
 
-    // Recompute filters whenever tab or corporate scope changes
+    // Recompute filters whenever tab, corporate scope, or date range changes
     useEffect(() => {
         const newFilters: BookingQueryParams = {};
 
@@ -44,8 +46,15 @@ const Bookings = () => {
             newFilters.corporateId = globalCompanyId;
         }
 
+        if (fromDate) {
+            newFilters.bookingDateFrom = fromDate.replace(/-/g, '');
+        }
+        if (toDate) {
+            newFilters.bookingDateTo = toDate.replace(/-/g, '');
+        }
+
         setFilters(newFilters);
-    }, [tabValue, globalCompanyId, setFilters]);
+    }, [tabValue, globalCompanyId, fromDate, toDate, setFilters]);
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
         setTabValue(newValue);
@@ -54,7 +63,7 @@ const Bookings = () => {
     return (
         <Layout appBarTitle="Bookings Management">
 
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper', mb: 2 }}>
                 <Tabs value={tabValue} onChange={handleTabChange} aria-label="booking type tabs">
                     <Tab label="All Bookings" value="all" />
                     {BOOKING_TYPES.map((type) => (
@@ -62,6 +71,25 @@ const Bookings = () => {
                     ))}
                 </Tabs>
             </Box>
+
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                <TextField
+                    label="From Date"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                />
+                <TextField
+                    label="To Date"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                />
+            </Stack>
 
             <Layout.Header component={AddBookingDialog} />
 
