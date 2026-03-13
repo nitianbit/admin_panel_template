@@ -56,6 +56,9 @@ export default function AddBookingDialog({
     const [availableSlots, setAvailableSlots] = React.useState<ISlot[]>([]);
     const [loadingSlots, setLoadingSlots] = React.useState(false);
     const [bookingScope, setBookingScope] = React.useState<'general' | 'corporate' | ''>('');
+    const [userLabel, setUserLabel] = React.useState<string>('');
+    const [packageLabel, setPackageLabel] = React.useState<string>('');
+    const [specialistLabel, setSpecialistLabel] = React.useState<string>('');
     const corporatePackagesCacheRef = React.useRef<Record<string, WellnessPackage[]>>({});
     const corporateSpecialistsCacheRef = React.useRef<Record<string, Specialist[]>>({});
 
@@ -405,6 +408,64 @@ export default function AddBookingDialog({
                     bookingDate: formattedDate,
                 });
                 setBookingType(data.bookingType);
+                // Infer booking scope for existing bookings so dropdowns work correctly
+                if (data.corporateId) {
+                    setBookingScope('corporate');
+                } else {
+                    setBookingScope('general');
+                }
+
+                // Fetch display labels for user, wellness package, and specialist for edit view (in parallel)
+                const fetchLabels = async () => {
+                    const tasks: Promise<any>[] = [];
+
+                    if (data.userId) {
+                        tasks.push(doGET(`/users/${data.userId}`));
+                    } else {
+                        tasks.push(Promise.resolve(null));
+                    }
+
+                    if (data.wellnessPackageId) {
+                        tasks.push(doGET(`/wellness-packages/${data.wellnessPackageId}`));
+                    } else {
+                        tasks.push(Promise.resolve(null));
+                    }
+
+                    if (data.specialistId) {
+                        tasks.push(doGET(`/specialists/${data.specialistId}`));
+                    } else {
+                        tasks.push(Promise.resolve(null));
+                    }
+
+                    const [userResult, packageResult, specialistResult] = await Promise.allSettled(tasks);
+
+                    if (userResult.status === 'fulfilled' && userResult.value) {
+                        const raw = userResult.value.data;
+                        const u = raw?.data?.user || raw?.user || raw;
+                        if (u) {
+                            setUserLabel(u.name || u.email || u.phone || data.userId);
+                        }
+                    }
+
+                    if (packageResult.status === 'fulfilled' && packageResult.value) {
+                        const raw = packageResult.value.data;
+                        const p = raw?.data || raw;
+                        if (p) {
+                            setPackageLabel(p.name || data.wellnessPackageId);
+                        }
+                    }
+
+                    if (specialistResult.status === 'fulfilled' && specialistResult.value) {
+                        const raw = specialistResult.value.data;
+                        const s = raw?.data || raw;
+                        if (s) {
+                            const base = s.name || 'Unknown';
+                            setSpecialistLabel(s.specialization ? `${base} (${s.specialization})` : base);
+                        }
+                    }
+                };
+
+                fetchLabels();
             }
         } catch (error) {
             console.error(error);
@@ -551,79 +612,106 @@ export default function AddBookingDialog({
                                         </Grid>
 
                                         <Grid item xs={12} sm={6}>
-                                            <Controller
-                                                name="userId"
-                                                control={control}
-                                                rules={{ required: 'User is required' }}
-                                                render={({ field }) => (
-                                                    <PaginatedSearchDropdown
-                                                        label="User"
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                        fetchOptions={fetchUserOptions}
-                                                        resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
-                                                        disabled={
-                                                            !!selectedId ||
-                                                            (!bookingScope && !selectedId) ||
-                                                            (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
-                                                        }
-                                                        error={!!errors.userId}
-                                                        helperText={errors.userId?.message as string}
-                                                    />
-                                                )}
-                                            />
+                                            {selectedId ? (
+                                                <TextField
+                                                    label="User"
+                                                    fullWidth
+                                                    size="small"
+                                                    value={userLabel || watch('userId') || ''}
+                                                    InputProps={{ readOnly: true }}
+                                                />
+                                            ) : (
+                                                <Controller
+                                                    name="userId"
+                                                    control={control}
+                                                    rules={{ required: 'User is required' }}
+                                                    render={({ field }) => (
+                                                        <PaginatedSearchDropdown
+                                                            label="User"
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            fetchOptions={fetchUserOptions}
+                                                            resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                            disabled={
+                                                                (!bookingScope && !selectedId) ||
+                                                                (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                            }
+                                                            error={!!errors.userId}
+                                                            helperText={errors.userId?.message as string}
+                                                        />
+                                                    )}
+                                                />
+                                            )}
                                         </Grid>
 
                                         {bookingType === 'package' && (
                                             <Grid item xs={12} sm={6}>
-                                                <Controller
-                                                    name="wellnessPackageId"
-                                                    control={control}
-                                                    rules={{ required: 'Wellness package is required' }}
-                                                    render={({ field }) => (
-                                                        <PaginatedSearchDropdown
-                                                            label="Wellness Package"
-                                                            value={field.value}
-                                                            onChange={field.onChange}
-                                                            fetchOptions={fetchPackageOptions}
-                                                            resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
-                                                            disabled={
-                                                                !!selectedId ||
-                                                                (!bookingScope && !selectedId) ||
-                                                                (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
-                                                            }
-                                                            error={!!errors.wellnessPackageId}
-                                                            helperText={errors.wellnessPackageId?.message as string}
-                                                        />
-                                                    )}
-                                                />
+                                                {selectedId ? (
+                                                    <TextField
+                                                        label="Wellness Package"
+                                                        fullWidth
+                                                        size="small"
+                                                        value={packageLabel || watch('wellnessPackageId') || ''}
+                                                        InputProps={{ readOnly: true }}
+                                                    />
+                                                ) : (
+                                                    <Controller
+                                                        name="wellnessPackageId"
+                                                        control={control}
+                                                        rules={{ required: 'Wellness package is required' }}
+                                                        render={({ field }) => (
+                                                            <PaginatedSearchDropdown
+                                                                label="Wellness Package"
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                fetchOptions={fetchPackageOptions}
+                                                                resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                                disabled={
+                                                                    (!bookingScope && !selectedId) ||
+                                                                    (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                                }
+                                                                error={!!errors.wellnessPackageId}
+                                                                helperText={errors.wellnessPackageId?.message as string}
+                                                            />
+                                                        )}
+                                                    />
+                                                )}
                                             </Grid>
                                         )}
 
                                         {bookingType === 'consultation' && (
                                             <>
                                                 <Grid item xs={12} sm={6}>
-                                                    <Controller
-                                                        name="specialistId"
-                                                        control={control}
-                                                        rules={{ required: 'Specialist is required' }}
-                                                        render={({ field }) => (
-                                                            <PaginatedSearchDropdown
-                                                                label="Specialist"
-                                                                value={field.value}
-                                                                onChange={field.onChange}
-                                                                fetchOptions={fetchSpecialistOptions}
-                                                                resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
-                                                                disabled={
-                                                                    !!selectedId ||
-                                                                    (!bookingScope && !selectedId) ||
-                                                                    (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
-                                                                }
-                                                                error={!!errors.specialistId}
-                                                                helperText={errors.specialistId?.message as string}
-                                                            />
-                                                        )}
-                                                    />
+                                                    {selectedId ? (
+                                                        <TextField
+                                                            label="Specialist"
+                                                            fullWidth
+                                                            size="small"
+                                                            value={specialistLabel || watch('specialistId') || ''}
+                                                            InputProps={{ readOnly: true }}
+                                                        />
+                                                    ) : (
+                                                        <Controller
+                                                            name="specialistId"
+                                                            control={control}
+                                                            rules={{ required: 'Specialist is required' }}
+                                                            render={({ field }) => (
+                                                                <PaginatedSearchDropdown
+                                                                    label="Specialist"
+                                                                    value={field.value}
+                                                                    onChange={field.onChange}
+                                                                    fetchOptions={fetchSpecialistOptions}
+                                                                    resetKey={`${bookingScope}-${watchedCorporateId || ''}`}
+                                                                    disabled={
+                                                                        (!bookingScope && !selectedId) ||
+                                                                        (bookingScope === 'corporate' && !watchedCorporateId && !selectedId)
+                                                                    }
+                                                                    error={!!errors.specialistId}
+                                                                    helperText={errors.specialistId?.message as string}
+                                                                />
+                                                            )}
+                                                        />
+                                                    )}
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     <Controller
