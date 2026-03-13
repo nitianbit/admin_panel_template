@@ -256,21 +256,75 @@ export default function AddCouponDialog({
 
     return (
         <div>
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                spacing={2}
-            >
-                <SearchInput handleChange={handleSearchChange} />
-                <Button
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={handleClickOpen}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
                 >
-                    Add Coupon
-                </Button>
-            </Stack>
+                    <SearchInput handleChange={handleSearchChange} />
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={handleClickOpen}
+                    >
+                        Add Coupon
+                    </Button>
+                </Stack>
+
+                <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Applicable To</InputLabel>
+                        <Select
+                            value={(filters as any).applicableTo || ''}
+                            label="Filter by Applicable To"
+                            onChange={(e) => setFilters({ ...filters, applicableTo: e.target.value || undefined })}
+                        >
+                            <MenuItem value="">All Applicable</MenuItem>
+                            {APPLICABLE_TO_TYPES.map((type) => (
+                                <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Validity</InputLabel>
+                        <Select
+                            value={
+                                (filters as any).isActive === true ? 'active' :
+                                (filters as any).isActive === false ? 'inactive' : ''
+                            }
+                            label="Filter by Validity"
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setFilters({ 
+                                    ...filters, 
+                                    isActive: val === 'active' ? true : (val === 'inactive' ? false : undefined) 
+                                });
+                            }}
+                        >
+                            <MenuItem value="">All Statuses</MenuItem>
+                            <MenuItem value="active">Active</MenuItem>
+                            <MenuItem value="inactive">Inactive</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Discount Type</InputLabel>
+                        <Select
+                            value={(filters as any).discountType || ''}
+                            label="Filter by Discount Type"
+                            onChange={(e) => setFilters({ ...filters, discountType: e.target.value || undefined })}
+                        >
+                            <MenuItem value="">All Discounts</MenuItem>
+                            {DISCOUNT_TYPES.map((type) => (
+                                <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Stack>
+            </Box>
 
             <Drawer
                 anchor="right"
