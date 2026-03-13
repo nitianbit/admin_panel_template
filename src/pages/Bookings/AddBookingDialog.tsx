@@ -52,7 +52,7 @@ export default function AddBookingDialog({
     toggleModal,
     selectedId
 }: any) {
-    const { onCreateSpecialist, onCreateWellnessPackage, detail, onUpdate } = useBookingStore();
+    const { onCreateSpecialist, onCreateWellnessPackage, detail, onUpdate, filters, setFilters, data: bookingsList } = useBookingStore();
     const { fetchBySpecialist, fetchByWellnessPackage } = useSlotStore();
     const { onCreate: onCreateSurgery } = useSurgeryStore();
     const { onCreate: onCreateSecondOpinion } = useSecondOpinionStore();
@@ -451,23 +451,152 @@ export default function AddBookingDialog({
         return `${date} | ${slot.startTime} - ${slot.endTime}${slot.isAvailable === false ? ' (Booked)' : ''}`;
     };
 
+    const uniqueDates = React.useMemo(() => {
+        const dateSet = new Set<string>();
+        const source = bookingsList || [];
+        source.forEach((s: any) => { if (s.bookingDate) dateSet.add(s.bookingDate); });
+        if ((filters as any).bookingDate) dateSet.add((filters as any).bookingDate as string);
+        return Array.from(dateSet).sort();
+    }, [bookingsList, (filters as any).bookingDate]);
+
+    const uniqueTimes = React.useMemo(() => {
+        const sourceData = bookingsList || [];
+        const filteredByDate = (filters as any).bookingDate 
+            ? sourceData.filter((s: any) => s.bookingDate === (filters as any).bookingDate)
+            : sourceData;
+
+        const timeSet = new Set<string>();
+        filteredByDate.forEach((s: any) => { if (s.bookingTime) timeSet.add(s.bookingTime); });
+        // Always ensure selected time is in the list
+        const currentStartTime = (filters as any).bookingTime;
+        if (currentStartTime) timeSet.add(currentStartTime);
+        return Array.from(timeSet).sort();
+    }, [bookingsList, (filters as any).bookingDate, (filters as any).bookingTime]);
+
+    const handleFilterChange = (key: string, value: any) => {
+        setFilters({ ...filters, [key]: value || undefined });
+    };
+
     return (
         <div>
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                spacing={2}
-            >
-                <SearchInput />
-                <Button
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={handleClickOpen}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
                 >
-                    Add Booking
-                </Button>
-            </Stack>
+                    <SearchInput />
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={handleClickOpen}
+                    >
+                        Add Booking
+                    </Button>
+                </Stack>
+
+                <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Type</InputLabel>
+                        <Select
+                            value={(filters as any).bookingType || ''}
+                            label="Filter by Type"
+                            onChange={(e) => handleFilterChange('bookingType', e.target.value)}
+                        >
+                            <MenuItem value="">All Types</MenuItem>
+                            {BOOKING_TYPES.map((type) => (
+                                <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Date</InputLabel>
+                        <Select
+                            value={(filters as any).bookingDate || ''}
+                            label="Filter by Date"
+                            onChange={(e) => handleFilterChange('bookingDate', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All Dates';
+                                const dateStr = selected as string;
+                                const formatted = dateStr.length === 8 ? `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}` : dateStr;
+                                return dayjs(formatted).format('DD MMM YYYY');
+                            }}
+                        >
+                            <MenuItem value="">All Dates</MenuItem>
+                            {uniqueDates.map((date: string) => {
+                                const formatted = date.length === 8 ? `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}` : date;
+                                return (
+                                    <MenuItem key={date} value={date}>
+                                        {dayjs(formatted).format('DD MMM YYYY')}
+                                    </MenuItem>
+                                );
+                            })}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Time</InputLabel>
+                        <Select
+                            value={(filters as any).bookingTime || ''}
+                            label="Filter by Time"
+                            onChange={(e) => handleFilterChange('bookingTime', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All Times';
+                                return selected as string;
+                            }}
+                        >
+                            <MenuItem value="">All Times</MenuItem>
+                            {uniqueTimes.map((t: string) => (
+                                <MenuItem key={t} value={t}>{t}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Mode</InputLabel>
+                        <Select
+                            value={(filters as any).serviceMode || ''}
+                            label="Filter by Mode"
+                            onChange={(e) => handleFilterChange('serviceMode', e.target.value)}
+                        >
+                            <MenuItem value="">All Modes</MenuItem>
+                            {SERVICE_MODES.map((mode) => (
+                                <MenuItem key={mode.value} value={mode.value}>{mode.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Status</InputLabel>
+                        <Select
+                            value={(filters as any).status || ''}
+                            label="Filter by Status"
+                            onChange={(e) => handleFilterChange('status', e.target.value)}
+                        >
+                            <MenuItem value="">All Statuses</MenuItem>
+                            {BOOKING_STATUSES.map((status) => (
+                                <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Filter by Payment</InputLabel>
+                        <Select
+                            value={(filters as any).paymentStatus || ''}
+                            label="Filter by Payment"
+                            onChange={(e) => handleFilterChange('paymentStatus', e.target.value)}
+                        >
+                            <MenuItem value="">All Payments</MenuItem>
+                            {PAYMENT_STATUSES.map((status) => (
+                                <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Stack>
+            </Box>
 
             <Drawer
                 anchor="right"

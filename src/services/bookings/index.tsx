@@ -30,7 +30,10 @@ const store = create<BookingState>((set, get) => ({
 
             set({ isLoading: true });
 
-            const queryParams = new URLSearchParams(filters as any);
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, v]) => v !== undefined && v !== '')
+            );
+            const queryParams = new URLSearchParams(cleanFilters as any);
             queryParams.append('page', String(currentPage));
             queryParams.append('limit', String(limit));
 

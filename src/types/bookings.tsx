@@ -124,12 +124,15 @@ export interface BookingQueryParams {
     specialistId?: string;
     status?: BookingStatus;
     paymentStatus?: PaymentStatus;
+    bookingDate?: string; // exact match
+    bookingTime?: string; // exact match
     bookingDateFrom?: string; // YYYYMMDD format
     bookingDateTo?: string; // YYYYMMDD format
     page?: number;
     limit?: number;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    [key: string]: any; // Allow arbitrary keys
 }
 
 export interface BookingState {
