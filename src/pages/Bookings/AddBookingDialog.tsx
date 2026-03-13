@@ -150,8 +150,12 @@ export default function AddBookingDialog({
         params.append("limit", String(limit));
         params.append("userType", "user");
         if (search) params.append("name", search);
+
         if (bookingScope === "corporate" && watchedCorporateId) {
             params.append("corporateId", watchedCorporateId);
+        } else {
+            // No corporate selected → show general data only
+            params.append("forUser", "true");
         }
 
         const response = await doGET(`/users?${params.toString()}`);
@@ -182,6 +186,8 @@ export default function AddBookingDialog({
         params.append("page", String(page));
         params.append("limit", String(limit));
         if (search) params.append("search", search);
+        // No corporate selected → show general wellness packages only
+        params.append("forUser", "true");
 
         const response = await doGET(`/wellness-packages?${params.toString()}`);
         const rows = response?.data?.data;
@@ -213,6 +219,8 @@ export default function AddBookingDialog({
         params.append("page", String(page));
         params.append("limit", String(limit));
         if (search) params.append("search", search);
+        // No corporate selected → show general specialists only
+        params.append("forUser", "true");
 
         const response = await doGET(`/specialists?${params.toString()}`);
         const rows = response?.data?.data;
