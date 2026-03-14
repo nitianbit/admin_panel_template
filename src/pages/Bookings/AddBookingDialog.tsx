@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -473,7 +472,7 @@ export default function AddBookingDialog({
 
     const uniqueTimes = React.useMemo(() => {
         const sourceData = bookingsList || [];
-        const filteredByDate = (filters as any).bookingDate 
+        const filteredByDate = (filters as any).bookingDate
             ? sourceData.filter((s: any) => s.bookingDate === (filters as any).bookingDate)
             : sourceData;
 
@@ -508,7 +507,7 @@ export default function AddBookingDialog({
                     </Button>
                 </Stack>
 
-                <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
+                <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" alignItems="center">
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Filter by Type</InputLabel>
                         <Select
@@ -602,6 +601,17 @@ export default function AddBookingDialog({
                             {secondOpinions.map(s => <MenuItem key={s._id} value={s._id}>{s.full_name}</MenuItem>)}
                         </Select>
                     </FormControl>
+
+                    {/* User Filter */}
+                    <Box sx={{ minWidth: 200 }}>
+                        <PaginatedSearchDropdown
+                            label="Filter by User"
+                            value={(filters as any).userId || ''}
+                            onChange={(val) => handleFilterChange('userId', val)}
+                            fetchOptions={fetchUserOptions}
+                            resetKey="grid-user-filter"
+                        />
+                    </Box>
 
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Filter by Date</InputLabel>
