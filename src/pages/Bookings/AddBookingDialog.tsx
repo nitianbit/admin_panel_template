@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -21,6 +20,8 @@ import { showError } from "../../services/toaster";
 import PaginatedSearchDropdown, { PaginatedOption } from "../../components/PaginatedSearchDropdown";
 import { useSurgeryStore } from "../../services/surgery";
 import { useSecondOpinionStore } from "../../services/secondOpinion";
+import { useSpecialistStore } from "../../services/specialist";
+import { useWellnessPackageStore } from "../../services/wellnessPackages";
 
 interface BookingFormValues {
     bookingType: 'package' | 'consultation' | 'surgery' | 'second-opinion';
@@ -54,8 +55,18 @@ export default function AddBookingDialog({
 }: any) {
     const { onCreateSpecialist, onCreateWellnessPackage, detail, onUpdate, filters, setFilters, data: bookingsList } = useBookingStore();
     const { fetchBySpecialist, fetchByWellnessPackage } = useSlotStore();
-    const { onCreate: onCreateSurgery } = useSurgeryStore();
-    const { onCreate: onCreateSecondOpinion } = useSecondOpinionStore();
+    const { onCreate: onCreateSurgery, data: surgeries, fetchGrid: fetchSurgeries } = useSurgeryStore();
+    const { onCreate: onCreateSecondOpinion, data: secondOpinions, fetchGrid: fetchSecondOpinions } = useSecondOpinionStore();
+    const { data: specialists, fetchGrid: fetchSpecialists } = useSpecialistStore();
+    const { data: wellnessPackages, fetchGrid: fetchWellnessPackages } = useWellnessPackageStore();
+
+    React.useEffect(() => {
+        fetchSpecialists();
+        fetchWellnessPackages();
+        fetchSurgeries();
+        fetchSecondOpinions();
+    }, []);
+
     const [bookingType, setBookingType] = React.useState<'package' | 'consultation' | 'surgery' | 'second-opinion'>('package');
     const [availableSlots, setAvailableSlots] = React.useState<ISlot[]>([]);
     const [loadingSlots, setLoadingSlots] = React.useState(false);
@@ -530,7 +541,7 @@ export default function AddBookingDialog({
 
     const uniqueTimes = React.useMemo(() => {
         const sourceData = bookingsList || [];
-        const filteredByDate = (filters as any).bookingDate 
+        const filteredByDate = (filters as any).bookingDate
             ? sourceData.filter((s: any) => s.bookingDate === (filters as any).bookingDate)
             : sourceData;
 
@@ -565,13 +576,21 @@ export default function AddBookingDialog({
                     </Button>
                 </Stack>
 
-                <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
+                <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" alignItems="center">
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Filter by Type</InputLabel>
                         <Select
                             value={(filters as any).bookingType || ''}
                             label="Filter by Type"
-                            onChange={(e) => handleFilterChange('bookingType', e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                const updatedFilters: any = { ...filters, bookingType: val || undefined };
+                                if (val !== 'consultation') updatedFilters.specialistId = undefined;
+                                if (val !== 'package') updatedFilters.wellnessPackageId = undefined;
+                                if (val !== 'surgery') updatedFilters.surgeryId = undefined;
+                                if (val !== 'second-opinion') updatedFilters.secondOpinionId = undefined;
+                                setFilters(updatedFilters);
+                            }}
                         >
                             <MenuItem value="">All Types</MenuItem>
                             {BOOKING_TYPES.map((type) => (
@@ -579,6 +598,89 @@ export default function AddBookingDialog({
                             ))}
                         </Select>
                     </FormControl>
+
+                    {/* Specialist Filter — enabled only when bookingType = consultation */}
+                    <FormControl size="small" sx={{ minWidth: 150 }} disabled={(filters as any).bookingType !== 'consultation'}>
+                        <InputLabel>Specialist</InputLabel>
+                        <Select
+                            value={(filters as any).specialistId || ''}
+                            label="Specialist"
+                            onChange={(e) => handleFilterChange('specialistId', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = specialists.find(s => s._id === selected);
+                                return found ? found.name : selected;
+                            }}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {specialists.map(s => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    {/* Wellness Package Filter — enabled only when bookingType = package */}
+                    <FormControl size="small" sx={{ minWidth: 150 }} disabled={(filters as any).bookingType !== 'package'}>
+                        <InputLabel>Wellness Package</InputLabel>
+                        <Select
+                            value={(filters as any).wellnessPackageId || ''}
+                            label="Wellness Package"
+                            onChange={(e) => handleFilterChange('wellnessPackageId', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = wellnessPackages.find(w => w._id === selected);
+                                return found ? found.name : selected;
+                            }}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {wellnessPackages.map(w => <MenuItem key={w._id} value={w._id}>{w.name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    {/* Surgery Filter — enabled only when bookingType = surgery */}
+                    <FormControl size="small" sx={{ minWidth: 150 }} disabled={(filters as any).bookingType !== 'surgery'}>
+                        <InputLabel>Surgery</InputLabel>
+                        <Select
+                            value={(filters as any).surgeryId || ''}
+                            label="Surgery"
+                            onChange={(e) => handleFilterChange('surgeryId', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = surgeries.find(s => s._id === selected);
+                                return found ? found.full_name : selected;
+                            }}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {surgeries.map(s => <MenuItem key={s._id} value={s._id}>{s.full_name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    {/* Second Opinion Filter — enabled only when bookingType = second-opinion */}
+                    <FormControl size="small" sx={{ minWidth: 150 }} disabled={(filters as any).bookingType !== 'second-opinion'}>
+                        <InputLabel>Second Opinion</InputLabel>
+                        <Select
+                            value={(filters as any).secondOpinionId || ''}
+                            label="Second Opinion"
+                            onChange={(e) => handleFilterChange('secondOpinionId', e.target.value)}
+                            renderValue={(selected) => {
+                                if (!selected) return 'All';
+                                const found = secondOpinions.find(s => s._id === selected);
+                                return found ? found.full_name : selected;
+                            }}
+                        >
+                            <MenuItem value="">All</MenuItem>
+                            {secondOpinions.map(s => <MenuItem key={s._id} value={s._id}>{s.full_name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    {/* User Filter */}
+                    <Box sx={{ minWidth: 200 }}>
+                        <PaginatedSearchDropdown
+                            label="Filter by User"
+                            value={(filters as any).userId || ''}
+                            onChange={(val) => handleFilterChange('userId', val)}
+                            fetchOptions={fetchUserOptions}
+                            resetKey="grid-user-filter"
+                        />
+                    </Box>
 
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Filter by Date</InputLabel>

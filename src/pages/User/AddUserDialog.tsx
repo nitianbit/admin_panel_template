@@ -30,6 +30,7 @@ import { showError } from "../../services/toaster";
 import { useUserStore } from "../../services/user";
 import { UserData } from "../../types/user";
 import SearchInput from "../../components/SearchInput";
+import { doGET } from "../../utils/HttpUtils";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children: React.ReactElement<any, any> },
@@ -70,6 +71,7 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
     const [tabValue, setTabValue] = React.useState(0);
     const [imageFile, setImageFile] = React.useState<File | null>(null);
     const [previewImage, setPreviewImage] = React.useState<string>("");
+    const [walletDetails, setWalletDetails] = React.useState<any>(null);
 
     // Search states
     const [searchQuery, setSearchQuery] = React.useState<string>("");
@@ -135,7 +137,22 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         reset();
         setImageFile(null);
         setPreviewImage("");
+        setWalletDetails(null);
         setTabValue(0);
+    };
+
+    const fetchWallet = async (id: string) => {
+        try {
+            const res = await doGET(`/wallet/user/${id}`);
+            if (res?.data?.data) {
+                setWalletDetails(res.data.data);
+            } else {
+                setWalletDetails(null);
+            }
+        } catch (error) {
+            console.error("Error fetching wallet details:", error);
+            setWalletDetails(null);
+        }
     };
 
     const onSubmit = async (data: UserData) => {
@@ -190,6 +207,7 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
         if (isModalOpen) {
             if (selectedId) {
                 fetchDetail(selectedId);
+                fetchWallet(selectedId);
             } else {
                 reset({
                     userType: 'user',
@@ -206,6 +224,7 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                 });
                 setImageFile(null);
                 setPreviewImage("");
+                setWalletDetails(null);
             }
         }
     }, [selectedId, isModalOpen]);
@@ -242,6 +261,7 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                             <Tab label="Profile Details" />
                             <Tab label="Address & Location" />
                             <Tab label="Access & Professional" />
+                            <Tab label="User Transaction Details" />
                         </Tabs>
                     </Box>
 
@@ -513,6 +533,53 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                                 </Grid>
                             </Grid>
                         </CustomTabPanel>
+                        <CustomTabPanel value={tabValue} index={4}>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12}>
+                                    <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 'bold' }}>Wallet Details</Typography>
+                                </Grid>
+                                {walletDetails ? (
+                                    <>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                label="Wallet Balance"
+                                                fullWidth
+                                                value={walletDetails.balance ?? ''}
+                                                disabled
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                label="Wallet Active"
+                                                fullWidth
+                                                value={walletDetails.isActive ? 'Yes' : 'No'}
+                                                disabled
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                label="Created At"
+                                                fullWidth
+                                                value={walletDetails.createdAt ? new Date(walletDetails.createdAt).toLocaleString() : ''}
+                                                disabled
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <TextField
+                                                label="Updated At"
+                                                fullWidth
+                                                value={walletDetails.updatedAt ? new Date(walletDetails.updatedAt).toLocaleString() : ''}
+                                                disabled
+                                            />
+                                        </Grid>
+                                    </>
+                                ) : (
+                                    <Grid item xs={12}>
+                                        <Typography color="textSecondary">{selectedId ? "No wallet details found for this user." : "Wallet details will be available after the user is created."}</Typography>
+                                    </Grid>
+                                )}
+                            </Grid>
+                        </CustomTabPanel>
                     </DialogContent>
 
                     <DialogActions sx={{ p: 3, bgcolor: '#fbfbfb' }}>
@@ -521,7 +588,7 @@ const AddUserDialog = ({ isModalOpen, toggleModal, selectedId }: any) => {
                         {tabValue > 0 && (
                             <Button onClick={() => setTabValue(tabValue - 1)} variant="text" sx={{ mr: 1 }}>Previous Step</Button>
                         )}
-                        {tabValue < 3 ? (
+                        {tabValue < 4 ? (
                             <Button onClick={() => setTabValue(tabValue + 1)} variant="contained" color="primary" sx={{ minWidth: 120 }}>Next Step</Button>
                         ) : (
                             <Button type="submit" variant="contained" color="success" sx={{ minWidth: 120 }}>
